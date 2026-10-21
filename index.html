@@ -156,7 +156,7 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 .seek { position: relative; height: 40px; cursor: pointer; touch-action: none; border-radius: 12px; }
 .seek canvas { display: block; width: 100%; height: 100%; }
 .times { display: flex; justify-content: space-between; font-family: var(--font-num); font-size: 12px; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.seek-tip { position: absolute; bottom: calc(100% + 4px); transform: translateX(-50%); padding: 3px 8px; border-radius: 999px;
+.seek-tip { position: absolute; z-index: 4; bottom: calc(100% + 4px); transform: translateX(-50%); padding: 3px 8px; border-radius: 999px;
   background: var(--tip-bg); color: var(--tip-fg); font-family: var(--font-num); font-size: 11px; font-weight: 700; pointer-events: none; white-space: nowrap; }
 .controls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
 .ctl-left { display: flex; gap: 6px; }
@@ -420,7 +420,6 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
       <div class="head-actions">
         <button class="chip" id="btnAudio" title="音声ファイルをひらく"><svg class="i"><use href="#i-note"/></svg><span class="lbl">おと</span></button>
         <button class="chip" id="btnMidi" title="MIDIファイルをひらく"><svg class="i"><use href="#i-piano"/></svg><span class="lbl">MIDI</span></button>
-        <button class="chip icon-only" id="btnDemo" title="デモにもどす" aria-label="デモにもどす" hidden><svg class="i"><use href="#i-sparkle"/></svg></button>
         <button class="chip" id="btnVideo" title="動画にする"><svg class="i"><use href="#i-video"/></svg><span class="lbl">動画</span></button>
       </div>
       <div class="pop icon-pop" id="iconPop" role="dialog" aria-label="アイコンをえらぶ" style="top:62px;left:0" hidden>
@@ -435,7 +434,7 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
         <canvas id="specCanvas"></canvas>
         <span class="mode-name" id="modeName">circle</span>
         <button class="float-btn" id="specGear" aria-label="スペクトラムの設定" aria-haspopup="dialog" aria-expanded="false"><svg class="i"><use href="#i-sliders"/></svg></button>
-        <div class="busy" id="busy" hidden>デモ曲を準備中…</div>
+        <div class="busy" id="busy" hidden>準備中…</div>
       </div>
       <div class="seg" role="tablist" id="specModes" aria-label="スペクトラムのモード">
         <button role="tab" data-mode="circle" aria-selected="true"><svg class="i"><use href="#i-circle"/></svg>まる</button>
@@ -2512,7 +2511,6 @@ function songArtist() {
   if (!S.audioName && !S.midiName) return '音声ファイルとMIDIファイルを読み込めます';
   const parts = [];
   if (S.meta && S.meta.artist) parts.push(S.meta.artist);
-  if (S.audioKind === 'demo' || S.midiKind === 'demo') parts.push('デモ');
   if (S.audioKind === 'synth') parts.push('MIDIから作った音');
   parts.push(S.midiName ? 'MIDI: ' + S.midiName : 'MIDIなし');
   return parts.join(' ・ ');
@@ -2541,91 +2539,6 @@ function setSong(song, name, kind) {
 }
 function clearSong() { S.song = null; S.songId++; S.midiName = ''; S.midiKind = ''; el.midiEmpty.hidden = false; }
 
-/* the demo is whatever demo.(mp3|m4a|…) and demo.mid sit in the same folder as the page.
-   Earlier names win; a file this browser cannot decode falls through to the next one. */
-const DEMO_AUDIO = ['demo.mp3', 'demo.m4a', 'demo.aac', 'demo.ogg', 'demo.opus', 'demo.wav', 'demo.flac'];
-const DEMO_MIDI = ['demo.mid', 'demo.midi'];
-const LOCAL_PAGE = location.protocol === 'file:';
-/* opened straight from disk: fetch() refuses file: URLs, XHR is allowed by a few browsers/settings */
-function xhrGet(url) {
-  return new Promise((res) => {
-    try {
-      const x = new XMLHttpRequest();
-      x.open('GET', url);
-      x.responseType = 'arraybuffer';
-      x.onload = () => res(x.status === 0 || (x.status >= 200 && x.status < 300) ? x.response : null);
-      x.onerror = x.onabort = x.ontimeout = () => res(null);
-      x.send();
-    } catch (e) { res(null); }
-  });
-}
-/* some hosts answer every unknown path with an HTML page (200 OK) — that is not a demo file */
-function looksLikeText(ab) {
-  const u = new Uint8Array(ab, 0, Math.min(ab.byteLength, 64));
-  let i = u[0] === 0xef && u[1] === 0xbb && u[2] === 0xbf ? 3 : 0;
-  while (i < u.length && (u[i] === 0x20 || u[i] === 0x09 || u[i] === 0x0a || u[i] === 0x0d)) i++;
-  return u[i] === 0x3c || u[i] === 0x7b;
-}
-async function getNeighbour(name) {
-  let ab = null;
-  try {
-    const r = await fetch(name, { cache: 'no-cache' });
-    if (r.ok) ab = await r.arrayBuffer();
-  } catch (e) {
-    if (LOCAL_PAGE) ab = await xhrGet(name);
-  }
-  return ab && ab.byteLength > 16 && !looksLikeText(ab) ? ab : null;
-}
-async function findDemoAudio() {
-  for (const name of DEMO_AUDIO) {
-    const ab = await getNeighbour(name);
-    if (!ab) continue;
-    const meta = readID3(ab);
-    try { return { name, meta, buf: await engine.decode(ab) }; }
-    catch (e) { console.warn('demo: this browser cannot decode', name, e); }
-  }
-  return null;
-}
-async function findDemoMidi() {
-  for (const name of DEMO_MIDI) {
-    const ab = await getNeighbour(name);
-    if (!ab) continue;
-    try { const song = parseMidi(ab); if (song.notes.length) return { name, song }; }
-    catch (e) { console.warn('demo: not a readable MIDI file', name, e); }
-  }
-  return null;
-}
-async function loadDemo() {
-  const tok = ++loadToken;
-  engine.pause();
-  setBusy('デモを読み込み中…');
-  const [a, m] = await Promise.all([findDemoAudio(), findDemoMidi()]);
-  if (tok !== loadToken) return false;
-  S.hasDemo = !!(a || m);
-  $('#btnDemo').hidden = !S.hasDemo;
-  if (!S.hasDemo) {
-    setBusy(null); clearSong(); setTitles();
-    if (LOCAL_PAGE && !S.localHint) {
-      S.localHint = true;
-      toast('ファイルを直接ひらくと、ブラウザの制限で同じフォルダの demo を読めません。ウェブサーバーに置くか、カードにドロップしてね', 8000);
-    }
-    return false;
-  }
-  if (m) setSong(m.song, m.name, 'demo');
-  else clearSong();
-  if (a) {
-    setAudioBuffer(a.buf, stripExt(a.name), 'demo', a.meta);
-    setTitles(); restoreOffset(); restoreGrid();
-    setBusy('波形を解析中…');
-    try { const ana = await analyzeBuffer(a.buf); if (tok === loadToken) setAnalysis(ana); } catch (e) { console.warn(e); }
-    if (tok === loadToken) setBusy(null);
-    return true;
-  }
-  /* MIDI only (or the audio would not decode here): let the synth play it */
-  setTitles(); restoreOffset();
-  await synthCurrentSong();
-  return true;
-}
 async function loadAudioFile(file) {
   const tok = ++loadToken;
   engine.pause();
@@ -2646,7 +2559,6 @@ async function loadAudioFile(file) {
   S.audioPending = false;
   if (tok !== loadToken) return;
   setAudioBuffer(buf, stripExt(file.name), 'user', meta);
-  if (S.midiKind === 'demo') clearSong();
   setTitles();
   restoreOffset();
   restoreGrid();
@@ -2702,7 +2614,7 @@ function handleFiles(list) {
 }
 
 /* ── offset / stretch ── */
-const ownKind = (k) => k === 'user' || k === 'demo';
+const ownKind = (k) => k === 'user';
 const pairKey = () => (ownKind(S.audioKind) && ownKind(S.midiKind) ? 'off:' + S.audioName + '|' + S.midiName : '');
 let saveTimer = 0;
 function setOffset(sec, quiet) {
@@ -2957,7 +2869,6 @@ function bindUI() {
   $('#btnMidi2').addEventListener('click', () => fm.click());
   fa.addEventListener('change', () => { if (fa.files[0]) handleFiles([fa.files[0]]); fa.value = ''; });
   fm.addEventListener('change', () => { if (fm.files[0]) loadMidiFile(fm.files[0]); fm.value = ''; });
-  $('#btnDemo').addEventListener('click', () => { loadDemo().then((ok) => { if (ok) toast('デモにもどしました'); }); });
   $('#btnVideo').addEventListener('click', openExport);
 
   const drop = $('#drop');
@@ -3844,8 +3755,8 @@ function init() {
   requestAnimationFrame(frame);
   window.__utakata = {
     S, spec, mv, engine, EX, MP4, setOffset, setStretch, setMode, setTheme, setDir, seekTo, resetAll, togglePlay,
-    loadDemo, parseMidi, readID3, renderSong, analyzeBuffer, midiOnsetTrain, autoSync, handleFiles,
-    openExport, startExport, encodeVideo, composeFrame, offlineAnalyser, setColor, C, ready: loadDemo(),
+    parseMidi, readID3, renderSong, analyzeBuffer, midiOnsetTrain, autoSync, handleFiles,
+    openExport, startExport, encodeVideo, composeFrame, offlineAnalyser, setColor, C,
   };
 }
 init();
