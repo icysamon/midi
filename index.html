@@ -205,9 +205,6 @@ input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border: 2px s
 .midi-win.touch-drag { touch-action: none; }
 .midi-win.no-drag { cursor: default; }
 .midi-win.no-drag .drag-hint { display: none; }
-.midi-grip { height: 14px; margin-top: -8px; margin-bottom: -6px; display: grid; place-items: center; cursor: ns-resize; touch-action: none; border-radius: 999px; }
-.midi-grip span { width: 46px; height: 4px; border-radius: 999px; background: var(--card-line); box-shadow: inset 0 0 0 1px var(--lav); transition: background .15s, width .15s; }
-.midi-grip:hover span, .midi-grip.dragging span { background: var(--violet-2); width: 64px; }
 .empty { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: 10px; text-align: center; padding: 16px; color: var(--ink-2); font-size: 13px; }
 .empty p { margin: 0; line-height: 1.7; }
 .empty .chip { background: var(--glass); }
@@ -319,6 +316,10 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
 .num { width: 62px; height: 30px; flex: none; border-radius: 10px; border: 1px solid var(--card-line); background: var(--card); color: var(--ink); text-align: center;
   font-family: var(--font-num); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
 #gridStartOut { min-width: 64px; text-align: center; flex: none; }
+.row .key-name { min-width: 46px; text-align: center; flex: none; }
+.key-sum { margin-top: -6px; }
+.key-sum .val { text-align: left; color: var(--ink-2); }
+.grid-box .key-presets { flex-wrap: wrap; }
 #tapBtn { min-width: 0; padding: 0 9px; }
 .sw-lbl { font-size: 12px; font-weight: 700; color: var(--ink-2); }
 .pop .row h3 { margin: 0; }
@@ -503,12 +504,17 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
         <span class="drag-hint" id="dragHint" data-i="dragHint">ドラッグでずれ調整</span>
         <div class="flash" id="flash" hidden>+0 ms</div>
       </div>
-      <div class="midi-grip" id="midiGrip" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="MIDI表示の高さ" title="ドラッグで高さを変える（ダブルクリックで元に戻す）" data-i-label="midiHeightLabel" data-i-title="gripTitle"><span></span></div>
       <div class="pop midi-pop" id="midiPop" role="dialog" aria-label="MIDI表示の設定" data-i-label="midiSettings" style="top:40px;right:0" hidden>
         <h3 data-i="midiDisplay">MIDI 表示</h3>
         <div class="row"><span class="lbl" data-i="direction">流れる向き</span><div class="mini-seg" id="dirSeg"><button data-dir="up" aria-pressed="false" data-i="dirUp">のぼる</button><button data-dir="down" aria-pressed="false" data-i="dirDown">おちる</button><button data-dir="left" aria-pressed="false" data-i="dirLeft">よこ</button></div></div>
         <div class="row"><label for="speed" data-i="visibleTime">見える秒数</label><input type="range" id="speed" min="1" max="8" step="0.5" value="3"><span class="val" id="speedVal">3.0 秒</span></div>
-        <div class="row"><label for="midiHeight" data-i="height">高さ</label><input type="range" id="midiHeight" min="140" max="560" step="4" value="252"><span class="val" id="midiHeightVal">252 px</span></div>
+        <div class="row"><span class="lbl" data-i="keyRange">鍵盤の範囲</span><div class="mini-seg" id="keyModeSeg"><button data-km="auto" aria-pressed="true" data-i="keyAuto">自動</button><button data-km="manual" aria-pressed="false" data-i="keyManual">手動</button></div></div>
+        <div class="row key-sum"><span class="lbl"></span><output class="val" id="keyCount"></output></div>
+        <div class="grid-box" id="keyBox" hidden>
+          <div class="row"><span class="lbl" data-i="keyLow">最低音</span><button class="nudge sm" data-side="lo" data-kstep="-12" aria-label="最低音を1オクターブ下げる" data-i-label="loOctDown">«</button><button class="nudge sm" data-side="lo" data-kstep="-1" aria-label="最低音を1鍵下げる" data-i-label="loDown">−</button><output class="val key-name" id="keyLoOut">C2</output><button class="nudge sm" data-side="lo" data-kstep="1" aria-label="最低音を1鍵上げる" data-i-label="loUp">+</button><button class="nudge sm" data-side="lo" data-kstep="12" aria-label="最低音を1オクターブ上げる" data-i-label="loOctUp">»</button></div>
+          <div class="row"><span class="lbl" data-i="keyHigh">最高音</span><button class="nudge sm" data-side="hi" data-kstep="-12" aria-label="最高音を1オクターブ下げる" data-i-label="hiOctDown">«</button><button class="nudge sm" data-side="hi" data-kstep="-1" aria-label="最高音を1鍵下げる" data-i-label="hiDown">−</button><output class="val key-name" id="keyHiOut">C7</output><button class="nudge sm" data-side="hi" data-kstep="1" aria-label="最高音を1鍵上げる" data-i-label="hiUp">+</button><button class="nudge sm" data-side="hi" data-kstep="12" aria-label="最高音を1オクターブ上げる" data-i-label="hiOctUp">»</button></div>
+          <div class="row key-presets"><button class="nudge" data-kp="88" data-i="keys88">88鍵</button><button class="nudge" data-kp="61" data-i="keys61">61鍵</button><button class="nudge" data-kp="49" data-i="keys49">49鍵</button><button class="nudge" id="keyFit" data-i="keyFit">曲に合わせる</button></div>
+        </div>
         <div class="row"><span class="lbl" data-i="drums">ドラム</span><button class="switch" id="drumSw" role="switch" aria-checked="false" aria-label="ドラムを表示" data-i-label="showDrums"></button></div>
         <div class="row"><span class="lbl" data-i="barLines">小節線</span><button class="switch" id="gridSw" role="switch" aria-checked="true" aria-label="小節線を表示" data-i-label="showBarLines"></button>
           <div class="mini-seg" id="gridModeSeg"><button data-gm="midi" aria-pressed="true" data-i="gridMidi">MIDIのまま</button><button data-gm="manual" aria-pressed="false" data-i="gridManual">手動</button></div></div>
@@ -647,8 +653,11 @@ const I18N = {
     play: '再生', pause: '一時停止', mute: 'ミュート', volume: '音量',
     midiLabel: 'MIDIビジュアライザ', midiThemes: 'MIDIのテーマ', themeBubble: 'あわ', themeCrystal: 'すいしょう', themeAbyss: 'しんかい',
     midiSettings: 'MIDI表示の設定', midiEmpty: 'MIDIファイルをえらぶか、<br>カードにドロップしてね', chooseMidi: 'MIDIをえらぶ', dragHint: 'ドラッグでずれ調整',
-    midiHeightLabel: 'MIDI表示の高さ', gripTitle: 'ドラッグで高さを変える（ダブルクリックで元に戻す）',
-    midiDisplay: 'MIDI 表示', direction: '流れる向き', dirUp: 'のぼる', dirDown: 'おちる', dirLeft: 'よこ', visibleTime: '見える秒数', height: '高さ',
+    midiDisplay: 'MIDI 表示', direction: '流れる向き', dirUp: 'のぼる', dirDown: 'おちる', dirLeft: 'よこ', visibleTime: '見える秒数',
+    keyRange: '鍵盤の範囲', keyAuto: '自動', keyManual: '手動', keyLow: '最低音', keyHigh: '最高音', keysN: (n) => n + '鍵',
+    keys88: '88鍵', keys61: '61鍵', keys49: '49鍵', keyFit: '曲に合わせる',
+    loOctDown: '最低音を1オクターブ下げる', loDown: '最低音を1鍵下げる', loUp: '最低音を1鍵上げる', loOctUp: '最低音を1オクターブ上げる',
+    hiOctDown: '最高音を1オクターブ下げる', hiDown: '最高音を1鍵下げる', hiUp: '最高音を1鍵上げる', hiOctUp: '最高音を1オクターブ上げる',
     drums: 'ドラム', showDrums: 'ドラムを表示', barLines: '小節線', showBarLines: '小節線を表示', gridMidi: 'MIDIのまま', gridManual: '手動',
     bpmDown: 'BPMを1さげる', bpmUp: 'BPMを1あげる', tap: 'タップ', tapTitle: '再生しながら拍に合わせて数回タップ', meter: '拍子',
     beats2: '2拍', beats3: '3拍', beats4: '4拍', beats6: '6拍', gridStart: '開始位置', gsEarlier: '開始位置を10ミリ秒はやく', gsLater: '開始位置を10ミリ秒おそく',
@@ -700,8 +709,11 @@ const I18N = {
     play: 'Play', pause: 'Pause', mute: 'Mute', volume: 'Volume',
     midiLabel: 'MIDI visualizer', midiThemes: 'MIDI theme', themeBubble: 'Bubble', themeCrystal: 'Crystal', themeAbyss: 'Abyss',
     midiSettings: 'MIDI display settings', midiEmpty: 'Choose a MIDI file,<br>or drop it on the card', chooseMidi: 'Choose MIDI', dragHint: 'Drag to adjust offset',
-    midiHeightLabel: 'MIDI view height', gripTitle: 'Drag to resize (double-click to reset)',
-    midiDisplay: 'MIDI display', direction: 'Direction', dirUp: 'Up', dirDown: 'Down', dirLeft: 'Side', visibleTime: 'Visible time', height: 'Height',
+    midiDisplay: 'MIDI display', direction: 'Direction', dirUp: 'Up', dirDown: 'Down', dirLeft: 'Side', visibleTime: 'Visible time',
+    keyRange: 'Key range', keyAuto: 'Auto', keyManual: 'Manual', keyLow: 'Lowest', keyHigh: 'Highest', keysN: (n) => n + ' keys',
+    keys88: '88 keys', keys61: '61 keys', keys49: '49 keys', keyFit: 'Fit to song',
+    loOctDown: 'Lowest key down an octave', loDown: 'Lowest key down one key', loUp: 'Lowest key up one key', loOctUp: 'Lowest key up an octave',
+    hiOctDown: 'Highest key down an octave', hiDown: 'Highest key down one key', hiUp: 'Highest key up one key', hiOctUp: 'Highest key up an octave',
     drums: 'Drums', showDrums: 'Show drums', barLines: 'Bar lines', showBarLines: 'Show bar lines', gridMidi: 'From MIDI', gridManual: 'Manual',
     bpmDown: 'BPM −1', bpmUp: 'BPM +1', tap: 'Tap', tapTitle: 'Tap a few times on the beat while playing', meter: 'Beats',
     beats2: '2', beats3: '3', beats4: '4', beats6: '6', gridStart: 'Start', gsEarlier: 'Start 10 ms earlier', gsLater: 'Start 10 ms later',
@@ -2009,20 +2021,27 @@ function drawSpectrum(cv, dt, t) {
 const THEMES = { bubble: { dir: 'down', dark: false }, crystal: { dir: 'down', dark: false }, abyss: { dir: 'left', dark: true } };
 const isBlackKey = (p) => [1, 3, 6, 8, 10].indexOf(p % 12) >= 0;
 
-const klCache = { key: '', kl: null };
-function getKeyLayout(song, drums) {
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const noteName = (p) => NOTE_NAMES[p % 12] + (Math.floor(p / 12) - 1);
+/* the song's own span with a little air, at least two octaves, ending on white keys */
+function autoKeyRange(song, drums) {
   let lo = 48, hi = 84;
   if (song) {
     lo = song.lo; hi = song.hi;
     if (drums) for (const n of song.notes) if (n.drum) { lo = Math.min(lo, n.p); hi = Math.max(hi, n.p); }
   }
-  const key = lo + ':' + hi;
-  if (klCache.key === key) return klCache.kl;
   let a = lo - 2, b = hi + 2;
   if (b - a < 25) { const c = (a + b) / 2; a = Math.round(c - 12.5); b = a + 25; }
   a = clamp(a, 0, 120); b = clamp(b, a + 12, 127);
   while (isBlackKey(a)) a--;
   while (isBlackKey(b)) b++;
+  return [a, b];
+}
+const klCache = { key: '', kl: null };
+function getKeyLayout(song, drums) {
+  const [a, b] = S.keys.mode === 'manual' ? [S.keys.lo, S.keys.hi] : autoKeyRange(song, drums);
+  const key = a + ':' + b;
+  if (klCache.key === key) return klCache.kl;
   const pos = new Array(128);
   let wi = 0;
   for (let p = a; p <= b; p++) {
@@ -2400,6 +2419,7 @@ function drawMidi(cv, dt, now, wt) {
 function drawMidiScene(g, w, h, dt, now, wt) {
   const th = C.midi[S.theme], song = S.song;
   const kl = getKeyLayout(song, S.showDrums);
+  if (kl !== mv.kl) { mv.kl = kl; updateKeysUI(); }
   const G = midiGeom(w, h, S.dir, kl, S.look);
   drawMidiBg(g, G, th, wt);
   drawAmbient(g, G, th, dt, wt);
@@ -2604,7 +2624,6 @@ const pick = (v, list, d) => (list.indexOf(v) >= 0 ? v : d);
 const MODES = ['circle', 'line', 'waves'];
 const THEME_KEYS = ['bubble', 'crystal', 'abyss'];
 const MODE_NAMES = { circle: 'circle', line: 'linear', waves: 'waves' };
-const MIDI_H_MIN = 140, MIDI_H_MAX = 560;
 const GRID_DEFAULT = () => ({ mode: 'midi', bpm: 120, beats: 4, start: 0 });
 const S = {
   song: null, songId: 0, ana: null, anaId: 0,
@@ -2617,7 +2636,7 @@ const S = {
   showDrums: !!store.get('drums', false),
   showGrid: store.get('grid', true) !== false,
   showSync: store.get('sync', true) !== false,
-  midiH: clamp(+store.get('midiH', 0) || 0, 0, MIDI_H_MAX),
+  keys: (() => { const k = store.get('keys') || {}; return { mode: k.mode === 'manual' ? 'manual' : 'auto', lo: +k.lo || 36, hi: +k.hi || 96 }; })(),
   scale: pick(store.get('scale'), ['log', 'lin'], 'log'),
   sens: clamp(+store.get('sens', 1) || 1, 0.5, 2),
   zoomSpan: 6, syncOpen: false, exporting: false, previewing: false, audioPending: false,
@@ -2935,16 +2954,35 @@ function setDir(d, quiet) { S.dir = d; if (!quiet) store.set('dir2.' + S.theme, 
 const cycle = (list, v) => list[(list.indexOf(v) + 1) % list.length];
 function setSwitch(id, on) { $(id).setAttribute('aria-checked', String(on)); }
 const speedText = () => S.look.toFixed(1) + tl('secSp');
-/* MIDI view height: 0 keeps the stylesheet's default (smaller on phones) */
-function setMidiHeight(px, quiet) {
-  S.midiH = px ? clamp(Math.round(px), MIDI_H_MIN, MIDI_H_MAX) : 0;
-  el.midiWin.style.height = S.midiH ? S.midiH + 'px' : '';
-  const r = $('#midiHeight'), cur = Math.round(el.midiWin.clientHeight);
-  r.value = cur; setRangeFill(r);
-  $('#midiHeightVal').textContent = cur + ' px';
-  $('#midiGrip').setAttribute('aria-valuenow', cur);
-  if (!quiet) store.set('midiH', S.midiH);
+/* keyboard range: fitted to the song, or a fixed span of white-key endpoints */
+const KEY_PRESETS = { 88: [21, 108], 61: [36, 96], 49: [36, 84] };
+function updateKeysUI() {
+  const kl = getKeyLayout(S.song, S.showDrums), manual = S.keys.mode === 'manual';
+  pressSeg($('#keyModeSeg'), 'data-km', S.keys.mode);
+  $('#keyBox').hidden = !manual;
+  $('#keyCount').textContent = noteName(kl.a) + '–' + noteName(kl.b) + ' ・ ' + tl('keysN', kl.b - kl.a + 1);
+  $('#keyLoOut').textContent = noteName(kl.a);
+  $('#keyHiOut').textContent = noteName(kl.b);
 }
+function setKeys(patch) {
+  Object.assign(S.keys, patch);
+  let { lo, hi } = S.keys;
+  lo = clamp(Math.round(lo), 0, 115); hi = clamp(Math.round(hi), 12, 127);
+  while (isBlackKey(lo)) lo--;
+  while (isBlackKey(hi)) hi++;
+  if (hi - lo < 12) { if (patch.lo != null) { lo = hi - 12; while (isBlackKey(lo)) lo--; } else { hi = lo + 12; while (isBlackKey(hi)) hi++; } }
+  S.keys.lo = lo; S.keys.hi = hi;
+  store.set('keys', S.keys);
+  updateKeysUI();
+}
+/* ±1 moves one white key, ±12 one octave */
+function stepKey(side, step) {
+  let p = S.keys[side];
+  if (Math.abs(step) === 12) p += step;
+  else do p += step; while (isBlackKey(p));
+  setKeys({ [side]: p });
+}
+function fitKeys() { const [lo, hi] = autoKeyRange(S.song, S.showDrums); setKeys({ mode: 'manual', lo, hi }); }
 function setSyncOpen(open) {
   S.syncOpen = open;
   $('#syncPanel').hidden = !open;
@@ -2979,6 +3017,7 @@ function applyLang(l) {
   setSyncOpen(S.syncOpen);
   $('#speedVal').textContent = speedText();
   updateGridUI();
+  updateKeysUI();
   renderIcon();
   if (!$('#exportModal').hidden) updateExportInfo();
 }
@@ -3022,9 +3061,14 @@ function bindUI() {
   const speed = $('#speed');
   speed.value = S.look; setRangeFill(speed); $('#speedVal').textContent = speedText();
   speed.addEventListener('input', () => { S.look = +speed.value; store.set('look', S.look); setRangeFill(speed); $('#speedVal').textContent = speedText(); });
-  const mh = $('#midiHeight');
-  mh.min = MIDI_H_MIN; mh.max = MIDI_H_MAX;
-  mh.addEventListener('input', () => setMidiHeight(+mh.value));
+  $('#keyModeSeg').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-km]');
+    if (!b || b.dataset.km === S.keys.mode) return;
+    if (b.dataset.km === 'manual') fitKeys(); else setKeys({ mode: 'auto' });
+  });
+  for (const b of $$('[data-kstep]')) b.addEventListener('click', () => stepKey(b.dataset.side, +b.dataset.kstep));
+  for (const b of $$('[data-kp]')) b.addEventListener('click', () => { const r = KEY_PRESETS[b.dataset.kp]; setKeys({ mode: 'manual', lo: r[0], hi: r[1] }); });
+  $('#keyFit').addEventListener('click', fitKeys);
   $('#syncSw').addEventListener('click', () => setShowSync(!S.showSync));
   $('#drumSw').addEventListener('click', () => { S.showDrums = !S.showDrums; store.set('drums', S.showDrums); setSwitch('#drumSw', S.showDrums); });
   $('#gridSw').addEventListener('click', () => { S.showGrid = !S.showGrid; store.set('grid', S.showGrid); setSwitch('#gridSw', S.showGrid); });
@@ -3110,24 +3154,6 @@ function bindDrags() {
   const endZ = () => { zdrag = null; };
   zw.addEventListener('pointerup', endZ);
   zw.addEventListener('pointercancel', endZ);
-
-  /* the grip under the MIDI view resizes it */
-  const gp = $('#midiGrip');
-  let gdrag = null;
-  gp.setAttribute('aria-valuemin', MIDI_H_MIN); gp.setAttribute('aria-valuemax', MIDI_H_MAX);
-  gp.addEventListener('pointerdown', (e) => { gdrag = { y: e.clientY, h: mw.clientHeight }; gp.setPointerCapture(e.pointerId); gp.classList.add('dragging'); e.preventDefault(); });
-  gp.addEventListener('pointermove', (e) => { if (gdrag) setMidiHeight(gdrag.h + e.clientY - gdrag.y, true); });
-  const endG = () => { if (!gdrag) return; gdrag = null; gp.classList.remove('dragging'); store.set('midiH', S.midiH); };
-  gp.addEventListener('pointerup', endG);
-  gp.addEventListener('pointercancel', endG);
-  gp.addEventListener('dblclick', () => setMidiHeight(0));
-  gp.addEventListener('keydown', (e) => {
-    const d = e.key === 'ArrowUp' ? -8 : e.key === 'ArrowDown' ? 8 : 0;
-    if (e.key === 'Home' || e.key === 'Escape') setMidiHeight(0);
-    else if (d) setMidiHeight(mw.clientHeight + d);
-    else return;
-    e.preventDefault();
-  });
 }
 
 function onKey(e) {
@@ -3944,7 +3970,7 @@ function init() {
   setSwitch('#drumSw', S.showDrums);
   setSwitch('#gridSw', S.showGrid);
   setShowSync(S.showSync, true);
-  setMidiHeight(S.midiH, true);
+  if (S.keys.mode === 'manual') setKeys({}); else updateKeysUI();
   setOffset(0, true);
   setStretch(0, true);
   bindUI();
