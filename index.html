@@ -118,6 +118,7 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 .head-actions { display: flex; gap: 4px; }
 .head-actions .chip { padding: 0 9px; }
 .head-actions .chip.icon-only { width: 30px; padding: 0; justify-content: center; }
+.chip.lang { font-family: var(--font-num); letter-spacing: .04em; }
 .chip { height: 30px; padding: 0 11px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px;
   background: var(--mist); color: var(--ink-2); font-size: 12px; font-weight: 700; box-shadow: inset 0 0 0 1px var(--card-line);
   transition: background .15s, color .15s, transform .15s; white-space: nowrap; }
@@ -202,6 +203,11 @@ input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border: 2px s
 .midi-win { height: 252px; touch-action: pan-y; cursor: grab; }
 .midi-win.dragging { cursor: grabbing; }
 .midi-win.touch-drag { touch-action: none; }
+.midi-win.no-drag { cursor: default; }
+.midi-win.no-drag .drag-hint { display: none; }
+.midi-grip { height: 14px; margin-top: -8px; margin-bottom: -6px; display: grid; place-items: center; cursor: ns-resize; touch-action: none; border-radius: 999px; }
+.midi-grip span { width: 46px; height: 4px; border-radius: 999px; background: var(--card-line); box-shadow: inset 0 0 0 1px var(--lav); transition: background .15s, width .15s; }
+.midi-grip:hover span, .midi-grip.dragging span { background: var(--violet-2); width: 64px; }
 .empty { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: 10px; text-align: center; padding: 16px; color: var(--ink-2); font-size: 13px; }
 .empty p { margin: 0; line-height: 1.7; }
 .empty .chip { background: var(--glass); }
@@ -286,7 +292,7 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
   box-shadow: 0 40px 80px -30px rgba(var(--shadow-rgb), .6), inset 0 0 0 1px var(--card-line); }
 .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .modal-head h2 { margin: 0; font-size: 17px; font-weight: 900; color: var(--ink); }
-.modal-head h2 span { color: var(--violet); }
+.modal-head h2 span[aria-hidden] { color: var(--violet); }
 .ex-body { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: start; }
 .ex-stage { width: 240px; height: 300px; display: grid; place-items: center; border-radius: 18px; background: var(--mist); box-shadow: inset 0 0 0 1px var(--card-line); overflow: hidden; }
 .ex-stage canvas, .ex-stage video { display: block; max-width: 100%; max-height: 100%; border-radius: 10px; }
@@ -320,7 +326,7 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
 .head.no-art { grid-template-columns: minmax(0, 1fr) auto; }
 .head.no-art .art { display: none; }
 .head.no-art .titles { cursor: pointer; border-radius: 10px; }
-.head.no-art .titles:hover .eyebrow::after, .head.no-art .titles:focus-visible .eyebrow::after { content: "  ✎ アイコン"; color: var(--ink-3); letter-spacing: 0; }
+.head.no-art .titles:hover .eyebrow::after, .head.no-art .titles:focus-visible .eyebrow::after { content: "  ✎ " attr(data-edit); color: var(--ink-3); letter-spacing: 0; }
 
 /* colour themes */
 .colors { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; max-width: 500px; }
@@ -340,6 +346,7 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
   .spec { height: 190px; }
   .midi-win { height: 232px; }
   .chip .lbl { display: none; }
+  .chip.lang svg.i { display: none; }
   .chip { padding: 0 9px; }
   .seg button { padding: 0 9px; font-size: 11.5px; }
   .midi-head .seg button svg.i { display: none; }
@@ -388,6 +395,7 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
   <symbol id="i-restart" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5"/><path d="M4.5 4.5v4h4"/><circle cx="12" cy="12" r="1.6"/></symbol>
   <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M5 19l1-4L15.5 5.5a2.1 2.1 0 0 1 3 3L9 18z"/><path d="M13.5 7.5l3 3"/></symbol>
   <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M20.5 16l-5-5-8.5 8.5"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.4 5.4 3.4 8.5s-1 6.1-3.4 8.5c-2.4-2.4-3.4-5.4-3.4-8.5s1-6.1 3.4-8.5z"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
 </svg>
 
@@ -406,166 +414,170 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
 </div>
 
 <main class="stage">
-  <article class="card" id="card" aria-label="うたかたプレイヤー">
+  <article class="card" id="card" aria-label="うたかたプレイヤー" data-i-label="cardLabel">
     <header class="head">
-      <button class="art" id="artBtn" aria-label="アイコンを変える" aria-haspopup="dialog" aria-expanded="false" title="アイコンを変える">
+      <button class="art" id="artBtn" aria-label="アイコンを変える" aria-haspopup="dialog" aria-expanded="false" title="アイコンを変える" data-i-label="changeIcon" data-i-title="changeIcon">
         <span class="art-face" id="artFace"></span>
         <span class="art-badge" aria-hidden="true"><svg class="i"><use href="#i-pencil"/></svg></span>
       </button>
       <div class="titles" id="titles">
-        <span class="eyebrow">♡ now playing</span>
+        <span class="eyebrow" data-edit="アイコン" data-i-edit="icon">♡ now playing</span>
         <div class="title" id="title">曲をえらんでね</div>
         <div class="artist" id="artist">音声ファイルとMIDIファイルを読み込めます</div>
       </div>
       <div class="head-actions">
-        <button class="chip" id="btnAudio" title="音声ファイルをひらく"><svg class="i"><use href="#i-note"/></svg><span class="lbl">おと</span></button>
-        <button class="chip" id="btnMidi" title="MIDIファイルをひらく"><svg class="i"><use href="#i-piano"/></svg><span class="lbl">MIDI</span></button>
-        <button class="chip" id="btnVideo" title="動画にする"><svg class="i"><use href="#i-video"/></svg><span class="lbl">動画</span></button>
+        <button class="chip" id="btnAudio" title="音声ファイルをひらく" data-i-title="openAudio"><svg class="i"><use href="#i-note"/></svg><span class="lbl" data-i="audio">おと</span></button>
+        <button class="chip" id="btnMidi" title="MIDIファイルをひらく" data-i-title="openMidi"><svg class="i"><use href="#i-piano"/></svg><span class="lbl">MIDI</span></button>
+        <button class="chip" id="btnVideo" title="動画にする" data-i-title="makeVideo"><svg class="i"><use href="#i-video"/></svg><span class="lbl" data-i="video">動画</span></button>
+        <button class="chip lang" id="btnLang" title="English" aria-label="Switch to English" data-i-title="langOther" data-i-label="langSwitch"><svg class="i"><use href="#i-globe"/></svg><span data-i="langCode">EN</span></button>
       </div>
-      <div class="pop icon-pop" id="iconPop" role="dialog" aria-label="アイコンをえらぶ" style="top:62px;left:0" hidden>
-        <div class="row"><h3>アイコン</h3><span class="spacer"></span><span class="lbl sw-lbl">表示</span><button class="switch" id="iconShowSw" role="switch" aria-checked="true" aria-label="アイコンを表示"></button></div>
-        <div class="row"><button class="chip" id="btnIconImg"><svg class="i"><use href="#i-image"/></svg>画像をえらぶ</button><button class="chip" id="btnIconClear" hidden>画像をはずす</button></div>
-        <p class="help">好きな画像をアイコンにできます。画像はこのブラウザにだけ保存されます。かくしたアイコンは、曲名をタップすると戻せます。</p>
+      <div class="pop icon-pop" id="iconPop" role="dialog" aria-label="アイコンをえらぶ" data-i-label="chooseIcon" style="top:62px;left:0" hidden>
+        <div class="row"><h3 data-i="icon">アイコン</h3><span class="spacer"></span><span class="lbl sw-lbl" data-i="show">表示</span><button class="switch" id="iconShowSw" role="switch" aria-checked="true" aria-label="アイコンを表示" data-i-label="showIcon"></button></div>
+        <div class="row"><button class="chip" id="btnIconImg"><svg class="i"><use href="#i-image"/></svg><span data-i="chooseImage">画像をえらぶ</span></button><button class="chip" id="btnIconClear" data-i="removeImage" hidden>画像をはずす</button></div>
+        <p class="help" data-i="iconHelp">好きな画像をアイコンにできます。画像はこのブラウザにだけ保存されます。かくしたアイコンは、曲名をタップすると戻せます。</p>
       </div>
     </header>
 
-    <section class="spec-wrap" aria-label="オーディオスペクトラム">
+    <section class="spec-wrap" aria-label="オーディオスペクトラム" data-i-label="spectrumLabel">
       <div class="window spec" id="specWin">
         <canvas id="specCanvas"></canvas>
         <span class="mode-name" id="modeName">circle</span>
-        <button class="float-btn" id="specGear" aria-label="スペクトラムの設定" aria-haspopup="dialog" aria-expanded="false"><svg class="i"><use href="#i-sliders"/></svg></button>
-        <div class="busy" id="busy" hidden>準備中…</div>
+        <button class="float-btn" id="specGear" aria-label="スペクトラムの設定" aria-haspopup="dialog" aria-expanded="false" data-i-label="specSettings"><svg class="i"><use href="#i-sliders"/></svg></button>
+        <div class="busy" id="busy" data-i="preparing" hidden>準備中…</div>
       </div>
-      <div class="seg" role="tablist" id="specModes" aria-label="スペクトラムのモード">
-        <button role="tab" data-mode="circle" aria-selected="true"><svg class="i"><use href="#i-circle"/></svg>まる</button>
-        <button role="tab" data-mode="line" aria-selected="false"><svg class="i"><use href="#i-bars"/></svg>ライン</button>
-        <button role="tab" data-mode="waves" aria-selected="false"><svg class="i"><use href="#i-wave"/></svg>なみ</button>
+      <div class="seg" role="tablist" id="specModes" aria-label="スペクトラムのモード" data-i-label="specModes">
+        <button role="tab" data-mode="circle" aria-selected="true"><svg class="i"><use href="#i-circle"/></svg><span data-i="modeCircle">まる</span></button>
+        <button role="tab" data-mode="line" aria-selected="false"><svg class="i"><use href="#i-bars"/></svg><span data-i="modeLine">ライン</span></button>
+        <button role="tab" data-mode="waves" aria-selected="false"><svg class="i"><use href="#i-wave"/></svg><span data-i="modeWaves">なみ</span></button>
       </div>
-      <div class="pop" id="specPop" role="dialog" aria-label="スペクトラムの設定" style="top:48px;right:10px" hidden>
-        <h3>スペクトラム</h3>
-        <div class="row"><span class="lbl">周波数軸</span><div class="mini-seg" id="scaleSeg"><button data-scale="log" aria-pressed="true">ログ</button><button data-scale="lin" aria-pressed="false">リニア</button></div></div>
-        <div class="row"><label for="sens">感度</label><input type="range" id="sens" min="0.5" max="2" step="0.05" value="1"><span class="val" id="sensVal">1.00×</span></div>
+      <div class="pop" id="specPop" role="dialog" aria-label="スペクトラムの設定" data-i-label="specSettings" style="top:48px;right:10px" hidden>
+        <h3 data-i="spectrum">スペクトラム</h3>
+        <div class="row"><span class="lbl" data-i="freqAxis">周波数軸</span><div class="mini-seg" id="scaleSeg"><button data-scale="log" aria-pressed="true" data-i="log">ログ</button><button data-scale="lin" aria-pressed="false" data-i="linear">リニア</button></div></div>
+        <div class="row"><label for="sens" data-i="sensitivity">感度</label><input type="range" id="sens" min="0.5" max="2" step="0.05" value="1"><span class="val" id="sensVal">1.00×</span></div>
       </div>
     </section>
 
-    <section class="transport" aria-label="再生">
-      <div class="seek" id="seek" role="slider" tabindex="0" aria-label="再生位置" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00">
+    <section class="transport" aria-label="再生" data-i-label="playback">
+      <div class="seek" id="seek" role="slider" tabindex="0" aria-label="再生位置" data-i-label="position" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00">
         <canvas id="seekCanvas"></canvas>
         <div class="seek-tip" id="seekTip" hidden>0:00</div>
       </div>
       <div class="times"><span id="tCur">0:00</span><span id="tDur">0:00</span></div>
       <div class="controls">
         <div class="ctl-left">
-          <button class="round small" id="btnLoop" aria-pressed="false" aria-label="ループ再生" title="ループ再生"><svg class="i"><use href="#i-loop"/></svg></button>
-          <button class="round small" id="btnResetAll" aria-label="位置をリセット（0:00・ずれ補正 0）" title="位置をリセット（0:00・ずれ補正 0）"><svg class="i"><use href="#i-restart"/></svg></button>
+          <button class="round small" id="btnLoop" aria-pressed="false" aria-label="ループ再生" title="ループ再生" data-i-label="loop" data-i-title="loop"><svg class="i"><use href="#i-loop"/></svg></button>
+          <button class="round small" id="btnResetAll" aria-label="位置をリセット（0:00・ずれ補正 0）" title="位置をリセット（0:00・ずれ補正 0）" data-i-label="resetAll" data-i-title="resetAll"><svg class="i"><use href="#i-restart"/></svg></button>
         </div>
         <div class="ctl-mid">
-          <button class="round" id="btnBack" aria-label="5秒もどる" title="5秒もどる"><svg class="i"><use href="#i-back"/></svg></button>
+          <button class="round" id="btnBack" aria-label="5秒もどる" title="5秒もどる" data-i-label="back5" data-i-title="back5"><svg class="i"><use href="#i-back"/></svg></button>
           <button class="play" id="btnPlay" aria-label="再生"><svg class="i"><use id="playUse" href="#i-play"/></svg></button>
-          <button class="round" id="btnFwd" aria-label="5秒すすむ" title="5秒すすむ"><svg class="i"><use href="#i-fwd"/></svg></button>
+          <button class="round" id="btnFwd" aria-label="5秒すすむ" title="5秒すすむ" data-i-label="fwd5" data-i-title="fwd5"><svg class="i"><use href="#i-fwd"/></svg></button>
         </div>
         <div class="ctl-right">
-          <button class="round small" id="btnMute" aria-label="ミュート" title="ミュート"><svg class="i"><use id="volUse" href="#i-vol"/></svg></button>
-          <input class="vol" type="range" id="vol" min="0" max="1" step="0.01" value="0.8" aria-label="音量">
+          <button class="round small" id="btnMute" aria-label="ミュート" title="ミュート" data-i-label="mute" data-i-title="mute"><svg class="i"><use id="volUse" href="#i-vol"/></svg></button>
+          <input class="vol" type="range" id="vol" min="0" max="1" step="0.01" value="0.8" aria-label="音量" data-i-label="volume">
         </div>
       </div>
     </section>
 
     <svg class="divider" viewBox="0 0 400 10" preserveAspectRatio="none" aria-hidden="true"><path d="M0 5q10-5 20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
 
-    <section class="midi" aria-label="MIDIビジュアライザ">
+    <section class="midi" aria-label="MIDIビジュアライザ" data-i-label="midiLabel">
       <div class="midi-head">
         <span class="sec-label">MIDI ✧</span>
-        <div class="seg" role="tablist" id="themeTabs" aria-label="MIDIのテーマ">
-          <button role="tab" data-theme="bubble" aria-selected="true"><svg class="i"><use href="#i-bubble"/></svg>あわ</button>
-          <button role="tab" data-theme="crystal" aria-selected="false"><svg class="i"><use href="#i-crystal"/></svg>すいしょう</button>
-          <button role="tab" data-theme="abyss" aria-selected="false"><svg class="i"><use href="#i-moon"/></svg>しんかい</button>
+        <div class="seg" role="tablist" id="themeTabs" aria-label="MIDIのテーマ" data-i-label="midiThemes">
+          <button role="tab" data-theme="bubble" aria-selected="true"><svg class="i"><use href="#i-bubble"/></svg><span data-i="themeBubble">あわ</span></button>
+          <button role="tab" data-theme="crystal" aria-selected="false"><svg class="i"><use href="#i-crystal"/></svg><span data-i="themeCrystal">すいしょう</span></button>
+          <button role="tab" data-theme="abyss" aria-selected="false"><svg class="i"><use href="#i-moon"/></svg><span data-i="themeAbyss">しんかい</span></button>
         </div>
         <span class="spacer"></span>
-        <button class="round small" id="midiGear" aria-label="MIDI表示の設定" aria-haspopup="dialog" aria-expanded="false" title="MIDI表示の設定"><svg class="i"><use href="#i-sliders"/></svg></button>
+        <button class="round small" id="midiGear" aria-label="MIDI表示の設定" aria-haspopup="dialog" aria-expanded="false" title="MIDI表示の設定" data-i-label="midiSettings" data-i-title="midiSettings"><svg class="i"><use href="#i-sliders"/></svg></button>
       </div>
       <div class="window midi-win" id="midiWin">
         <canvas id="midiCanvas"></canvas>
         <div class="empty" id="midiEmpty" hidden>
           <svg class="i" style="width:34px;height:34px;color:var(--violet-2)"><use href="#i-bubble"/></svg>
-          <p>MIDIファイルをえらぶか、<br>カードにドロップしてね</p>
-          <button class="chip" id="btnMidi2"><svg class="i"><use href="#i-piano"/></svg>MIDIをえらぶ</button>
+          <p data-i-html="midiEmpty">MIDIファイルをえらぶか、<br>カードにドロップしてね</p>
+          <button class="chip" id="btnMidi2"><svg class="i"><use href="#i-piano"/></svg><span data-i="chooseMidi">MIDIをえらぶ</span></button>
         </div>
-        <span class="drag-hint" id="dragHint">ドラッグでずれ調整</span>
+        <span class="drag-hint" id="dragHint" data-i="dragHint">ドラッグでずれ調整</span>
         <div class="flash" id="flash" hidden>+0 ms</div>
       </div>
-      <div class="pop midi-pop" id="midiPop" role="dialog" aria-label="MIDI表示の設定" style="top:40px;right:0" hidden>
-        <h3>MIDI 表示</h3>
-        <div class="row"><span class="lbl">流れる向き</span><div class="mini-seg" id="dirSeg"><button data-dir="up" aria-pressed="false">のぼる</button><button data-dir="down" aria-pressed="false">おちる</button><button data-dir="left" aria-pressed="false">よこ</button></div></div>
-        <div class="row"><label for="speed">見える秒数</label><input type="range" id="speed" min="1" max="8" step="0.5" value="3"><span class="val" id="speedVal">3.0 秒</span></div>
-        <div class="row"><span class="lbl">ドラム</span><button class="switch" id="drumSw" role="switch" aria-checked="false" aria-label="ドラムを表示"></button></div>
-        <div class="row"><span class="lbl">小節線</span><button class="switch" id="gridSw" role="switch" aria-checked="true" aria-label="小節線を表示"></button>
-          <div class="mini-seg" id="gridModeSeg"><button data-gm="midi" aria-pressed="true">MIDIのまま</button><button data-gm="manual" aria-pressed="false">手動</button></div></div>
+      <div class="midi-grip" id="midiGrip" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="MIDI表示の高さ" title="ドラッグで高さを変える（ダブルクリックで元に戻す）" data-i-label="midiHeightLabel" data-i-title="gripTitle"><span></span></div>
+      <div class="pop midi-pop" id="midiPop" role="dialog" aria-label="MIDI表示の設定" data-i-label="midiSettings" style="top:40px;right:0" hidden>
+        <h3 data-i="midiDisplay">MIDI 表示</h3>
+        <div class="row"><span class="lbl" data-i="direction">流れる向き</span><div class="mini-seg" id="dirSeg"><button data-dir="up" aria-pressed="false" data-i="dirUp">のぼる</button><button data-dir="down" aria-pressed="false" data-i="dirDown">おちる</button><button data-dir="left" aria-pressed="false" data-i="dirLeft">よこ</button></div></div>
+        <div class="row"><label for="speed" data-i="visibleTime">見える秒数</label><input type="range" id="speed" min="1" max="8" step="0.5" value="3"><span class="val" id="speedVal">3.0 秒</span></div>
+        <div class="row"><label for="midiHeight" data-i="height">高さ</label><input type="range" id="midiHeight" min="140" max="560" step="4" value="252"><span class="val" id="midiHeightVal">252 px</span></div>
+        <div class="row"><span class="lbl" data-i="drums">ドラム</span><button class="switch" id="drumSw" role="switch" aria-checked="false" aria-label="ドラムを表示" data-i-label="showDrums"></button></div>
+        <div class="row"><span class="lbl" data-i="barLines">小節線</span><button class="switch" id="gridSw" role="switch" aria-checked="true" aria-label="小節線を表示" data-i-label="showBarLines"></button>
+          <div class="mini-seg" id="gridModeSeg"><button data-gm="midi" aria-pressed="true" data-i="gridMidi">MIDIのまま</button><button data-gm="manual" aria-pressed="false" data-i="gridManual">手動</button></div></div>
         <div class="grid-box" id="gridBox" hidden>
-          <div class="row"><label class="lbl" for="bpmIn">BPM</label><button class="nudge sm" data-bpm="-1" aria-label="BPMを1さげる">−</button><input class="num" id="bpmIn" type="number" inputmode="decimal" min="20" max="300" step="0.1" value="120"><button class="nudge sm" data-bpm="1" aria-label="BPMを1あげる">+</button><button class="nudge" id="tapBtn" title="再生しながら拍に合わせて数回タップ">タップ</button></div>
-          <div class="row"><span class="lbl">拍子</span><div class="mini-seg" id="beatsSeg"><button data-beats="2" aria-pressed="false">2拍</button><button data-beats="3" aria-pressed="false">3拍</button><button data-beats="4" aria-pressed="true">4拍</button><button data-beats="6" aria-pressed="false">6拍</button></div></div>
-          <div class="row"><span class="lbl">開始位置</span><button class="nudge sm" data-gs="-0.01" aria-label="開始位置を10ミリ秒はやく">−10ms</button><output class="val" id="gridStartOut">0.000秒</output><button class="nudge sm" data-gs="0.01" aria-label="開始位置を10ミリ秒おそく">+10ms</button></div>
-          <div class="row"><span class="lbl"></span><button class="nudge" data-gbeat="-1">−1拍</button><button class="nudge" data-gbeat="1">+1拍</button><button class="nudge" id="gridHere">いまを1拍目に</button></div>
-          <button class="chip" id="gridFromMidi">MIDIのテンポから読みこむ</button>
+          <div class="row"><label class="lbl" for="bpmIn">BPM</label><button class="nudge sm" data-bpm="-1" aria-label="BPMを1さげる" data-i-label="bpmDown">−</button><input class="num" id="bpmIn" type="number" inputmode="decimal" min="20" max="300" step="0.1" value="120"><button class="nudge sm" data-bpm="1" aria-label="BPMを1あげる" data-i-label="bpmUp">+</button><button class="nudge" id="tapBtn" title="再生しながら拍に合わせて数回タップ" data-i-title="tapTitle" data-i="tap">タップ</button></div>
+          <div class="row"><span class="lbl" data-i="meter">拍子</span><div class="mini-seg" id="beatsSeg"><button data-beats="2" aria-pressed="false" data-i="beats2">2拍</button><button data-beats="3" aria-pressed="false" data-i="beats3">3拍</button><button data-beats="4" aria-pressed="true" data-i="beats4">4拍</button><button data-beats="6" aria-pressed="false" data-i="beats6">6拍</button></div></div>
+          <div class="row"><span class="lbl" data-i="gridStart">開始位置</span><button class="nudge sm" data-gs="-0.01" aria-label="開始位置を10ミリ秒はやく" data-i-label="gsEarlier">−10ms</button><output class="val" id="gridStartOut">0.000秒</output><button class="nudge sm" data-gs="0.01" aria-label="開始位置を10ミリ秒おそく" data-i-label="gsLater">+10ms</button></div>
+          <div class="row"><span class="lbl"></span><button class="nudge" data-gbeat="-1" data-i="beatMinus">−1拍</button><button class="nudge" data-gbeat="1" data-i="beatPlus">+1拍</button><button class="nudge" id="gridHere" data-i="gridHere">いまを1拍目に</button></div>
+          <button class="chip" id="gridFromMidi" data-i="gridFromMidi">MIDIのテンポから読みこむ</button>
         </div>
+        <div class="row"><span class="lbl" data-i="syncBar">ずれ補正</span><button class="switch" id="syncSw" role="switch" aria-checked="true" aria-label="ずれ補正を表示" data-i-label="showSync"></button></div>
       </div>
     </section>
 
-    <section class="sync" aria-label="タイミング調整">
+    <section class="sync" id="syncSec" aria-label="タイミング調整" data-i-label="timing">
       <div class="sync-row">
-        <span class="sync-label"><svg class="i"><use href="#i-bubble"/></svg>ずれ補正</span>
+        <span class="sync-label"><svg class="i"><use href="#i-bubble"/></svg><span data-i="syncBar">ずれ補正</span></span>
         <div class="nudger">
-          <button class="nudge" data-nudge="-10" aria-label="MIDIを10ミリ秒はやく">−10</button>
+          <button class="nudge" data-nudge="-10" aria-label="MIDIを10ミリ秒はやく" data-i-label="midiEarlier">−10</button>
           <output class="offset-out" id="offsetOut" aria-live="polite">+0<small>ms</small></output>
-          <button class="nudge" data-nudge="10" aria-label="MIDIを10ミリ秒おそく">+10</button>
+          <button class="nudge" data-nudge="10" aria-label="MIDIを10ミリ秒おそく" data-i-label="midiLater">+10</button>
         </div>
-        <button class="chip auto" id="btnAuto" title="音の立ち上がりとノートの頭を照らし合わせて自動で合わせます"><svg class="i"><use href="#i-wand"/></svg><span class="lbl">おまかせ</span></button>
+        <button class="chip auto" id="btnAuto" title="音の立ち上がりとノートの頭を照らし合わせて自動で合わせます" data-i-title="autoTitle"><svg class="i"><use href="#i-wand"/></svg><span class="lbl" data-i="auto">おまかせ</span></button>
         <button class="round small expand" id="btnExpand" aria-expanded="false" aria-controls="syncPanel" aria-label="タイミング調整をひらく"><svg class="i"><use href="#i-chev"/></svg></button>
       </div>
       <div class="sync-panel" id="syncPanel" hidden>
         <div class="zoom" id="zoomWin"><canvas id="zoomCanvas"></canvas></div>
-        <p class="help">上の段が<b>おと</b>の波形、下の段が<b>MIDI</b>。下の段を左右にドラッグして、音の立ち上がりとノートの頭をそろえてね。</p>
-        <div class="row"><label for="offsetRange">オフセット</label><input type="range" id="offsetRange" min="-3000" max="3000" step="1" value="0"><span class="val" id="offsetVal">+0 ms</span></div>
+        <p class="help" data-i-html="syncHelp1">上の段が<b>おと</b>の波形、下の段が<b>MIDI</b>。下の段を左右にドラッグして、音の立ち上がりとノートの頭をそろえてね。</p>
+        <div class="row"><label for="offsetRange" data-i="offset">オフセット</label><input type="range" id="offsetRange" min="-3000" max="3000" step="1" value="0"><span class="val" id="offsetVal">+0 ms</span></div>
         <div class="row">
-          <span class="lbl">こまかく</span>
+          <span class="lbl" data-i="fine">こまかく</span>
           <button class="nudge" data-nudge="-100">−100</button>
           <button class="nudge" data-nudge="-1">−1</button>
           <button class="nudge" data-nudge="1">+1</button>
           <button class="nudge" data-nudge="100">+100</button>
-          <button class="nudge" id="btnReset">0 にもどす</button>
+          <button class="nudge" id="btnReset" data-i="resetZero">0 にもどす</button>
         </div>
-        <div class="row"><label for="stretch">MIDIの長さ</label><input type="range" id="stretch" min="-8" max="8" step="0.05" value="0"><span class="val" id="stretchVal">100.00%</span></div>
-        <div class="row"><span class="lbl">表示のはば</span><div class="mini-seg" id="zoomSeg"><button data-span="2" aria-pressed="false">2秒</button><button data-span="6" aria-pressed="true">6秒</button><button data-span="12" aria-pressed="false">12秒</button></div></div>
-        <p class="help"><b>＋</b>でMIDIがおそく、<b>−</b>ではやくなります。だんだんずれていくときは「MIDIの長さ」で調整してね。</p>
+        <div class="row"><label for="stretch" data-i="midiLength">MIDIの長さ</label><input type="range" id="stretch" min="-8" max="8" step="0.05" value="0"><span class="val" id="stretchVal">100.00%</span></div>
+        <div class="row"><span class="lbl" data-i="viewSpan">表示のはば</span><div class="mini-seg" id="zoomSeg"><button data-span="2" aria-pressed="false" data-i="sec2">2秒</button><button data-span="6" aria-pressed="true" data-i="sec6">6秒</button><button data-span="12" aria-pressed="false" data-i="sec12">12秒</button></div></div>
+        <p class="help" data-i-html="syncHelp2"><b>＋</b>でMIDIがおそく、<b>−</b>ではやくなります。だんだんずれていくときは「MIDIの長さ」で調整してね。</p>
       </div>
     </section>
   </article>
-  <div class="colors" role="radiogroup" aria-label="カラー">
-    <span class="colors-label">カラー</span>
+  <div class="colors" role="radiogroup" aria-label="カラー" data-i-label="color">
+    <span class="colors-label" data-i="color">カラー</span>
     <div class="swatches" id="swatches"></div>
   </div>
-  <p class="hint"><span><kbd>Space</kbd> 再生</span> <span><kbd>←</kbd><kbd>→</kbd> 5秒</span> <span><kbd>[</kbd><kbd>]</kbd> ずれ ±10ms</span> <span><kbd>M</kbd> モード</span> <span><kbd>T</kbd> テーマ</span> <span><kbd>C</kbd> カラー</span><br><span>音声とMIDIは、カードにドロップしても読み込めます</span></p>
+  <p class="hint" data-i-html="hint"><span><kbd>Space</kbd> 再生</span> <span><kbd>←</kbd><kbd>→</kbd> 5秒</span> <span><kbd>[</kbd><kbd>]</kbd> ずれ ±10ms</span> <span><kbd>M</kbd> モード</span> <span><kbd>T</kbd> テーマ</span> <span><kbd>C</kbd> カラー</span><br><span>音声とMIDIは、カードにドロップしても読み込めます</span></p>
 </main>
 
 <input type="file" id="fileAudio" accept="audio/*,.mp3,.m4a,.wav,.aac,.flac,.ogg,.oga,.opus,.aif,.aiff" hidden>
 <input type="file" id="fileMidi" accept=".mid,.midi,.smf,.kar,.rmi,audio/midi,audio/x-midi" hidden>
-<div class="drop" id="drop" hidden><div class="drop-inner">ここに はなしてね ♪<small>音声ファイル・MIDIファイル（いっしょでもOK）</small></div></div>
+<div class="drop" id="drop" hidden><div class="drop-inner" data-i-html="dropHere">ここに はなしてね ♪<small>音声ファイル・MIDIファイル（いっしょでもOK）</small></div></div>
 <input type="file" id="fileIcon" accept="image/*" hidden>
 <div class="modal" id="exportModal" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="exTitle">
     <header class="modal-head">
-      <h2 id="exTitle">動画にする <span aria-hidden="true">✧</span></h2>
-      <button class="round small" id="exClose" aria-label="とじる"><svg class="i"><use href="#i-close"/></svg></button>
+      <h2 id="exTitle"><span class="t" data-i="makeVideo">動画にする</span> <span aria-hidden="true">✧</span></h2>
+      <button class="round small" id="exClose" aria-label="とじる" data-i-label="close"><svg class="i"><use href="#i-close"/></svg></button>
     </header>
     <div class="ex-body">
       <div class="ex-stage"><canvas id="exPreview"></canvas><video id="exVideo" controls playsinline hidden></video></div>
       <div class="ex-opts" id="exOpts">
-        <div class="row"><span class="lbl">かたち</span><div class="mini-seg" id="exFormat"><button data-v="v" aria-pressed="true">縦 9:16</button><button data-v="h" aria-pressed="false">横 16:9</button><button data-v="s" aria-pressed="false">正方形</button></div></div>
-        <div class="row"><span class="lbl">なめらかさ</span><div class="mini-seg" id="exFps"><button data-v="30" aria-pressed="true">30fps</button><button data-v="60" aria-pressed="false">60fps</button></div></div>
-        <div class="row"><span class="lbl">はんい</span><div class="mini-seg" id="exRange"><button data-v="all" aria-pressed="true">曲ぜんぶ</button><button data-v="here" aria-pressed="false">いまから30秒</button></div></div>
-        <div class="row"><span class="lbl">画質</span><div class="mini-seg" id="exQuality"><button data-v="std" aria-pressed="true">ふつう</button><button data-v="high" aria-pressed="false">きれい</button></div></div>
+        <div class="row"><span class="lbl" data-i="exShape">かたち</span><div class="mini-seg" id="exFormat"><button data-v="v" aria-pressed="true" data-i="exPortrait">縦 9:16</button><button data-v="h" aria-pressed="false" data-i="exLandscape">横 16:9</button><button data-v="s" aria-pressed="false" data-i="exSquare">正方形</button></div></div>
+        <div class="row"><span class="lbl" data-i="exSmooth">なめらかさ</span><div class="mini-seg" id="exFps"><button data-v="30" aria-pressed="true">30fps</button><button data-v="60" aria-pressed="false">60fps</button></div></div>
+        <div class="row"><span class="lbl" data-i="exRange">はんい</span><div class="mini-seg" id="exRange"><button data-v="all" aria-pressed="true" data-i="exAll">曲ぜんぶ</button><button data-v="here" aria-pressed="false" data-i="exHere">いまから30秒</button></div></div>
+        <div class="row"><span class="lbl" data-i="exQuality">画質</span><div class="mini-seg" id="exQuality"><button data-v="std" aria-pressed="true" data-i="exStd">ふつう</button><button data-v="high" aria-pressed="false" data-i="exHigh">きれい</button></div></div>
         <p class="help" id="exInfo"></p>
-        <p class="help">スペクトラムとMIDIは、いまのモード・テーマ・ずれ補正のまま動画になります（ずれ補正のパネルは入りません）。</p>
+        <p class="help" data-i="exHelp">スペクトラムとMIDIは、いまのモード・テーマ・ずれ補正のまま動画になります（ずれ補正のパネルは入りません）。</p>
       </div>
     </div>
     <div class="ex-progress" id="exProgress" hidden>
@@ -574,10 +586,10 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
     </div>
     <footer class="modal-foot">
       <span class="ex-note" id="exNote"></span>
-      <button class="chip" id="exCancel" hidden>やめる</button>
-      <button class="chip" id="exAgain" hidden>もういちど</button>
-      <button class="primary" id="exStart"><svg class="i"><use href="#i-video"/></svg>書き出す</button>
-      <button class="primary" id="exSave" hidden><svg class="i"><use href="#i-sparkle"/></svg>保存する</button>
+      <button class="chip" id="exCancel" data-i="cancel" hidden>やめる</button>
+      <button class="chip" id="exAgain" data-i="again" hidden>もういちど</button>
+      <button class="primary" id="exStart"><svg class="i"><use href="#i-video"/></svg><span data-i="exStart">書き出す</span></button>
+      <button class="primary" id="exSave" hidden><svg class="i"><use href="#i-sparkle"/></svg><span data-i="save">保存する</span></button>
     </footer>
   </div>
 </div>
@@ -618,6 +630,122 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('utakata.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('utakata.' + k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } },
 };
+
+/* ───────── language: Japanese (default) and English ─────────
+   Static markup carries data-i (text), data-i-html, data-i-label (aria-label), data-i-title and data-i-edit keys;
+   script strings go through t(). A function entry takes arguments. */
+const I18N = {
+  ja: {
+    preparing: '準備中…', docTitle: 'MIDI プレイヤー', langCode: 'EN', langOther: 'English', langSwitch: 'Switch to English',
+    cardLabel: 'うたかたプレイヤー', changeIcon: 'アイコンを変える', chooseIcon: 'アイコンをえらぶ', icon: 'アイコン', show: '表示', showIcon: 'アイコンを表示',
+    chooseImage: '画像をえらぶ', removeImage: '画像をはずす', openIconMenu: 'アイコンの設定をひらく',
+    iconHelp: '好きな画像をアイコンにできます。画像はこのブラウザにだけ保存されます。かくしたアイコンは、曲名をタップすると戻せます。',
+    openAudio: '音声ファイルをひらく', openMidi: 'MIDIファイルをひらく', makeVideo: '動画にする', audio: 'おと', video: '動画',
+    spectrumLabel: 'オーディオスペクトラム', specSettings: 'スペクトラムの設定', specModes: 'スペクトラムのモード',
+    modeCircle: 'まる', modeLine: 'ライン', modeWaves: 'なみ', spectrum: 'スペクトラム', freqAxis: '周波数軸', log: 'ログ', linear: 'リニア', sensitivity: '感度',
+    playback: '再生', position: '再生位置', loop: 'ループ再生', resetAll: '位置をリセット（0:00・ずれ補正 0）', back5: '5秒もどる', fwd5: '5秒すすむ',
+    play: '再生', pause: '一時停止', mute: 'ミュート', volume: '音量',
+    midiLabel: 'MIDIビジュアライザ', midiThemes: 'MIDIのテーマ', themeBubble: 'あわ', themeCrystal: 'すいしょう', themeAbyss: 'しんかい',
+    midiSettings: 'MIDI表示の設定', midiEmpty: 'MIDIファイルをえらぶか、<br>カードにドロップしてね', chooseMidi: 'MIDIをえらぶ', dragHint: 'ドラッグでずれ調整',
+    midiHeightLabel: 'MIDI表示の高さ', gripTitle: 'ドラッグで高さを変える（ダブルクリックで元に戻す）',
+    midiDisplay: 'MIDI 表示', direction: '流れる向き', dirUp: 'のぼる', dirDown: 'おちる', dirLeft: 'よこ', visibleTime: '見える秒数', height: '高さ',
+    drums: 'ドラム', showDrums: 'ドラムを表示', barLines: '小節線', showBarLines: '小節線を表示', gridMidi: 'MIDIのまま', gridManual: '手動',
+    bpmDown: 'BPMを1さげる', bpmUp: 'BPMを1あげる', tap: 'タップ', tapTitle: '再生しながら拍に合わせて数回タップ', meter: '拍子',
+    beats2: '2拍', beats3: '3拍', beats4: '4拍', beats6: '6拍', gridStart: '開始位置', gsEarlier: '開始位置を10ミリ秒はやく', gsLater: '開始位置を10ミリ秒おそく',
+    beatMinus: '−1拍', beatPlus: '+1拍', gridHere: 'いまを1拍目に', gridFromMidi: 'MIDIのテンポから読みこむ',
+    syncBar: 'ずれ補正', showSync: 'ずれ補正を表示', syncHidden: 'ずれ補正をかくしました（MIDI表示の設定から戻せます）',
+    timing: 'タイミング調整', midiEarlier: 'MIDIを10ミリ秒はやく', midiLater: 'MIDIを10ミリ秒おそく',
+    autoTitle: '音の立ち上がりとノートの頭を照らし合わせて自動で合わせます', auto: 'おまかせ', openTiming: 'タイミング調整をひらく', closeTiming: 'タイミング調整をとじる',
+    syncHelp1: '上の段が<b>おと</b>の波形、下の段が<b>MIDI</b>。下の段を左右にドラッグして、音の立ち上がりとノートの頭をそろえてね。',
+    offset: 'オフセット', fine: 'こまかく', resetZero: '0 にもどす', midiLength: 'MIDIの長さ', viewSpan: '表示のはば', sec2: '2秒', sec6: '6秒', sec12: '12秒',
+    syncHelp2: '<b>＋</b>でMIDIがおそく、<b>−</b>ではやくなります。だんだんずれていくときは「MIDIの長さ」で調整してね。',
+    color: 'カラー',
+    hint: '<span><kbd>Space</kbd> 再生</span> <span><kbd>←</kbd><kbd>→</kbd> 5秒</span> <span><kbd>[</kbd><kbd>]</kbd> ずれ ±10ms</span> <span><kbd>M</kbd> モード</span> <span><kbd>T</kbd> テーマ</span> <span><kbd>C</kbd> カラー</span><br><span>音声とMIDIは、カードにドロップしても読み込めます</span>',
+    dropHere: 'ここに はなしてね ♪<small>音声ファイル・MIDIファイル（いっしょでもOK）</small>',
+    close: 'とじる', exShape: 'かたち', exPortrait: '縦 9:16', exLandscape: '横 16:9', exSquare: '正方形', exSmooth: 'なめらかさ', exRange: 'はんい',
+    exAll: '曲ぜんぶ', exHere: 'いまから30秒', exQuality: '画質', exStd: 'ふつう', exHigh: 'きれい',
+    exHelp: 'スペクトラムとMIDIは、いまのモード・テーマ・ずれ補正のまま動画になります（ずれ補正のパネルは入りません）。',
+    cancel: 'やめる', again: 'もういちど', exStart: '書き出す', save: '保存する',
+    /* script strings */
+    pickSong: '曲をえらんでね', canLoad: '音声ファイルとMIDIファイルを読み込めます', synthAudio: 'MIDIから作った音', noMidi: 'MIDIなし',
+    loadingAudio: '音声を読み込み中…', badAudio: 'この音声ファイルは読めませんでした（mp3 / wav / m4a / ogg / flac などをためしてね）', analyzing: '波形を解析中…',
+    badMidi: (m) => 'MIDIを読めませんでした（' + m + '）', noNotes: 'このMIDIにはノートがありません', midiLoaded: (n) => 'MIDIを読み込みました：' + n + ' ノート',
+    synthing: 'MIDIを音にしています…', synthDone: '音声がないので、MIDIをオルゴール風の音で鳴らします ♪', synthFail: 'MIDIの音を作れませんでした',
+    pickFiles: '音声ファイルかMIDIファイルをえらんでね', restored: (ms) => '前回のずれ補正 ' + ms + ' ms を戻しました',
+    needMidi: '先にMIDIを読み込んでね', waitAna: '音声の解析が終わるまで少し待ってね', checking: 'しらべ中…',
+    autoFail: 'うまく合わせられませんでした。下の波形を見ながら手で調整してね', autoDone: (ms, stars) => 'おまかせ調整：' + ms + ' ms（自信 ' + stars + '）',
+    preparingAudio: '音声を準備中です…', pickFirst: '先に音声ファイルかMIDIファイルをえらんでね', cantPlay: '再生できませんでした',
+    resetDone: '位置をリセットしました（0:00・ずれ補正 0 ms）', secUnit: '秒', secSp: ' 秒', noMidiTempo: 'MIDIがないので読みこめません',
+    iconTooBig: 'アイコン画像が大きくて保存できませんでした（このページを開いている間は使えます）', badImage: '画像を読めませんでした', iconChanged: 'アイコンを変えました',
+    waveLoading: '波形を準備中…', noMidiLane: 'MIDIがありません', laneAudio: 'おと',
+    vPortrait: '縦', vLandscape: '横', vSquare: '正方形', approx: '約 ',
+    noEncoder: 'このブラウザでは動画をエンコードできません', exAudioPrep: '音声を準備中…', remaining: (s) => 'のこり ' + s, writing: '書き出し中…',
+    noAvcDesc: 'H.264 の設定情報が取れませんでした', muxing: 'ファイルにまとめています…', notReady: '音声の準備ができてからためしてね',
+    noExport: 'このブラウザは動画の書き出しに対応していません。Chrome・Edge・Firefox・Safari の最新版でためしてね。',
+    cantSaveHere: ' ・ この画面では保存できません（claude.ai でひらくと保存できます）', videoDone: '動画ができました ♪', exCancelled: '書き出しをやめました',
+    exFailed: (m) => '書き出しに失敗しました（' + m + '）', cantSaveToast: 'この画面では保存できません。claude.ai でひらいてためしてね', dlStarted: 'ダウンロードをはじめました ♪',
+    saved: '保存しました ♪', saveDeclined: '保存をキャンセルしました', rateLimited: '少し待ってから、もう一度ためしてね',
+    tooLarge: 'ファイルが大きすぎました。「いまから30秒」や「ふつう」でためしてね', saveFailed: (m) => '保存できませんでした（' + m + '）',
+    colorNames: { umi: 'うみ', orange: 'オレンジ', green: 'みどり', sakura: 'さくら', mono: 'モノクロ', cubase: 'ダーク' },
+  },
+  en: {
+    preparing: 'Preparing…', docTitle: 'MIDI Player', langCode: 'JA', langOther: '日本語', langSwitch: '日本語に切り替え',
+    cardLabel: 'Utakata player', changeIcon: 'Change icon', chooseIcon: 'Choose icon', icon: 'Icon', show: 'Show', showIcon: 'Show icon',
+    chooseImage: 'Choose image', removeImage: 'Remove image', openIconMenu: 'Open icon settings',
+    iconHelp: 'Use any picture as the icon. It is saved only in this browser. If you hide the icon, tap the song title to bring it back.',
+    openAudio: 'Open audio file', openMidi: 'Open MIDI file', makeVideo: 'Make a video', audio: 'Audio', video: 'Video',
+    spectrumLabel: 'Audio spectrum', specSettings: 'Spectrum settings', specModes: 'Spectrum mode',
+    modeCircle: 'Circle', modeLine: 'Line', modeWaves: 'Waves', spectrum: 'Spectrum', freqAxis: 'Freq. axis', log: 'Log', linear: 'Linear', sensitivity: 'Sensitivity',
+    playback: 'Playback', position: 'Position', loop: 'Loop', resetAll: 'Reset (0:00, offset 0)', back5: 'Back 5 s', fwd5: 'Forward 5 s',
+    play: 'Play', pause: 'Pause', mute: 'Mute', volume: 'Volume',
+    midiLabel: 'MIDI visualizer', midiThemes: 'MIDI theme', themeBubble: 'Bubble', themeCrystal: 'Crystal', themeAbyss: 'Abyss',
+    midiSettings: 'MIDI display settings', midiEmpty: 'Choose a MIDI file,<br>or drop it on the card', chooseMidi: 'Choose MIDI', dragHint: 'Drag to adjust offset',
+    midiHeightLabel: 'MIDI view height', gripTitle: 'Drag to resize (double-click to reset)',
+    midiDisplay: 'MIDI display', direction: 'Direction', dirUp: 'Up', dirDown: 'Down', dirLeft: 'Side', visibleTime: 'Visible time', height: 'Height',
+    drums: 'Drums', showDrums: 'Show drums', barLines: 'Bar lines', showBarLines: 'Show bar lines', gridMidi: 'From MIDI', gridManual: 'Manual',
+    bpmDown: 'BPM −1', bpmUp: 'BPM +1', tap: 'Tap', tapTitle: 'Tap a few times on the beat while playing', meter: 'Beats',
+    beats2: '2', beats3: '3', beats4: '4', beats6: '6', gridStart: 'Start', gsEarlier: 'Start 10 ms earlier', gsLater: 'Start 10 ms later',
+    beatMinus: '−1 beat', beatPlus: '+1 beat', gridHere: 'Downbeat here', gridFromMidi: 'Load from MIDI tempo',
+    syncBar: 'Offset', showSync: 'Show offset bar', syncHidden: 'Offset bar hidden (turn it back on in MIDI display settings)',
+    timing: 'Timing', midiEarlier: 'MIDI 10 ms earlier', midiLater: 'MIDI 10 ms later',
+    autoTitle: 'Match note starts to the audio onsets automatically', auto: 'Auto', openTiming: 'Open timing panel', closeTiming: 'Close timing panel',
+    syncHelp1: 'The top lane is the <b>audio</b> waveform, the bottom lane is the <b>MIDI</b>. Drag the bottom lane sideways to line up the attacks with the note starts.',
+    offset: 'Offset', fine: 'Fine', resetZero: 'Reset to 0', midiLength: 'MIDI length', viewSpan: 'View span', sec2: '2 s', sec6: '6 s', sec12: '12 s',
+    syncHelp2: '<b>+</b> makes the MIDI later, <b>−</b> earlier. If it drifts over time, adjust “MIDI length”.',
+    color: 'Color',
+    hint: '<span><kbd>Space</kbd> play</span> <span><kbd>←</kbd><kbd>→</kbd> 5 s</span> <span><kbd>[</kbd><kbd>]</kbd> offset ±10 ms</span> <span><kbd>M</kbd> mode</span> <span><kbd>T</kbd> theme</span> <span><kbd>C</kbd> color</span><br><span>You can also drop audio and MIDI files onto the card</span>',
+    dropHere: 'Drop here ♪<small>Audio and/or MIDI files</small>',
+    close: 'Close', exShape: 'Shape', exPortrait: 'Portrait 9:16', exLandscape: 'Landscape 16:9', exSquare: 'Square', exSmooth: 'Frame rate', exRange: 'Range',
+    exAll: 'Whole song', exHere: '30 s from here', exQuality: 'Quality', exStd: 'Standard', exHigh: 'High',
+    exHelp: 'The spectrum and MIDI are rendered with the current mode, theme and offset (the offset panel is left out).',
+    cancel: 'Cancel', again: 'Again', exStart: 'Export', save: 'Save',
+    pickSong: 'Pick a song', canLoad: 'Load an audio file and a MIDI file', synthAudio: 'synthesized from MIDI', noMidi: 'no MIDI',
+    loadingAudio: 'Loading audio…', badAudio: 'Could not read this audio file (try mp3 / wav / m4a / ogg / flac)', analyzing: 'Analyzing waveform…',
+    badMidi: (m) => 'Could not read the MIDI (' + m + ')', noNotes: 'This MIDI has no notes', midiLoaded: (n) => 'MIDI loaded: ' + n + ' notes',
+    synthing: 'Rendering the MIDI to audio…', synthDone: 'No audio loaded, so the MIDI plays as a music box ♪', synthFail: 'Could not render the MIDI',
+    pickFiles: 'Choose an audio file or a MIDI file', restored: (ms) => 'Restored last offset: ' + ms + ' ms',
+    needMidi: 'Load a MIDI file first', waitAna: 'Please wait for the audio analysis to finish', checking: 'Checking…',
+    autoFail: 'Could not find a match. Adjust by hand using the waveform below', autoDone: (ms, stars) => 'Auto offset: ' + ms + ' ms (confidence ' + stars + ')',
+    preparingAudio: 'Preparing audio…', pickFirst: 'Choose an audio file or a MIDI file first', cantPlay: 'Could not play',
+    resetDone: 'Reset to 0:00, offset 0 ms', secUnit: ' s', secSp: ' s', noMidiTempo: 'No MIDI to load from',
+    iconTooBig: 'The icon image is too large to save (it works while this page is open)', badImage: 'Could not read the image', iconChanged: 'Icon changed',
+    waveLoading: 'Preparing waveform…', noMidiLane: 'No MIDI', laneAudio: 'Audio',
+    vPortrait: 'portrait', vLandscape: 'landscape', vSquare: 'square', approx: '~',
+    noEncoder: 'This browser cannot encode video', exAudioPrep: 'Preparing audio…', remaining: (s) => s + ' left', writing: 'Exporting…',
+    noAvcDesc: 'Could not get the H.264 configuration', muxing: 'Writing the file…', notReady: 'Try again once the audio is ready',
+    noExport: 'This browser cannot export video. Try the latest Chrome, Edge, Firefox or Safari.',
+    cantSaveHere: ' · cannot save in this view (open it on claude.ai to save)', videoDone: 'Your video is ready ♪', exCancelled: 'Export cancelled',
+    exFailed: (m) => 'Export failed (' + m + ')', cantSaveToast: 'Cannot save in this view. Try opening it on claude.ai', dlStarted: 'Download started ♪',
+    saved: 'Saved ♪', saveDeclined: 'Save cancelled', rateLimited: 'Please wait a moment and try again',
+    tooLarge: 'The file is too large. Try “30 s from here” or “Standard”', saveFailed: (m) => 'Could not save (' + m + ')',
+    colorNames: { umi: 'Ocean', orange: 'Orange', green: 'Green', sakura: 'Sakura', mono: 'Mono', cubase: 'Dark' },
+  },
+};
+let lang = I18N[store.get('lang')] ? store.get('lang') : 'ja';
+function tl(k, ...a) {
+  const v = k in I18N[lang] ? I18N[lang][k] : I18N.ja[k];
+  return typeof v === 'function' ? v(...a) : v == null ? k : v;
+}
 
 /* ───────── color ───────── */
 const rgbCache = new Map();
@@ -2438,7 +2566,7 @@ function drawZoom(cv, t, dragging) {
   } else {
     g.fillStyle = C.zoom.text;
     g.font = '600 11px "Zen Maru Gothic", sans-serif';
-    g.fillText('波形を準備中…', 54, A.y + A.h / 2 + 4);
+    g.fillText(tl('waveLoading'), 54, A.y + A.h / 2 + 4);
   }
   if (S.song) {
     const O = S.offset, st = S.stretch, song = S.song, lo = song.lo, hi = Math.max(song.lo + 1, song.hi);
@@ -2459,7 +2587,7 @@ function drawZoom(cv, t, dragging) {
   } else {
     g.fillStyle = C.zoom.text;
     g.font = '600 11px "Zen Maru Gothic", sans-serif';
-    g.fillText('MIDIがありません', 54, M.y + M.h / 2 + 4);
+    g.fillText(tl('noMidiLane'), 54, M.y + M.h / 2 + 4);
   }
   const px = Math.round(w / 2) + 0.5;
   g.strokeStyle = C.zoom.head;
@@ -2467,7 +2595,7 @@ function drawZoom(cv, t, dragging) {
   g.setLineDash([3, 3]);
   g.beginPath(); g.moveTo(px, 15); g.lineTo(px, h - 3); g.stroke();
   g.setLineDash([]);
-  zoomLabel(g, 9, A.y + 9, 'おと', C.accent);
+  zoomLabel(g, 9, A.y + 9, tl('laneAudio'), C.accent);
   zoomLabel(g, 9, M.y + 9, 'MIDI ⇆', C.zoom.midiLabel);
 }
 
@@ -2476,6 +2604,7 @@ const pick = (v, list, d) => (list.indexOf(v) >= 0 ? v : d);
 const MODES = ['circle', 'line', 'waves'];
 const THEME_KEYS = ['bubble', 'crystal', 'abyss'];
 const MODE_NAMES = { circle: 'circle', line: 'linear', waves: 'waves' };
+const MIDI_H_MIN = 140, MIDI_H_MAX = 560;
 const GRID_DEFAULT = () => ({ mode: 'midi', bpm: 120, beats: 4, start: 0 });
 const S = {
   song: null, songId: 0, ana: null, anaId: 0,
@@ -2487,6 +2616,8 @@ const S = {
   look: clamp(+store.get('look', 3) || 3, 1, 8),
   showDrums: !!store.get('drums', false),
   showGrid: store.get('grid', true) !== false,
+  showSync: store.get('sync', true) !== false,
+  midiH: clamp(+store.get('midiH', 0) || 0, 0, MIDI_H_MAX),
   scale: pick(store.get('scale'), ['log', 'lin'], 'log'),
   sens: clamp(+store.get('sens', 1) || 1, 0.5, 2),
   zoomSpan: 6, syncOpen: false, exporting: false, previewing: false, audioPending: false,
@@ -2506,13 +2637,13 @@ let loadToken = 0;
 
 function setBusy(msg) { if (msg) { el.busy.textContent = msg; el.busy.hidden = false; } else el.busy.hidden = true; }
 function getDuration() { return engine.duration || (S.ana && S.ana.duration) || (S.song && S.song.duration) || 0; }
-function songTitle() { return (S.meta && S.meta.title) || S.audioName || stripExt(S.midiName) || '曲をえらんでね'; }
+function songTitle() { return (S.meta && S.meta.title) || S.audioName || stripExt(S.midiName) || tl('pickSong'); }
 function songArtist() {
-  if (!S.audioName && !S.midiName) return '音声ファイルとMIDIファイルを読み込めます';
+  if (!S.audioName && !S.midiName) return tl('canLoad');
   const parts = [];
   if (S.meta && S.meta.artist) parts.push(S.meta.artist);
-  if (S.audioKind === 'synth') parts.push('MIDIから作った音');
-  parts.push(S.midiName ? 'MIDI: ' + S.midiName : 'MIDIなし');
+  if (S.audioKind === 'synth') parts.push(tl('synthAudio'));
+  parts.push(S.midiName ? 'MIDI: ' + S.midiName : tl('noMidi'));
   return parts.join(' ・ ');
 }
 function setTitles() {
@@ -2543,7 +2674,7 @@ async function loadAudioFile(file) {
   const tok = ++loadToken;
   engine.pause();
   S.audioPending = true;
-  setBusy('音声を読み込み中…');
+  setBusy(tl('loadingAudio'));
   let buf, meta = null;
   try { const ab = await file.arrayBuffer(); meta = readID3(ab); buf = await engine.decode(ab); }
   catch (e) {
@@ -2551,7 +2682,7 @@ async function loadAudioFile(file) {
     S.audioPending = false;
     if (tok === loadToken) {
       setBusy(null);
-      toast('この音声ファイルは読めませんでした（mp3 / wav / m4a / ogg / flac などをためしてね）', 4200);
+      toast(tl('badAudio'), 4200);
       if (S.midiKind === 'user' && S.audioKind !== 'user') synthCurrentSong();
     }
     return;
@@ -2562,7 +2693,7 @@ async function loadAudioFile(file) {
   setTitles();
   restoreOffset();
   restoreGrid();
-  setBusy('波形を解析中…');
+  setBusy(tl('analyzing'));
   try { const ana = await analyzeBuffer(buf); if (tok === loadToken) setAnalysis(ana); }
   catch (e) { console.warn(e); }
   if (tok === loadToken) setBusy(null);
@@ -2570,12 +2701,12 @@ async function loadAudioFile(file) {
 async function loadMidiFile(file) {
   let song;
   try { song = parseMidi(await file.arrayBuffer()); }
-  catch (e) { toast('MIDIを読めませんでした（' + e.message + '）', 3600); return; }
-  if (!song.notes.length) { toast('このMIDIにはノートがありません'); return; }
+  catch (e) { toast(tl('badMidi', e.message), 3600); return; }
+  if (!song.notes.length) { toast(tl('noNotes')); return; }
   setSong(song, file.name, 'user');
   setTitles();
   restoreOffset();
-  toast('MIDIを読み込みました：' + song.notes.length + ' ノート');
+  toast(tl('midiLoaded', song.notes.length));
   if (S.audioKind === 'user' || S.audioPending) return;
   await synthCurrentSong();
 }
@@ -2585,30 +2716,30 @@ async function synthCurrentSong() {
   if (!song) return;
   const tok = ++loadToken;
   engine.pause();
-  setBusy('MIDIを音にしています…');
+  setBusy(tl('synthing'));
   await nextTick();
   try {
     const long = song.duration > 150;
     const buf = await renderSong(song, {
       sampleRate: long ? 32000 : 44100, channels: long ? 1 : 2,
-      onProgress: (f) => { if (tok === loadToken) setBusy('MIDIを音にしています… ' + Math.round(f * 100) + '%'); },
+      onProgress: (f) => { if (tok === loadToken) setBusy(tl('synthing') + ' ' + Math.round(f * 100) + '%'); },
     });
     if (tok !== loadToken) return;
     setAudioBuffer(buf, name, 'synth');
     restoreGrid();
     setTitles();
     setAnalysis(await analyzeBuffer(engine.buffer));
-    toast('音声がないので、MIDIをオルゴール風の音で鳴らします ♪', 3200);
+    toast(tl('synthDone'), 3200);
   } catch (e) {
     console.error(e);
-    toast('MIDIの音を作れませんでした');
+    toast(tl('synthFail'));
   }
   if (tok === loadToken) setBusy(null);
 }
 function handleFiles(list) {
   const files = Array.from(list || []);
   const midi = files.find(isMidi), audio = files.find((f) => !isMidi(f) && isAudio(f));
-  if (!midi && !audio) { toast('音声ファイルかMIDIファイルをえらんでね'); return; }
+  if (!midi && !audio) { toast(tl('pickFiles')); return; }
   if (audio) loadAudioFile(audio);
   if (midi) loadMidiFile(midi);
 }
@@ -2642,7 +2773,7 @@ function restoreOffset() {
     const changed = Math.abs(v.o - S.offset) > 1e-4;
     setStretch(((v.s || 1) - 1) * 100, true);
     setOffset(v.o, true);
-    if (changed) toast('前回のずれ補正 ' + fmtMs(v.o * 1000) + ' ms を戻しました');
+    if (changed) toast(tl('restored', fmtMs(v.o * 1000)));
   } else if (!ownKind(S.audioKind) || !ownKind(S.midiKind)) { setStretch(0, true); setOffset(0, true); }
 }
 const nudge = (ms) => { setOffset(S.offset + ms / 1000); flash(); };
@@ -2654,34 +2785,34 @@ function flash() {
   flashTimer = setTimeout(() => { el.flash.hidden = true; }, 700);
 }
 async function runAuto() {
-  if (!S.song) { toast('先にMIDIを読み込んでね'); return; }
-  if (!S.ana) { toast('音声の解析が終わるまで少し待ってね'); return; }
+  if (!S.song) { toast(tl('needMidi')); return; }
+  if (!S.ana) { toast(tl('waitAna')); return; }
   const btn = $('#btnAuto'), lbl = btn.querySelector('.lbl'), old = lbl.textContent;
-  btn.disabled = true; lbl.textContent = 'しらべ中…';
+  btn.disabled = true; lbl.textContent = tl('checking');
   await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
   const res = autoSync(S.ana.onset, midiOnsetTrain(S.song, S.stretch), Math.round(S.offset * FPS), 15 * FPS);
   btn.disabled = false; lbl.textContent = old;
   if (!(res.r >= 0.12)) {
-    toast('うまく合わせられませんでした。下の波形を見ながら手で調整してね', 3800);
-    if (!S.syncOpen) $('#btnExpand').click();
+    toast(tl('autoFail'), 3800);
+    if (!S.syncOpen) { if (!S.showSync) setShowSync(true, true); setSyncOpen(true); }
     return;
   }
   setOffset(res.lag / FPS);
   flash();
   const stars = res.r >= 0.4 ? '★★★' : res.r >= 0.18 ? '★★☆' : '★☆☆';
-  toast('おまかせ調整：' + fmtMs(S.offset * 1000) + ' ms（自信 ' + stars + '）', 3400);
+  toast(tl('autoDone', fmtMs(S.offset * 1000), stars), 3400);
 }
 
 /* ── playback ── */
 function updatePlayUI(on) {
   el.card.classList.toggle('is-playing', on);
   $('#playUse').setAttribute('href', on ? '#i-pause' : '#i-play');
-  $('#btnPlay').setAttribute('aria-label', on ? '一時停止' : '再生');
+  $('#btnPlay').setAttribute('aria-label', tl(on ? 'pause' : 'play'));
 }
 engine.onstate = updatePlayUI;
 function play() {
-  if (!engine.buffer) { toast(S.audioPending || S.song ? '音声を準備中です…' : '先に音声ファイルかMIDIファイルをえらんでね'); return; }
-  try { engine.play(); } catch (e) { console.warn(e); toast('再生できませんでした'); }
+  if (!engine.buffer) { toast(tl(S.audioPending || S.song ? 'preparingAudio' : 'pickFirst')); return; }
+  try { engine.play(); } catch (e) { console.warn(e); toast(tl('cantPlay')); }
 }
 const togglePlay = () => (engine.playing ? engine.pause() : play());
 function seekTo(t) {
@@ -2698,7 +2829,7 @@ function resetAll() {
   resetVisualState();
   resetSpectrumState();
   S.t = 0;
-  toast('位置をリセットしました（0:00・ずれ補正 0 ms）');
+  toast(tl('resetDone'));
 }
 
 /* ── bar lines: the MIDI's own tempo map, or a manual BPM grid (saved per audio file) ── */
@@ -2735,7 +2866,7 @@ function setGrid(patch, quiet) {
   updateGridUI();
   saveGrid();
   if (!quiet && S.grid.mode === 'manual') {
-    el.flash.textContent = 'BPM ' + S.grid.bpm.toFixed(1) + ' ・ ' + S.grid.start.toFixed(3) + '秒';
+    el.flash.textContent = 'BPM ' + S.grid.bpm.toFixed(1) + ' ・ ' + S.grid.start.toFixed(3) + tl('secUnit');
     el.flash.hidden = false;
     clearTimeout(flashTimer);
     flashTimer = setTimeout(() => { el.flash.hidden = true; }, 800);
@@ -2803,6 +2934,54 @@ function setTheme(th) {
 function setDir(d, quiet) { S.dir = d; if (!quiet) store.set('dir2.' + S.theme, d); pressSeg($('#dirSeg'), 'data-dir', d); }
 const cycle = (list, v) => list[(list.indexOf(v) + 1) % list.length];
 function setSwitch(id, on) { $(id).setAttribute('aria-checked', String(on)); }
+const speedText = () => S.look.toFixed(1) + tl('secSp');
+/* MIDI view height: 0 keeps the stylesheet's default (smaller on phones) */
+function setMidiHeight(px, quiet) {
+  S.midiH = px ? clamp(Math.round(px), MIDI_H_MIN, MIDI_H_MAX) : 0;
+  el.midiWin.style.height = S.midiH ? S.midiH + 'px' : '';
+  const r = $('#midiHeight'), cur = Math.round(el.midiWin.clientHeight);
+  r.value = cur; setRangeFill(r);
+  $('#midiHeightVal').textContent = cur + ' px';
+  $('#midiGrip').setAttribute('aria-valuenow', cur);
+  if (!quiet) store.set('midiH', S.midiH);
+}
+function setSyncOpen(open) {
+  S.syncOpen = open;
+  $('#syncPanel').hidden = !open;
+  const b = $('#btnExpand');
+  b.setAttribute('aria-expanded', String(open));
+  b.setAttribute('aria-label', tl(open ? 'closeTiming' : 'openTiming'));
+  el.midiWin.classList.toggle('touch-drag', open);
+}
+/* the offset bar can be hidden; dragging the MIDI view to shift it goes away with it */
+function setShowSync(on, quiet) {
+  S.showSync = on;
+  setSwitch('#syncSw', on);
+  $('#syncSec').hidden = !on;
+  el.midiWin.classList.toggle('no-drag', !on);
+  if (!on && S.syncOpen) setSyncOpen(false);
+  if (!quiet) { store.set('sync', on); if (!on) toast(tl('syncHidden'), 3200); }
+}
+function applyLang(l) {
+  lang = I18N[l] ? l : 'ja';
+  store.set('lang', lang);
+  document.documentElement.lang = lang;
+  document.title = tl('docTitle');
+  for (const e of $$('[data-i]')) e.textContent = tl(e.dataset.i);
+  for (const e of $$('[data-i-html]')) e.innerHTML = tl(e.dataset.iHtml);
+  for (const e of $$('[data-i-label]')) e.setAttribute('aria-label', tl(e.dataset.iLabel));
+  for (const e of $$('[data-i-title]')) e.title = tl(e.dataset.iTitle);
+  for (const e of $$('[data-i-edit]')) e.dataset.edit = tl(e.dataset.iEdit);
+  const names = tl('colorNames');
+  for (const b of $$('#swatches [data-color]')) b.lastChild.textContent = names[b.dataset.color] || COLOR_THEMES[b.dataset.color].name;
+  setTitles();
+  updatePlayUI(engine.playing);
+  setSyncOpen(S.syncOpen);
+  $('#speedVal').textContent = speedText();
+  updateGridUI();
+  renderIcon();
+  if (!$('#exportModal').hidden) updateExportInfo();
+}
 function closePops() {
   for (const p of $$('.pop')) p.hidden = true;
   for (const b of $$('[aria-haspopup]')) b.setAttribute('aria-expanded', 'false');
@@ -2841,8 +3020,12 @@ function bindUI() {
   sens.addEventListener('input', () => { S.sens = +sens.value; store.set('sens', S.sens); setRangeFill(sens); $('#sensVal').textContent = S.sens.toFixed(2) + '×'; });
   $('#dirSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-dir]'); if (b) { setDir(b.dataset.dir); mv.parts.length = 0; } });
   const speed = $('#speed');
-  speed.value = S.look; setRangeFill(speed); $('#speedVal').textContent = S.look.toFixed(1) + ' 秒';
-  speed.addEventListener('input', () => { S.look = +speed.value; store.set('look', S.look); setRangeFill(speed); $('#speedVal').textContent = S.look.toFixed(1) + ' 秒'; });
+  speed.value = S.look; setRangeFill(speed); $('#speedVal').textContent = speedText();
+  speed.addEventListener('input', () => { S.look = +speed.value; store.set('look', S.look); setRangeFill(speed); $('#speedVal').textContent = speedText(); });
+  const mh = $('#midiHeight');
+  mh.min = MIDI_H_MIN; mh.max = MIDI_H_MAX;
+  mh.addEventListener('input', () => setMidiHeight(+mh.value));
+  $('#syncSw').addEventListener('click', () => setShowSync(!S.showSync));
   $('#drumSw').addEventListener('click', () => { S.showDrums = !S.showDrums; store.set('drums', S.showDrums); setSwitch('#drumSw', S.showDrums); });
   $('#gridSw').addEventListener('click', () => { S.showGrid = !S.showGrid; store.set('grid', S.showGrid); setSwitch('#gridSw', S.showGrid); });
   bindGridUI();
@@ -2852,13 +3035,8 @@ function bindUI() {
   el.offsetRange.addEventListener('input', () => { setOffset(+el.offsetRange.value / 1000); });
   el.stretch.addEventListener('input', () => setStretch(+el.stretch.value, false, true));
   $('#btnAuto').addEventListener('click', runAuto);
-  $('#btnExpand').addEventListener('click', (e) => {
-    S.syncOpen = !S.syncOpen;
-    $('#syncPanel').hidden = !S.syncOpen;
-    e.currentTarget.setAttribute('aria-expanded', String(S.syncOpen));
-    e.currentTarget.setAttribute('aria-label', S.syncOpen ? 'タイミング調整をとじる' : 'タイミング調整をひらく');
-    el.midiWin.classList.toggle('touch-drag', S.syncOpen);
-  });
+  $('#btnExpand').addEventListener('click', () => setSyncOpen(!S.syncOpen));
+  $('#btnLang').addEventListener('click', () => applyLang(lang === 'ja' ? 'en' : 'ja'));
   $('#zoomSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-span]'); if (!b) return; S.zoomSpan = +b.dataset.span; pressSeg($('#zoomSeg'), 'data-span', S.zoomSpan); });
 
   const fa = $('#fileAudio'), fm = $('#fileMidi');
@@ -2912,7 +3090,7 @@ let mdrag = null, zdrag = null;
 function bindDrags() {
   const mw = el.midiWin, zw = $('#zoomWin');
   mw.addEventListener('pointerdown', (e) => {
-    if (!S.song || !mv.G || e.target.closest('button')) return;
+    if (!S.song || !mv.G || !S.showSync || e.target.closest('button')) return;
     if (e.pointerType === 'touch' && !S.syncOpen) return;
     mdrag = { x: e.clientX, y: e.clientY, o: S.offset };
     mw.setPointerCapture(e.pointerId);
@@ -2932,6 +3110,24 @@ function bindDrags() {
   const endZ = () => { zdrag = null; };
   zw.addEventListener('pointerup', endZ);
   zw.addEventListener('pointercancel', endZ);
+
+  /* the grip under the MIDI view resizes it */
+  const gp = $('#midiGrip');
+  let gdrag = null;
+  gp.setAttribute('aria-valuemin', MIDI_H_MIN); gp.setAttribute('aria-valuemax', MIDI_H_MAX);
+  gp.addEventListener('pointerdown', (e) => { gdrag = { y: e.clientY, h: mw.clientHeight }; gp.setPointerCapture(e.pointerId); gp.classList.add('dragging'); e.preventDefault(); });
+  gp.addEventListener('pointermove', (e) => { if (gdrag) setMidiHeight(gdrag.h + e.clientY - gdrag.y, true); });
+  const endG = () => { if (!gdrag) return; gdrag = null; gp.classList.remove('dragging'); store.set('midiH', S.midiH); };
+  gp.addEventListener('pointerup', endG);
+  gp.addEventListener('pointercancel', endG);
+  gp.addEventListener('dblclick', () => setMidiHeight(0));
+  gp.addEventListener('keydown', (e) => {
+    const d = e.key === 'ArrowUp' ? -8 : e.key === 'ArrowDown' ? 8 : 0;
+    if (e.key === 'Home' || e.key === 'Escape') setMidiHeight(0);
+    else if (d) setMidiHeight(mw.clientHeight + d);
+    else return;
+    e.preventDefault();
+  });
 }
 
 function onKey(e) {
@@ -2988,7 +3184,7 @@ function updateGridUI() {
   const bi = $('#bpmIn');
   if (document.activeElement !== bi) bi.value = S.grid.bpm.toFixed(1);
   pressSeg($('#beatsSeg'), 'data-beats', S.grid.beats);
-  $('#gridStartOut').textContent = S.grid.start.toFixed(3) + '秒';
+  $('#gridStartOut').textContent = S.grid.start.toFixed(3) + tl('secUnit');
 }
 function bindGridUI() {
   const showGrid = () => { if (!S.showGrid) { S.showGrid = true; store.set('grid', true); setSwitch('#gridSw', true); } };
@@ -3008,7 +3204,7 @@ function bindGridUI() {
   for (const b of $$('[data-gs]')) b.addEventListener('click', () => setGrid({ start: S.grid.start + +b.dataset.gs }));
   for (const b of $$('[data-gbeat]')) b.addEventListener('click', () => setGrid({ start: S.grid.start + (+b.dataset.gbeat * 60) / S.grid.bpm }));
   $('#gridHere').addEventListener('click', () => setGrid({ start: S.t }));
-  $('#gridFromMidi').addEventListener('click', () => { if (!S.song) { toast('MIDIがないので読みこめません'); return; } setGrid(gridFromMidi()); });
+  $('#gridFromMidi').addEventListener('click', () => { if (!S.song) { toast(tl('noMidiTempo')); return; } setGrid(gridFromMidi()); });
   updateGridUI();
 }
 
@@ -3066,17 +3262,17 @@ function renderIcon() {
   $('.head').classList.toggle('no-art', iconState.hidden);
   setSwitch('#iconShowSw', !iconState.hidden);
   const t = $('#titles');
-  if (iconState.hidden) { t.setAttribute('role', 'button'); t.tabIndex = 0; t.setAttribute('aria-label', 'アイコンの設定をひらく'); }
+  if (iconState.hidden) { t.setAttribute('role', 'button'); t.tabIndex = 0; t.setAttribute('aria-label', tl('openIconMenu')); }
   else { t.removeAttribute('role'); t.removeAttribute('tabindex'); t.removeAttribute('aria-label'); }
 }
 function saveIcon() {
   try { localStorage.setItem('utakata.icon', JSON.stringify(iconState)); }
-  catch (e) { toast('アイコン画像が大きくて保存できませんでした（このページを開いている間は使えます）', 3600); }
+  catch (e) { toast(tl('iconTooBig'), 3600); }
 }
 function setIconHidden(on) { iconState.hidden = on; saveIcon(); renderIcon(); }
 function clearIconImage() { iconState.kind = 'none'; iconState.data = ''; saveIcon(); renderIcon(); }
 function loadImage(src) {
-  return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('画像を読めませんでした')); im.src = src; });
+  return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error(tl('badImage'))); im.src = src; });
 }
 async function setIconFromFile(file) {
   const url = URL.createObjectURL(file);
@@ -3091,8 +3287,8 @@ async function setIconFromFile(file) {
     if (!data.startsWith('data:image/webp')) data = c.toDataURL('image/png');
     iconState.kind = 'image'; iconState.data = data; iconState.hidden = false;
     saveIcon(); renderIcon();
-    toast('アイコンを変えました');
-  } catch (e) { toast(e.message || '画像を読めませんでした'); }
+    toast(tl('iconChanged'));
+  } catch (e) { toast(e.message || tl('badImage')); }
   finally { URL.revokeObjectURL(url); }
 }
 /* the picture for the video; null when there is none (the video then shows no icon) */
@@ -3342,9 +3538,9 @@ function offlineAnalyser(buf, N) {
 
 /* logical canvas sizes; the encoder gets them ×2 (1080p) */
 const VIDEO_FORMATS = {
-  v: { w: 540, h: 960, name: '縦' },
-  h: { w: 960, h: 540, name: '横' },
-  s: { w: 540, h: 540, name: '正方形' },
+  v: { w: 540, h: 960, name: 'vPortrait' },
+  h: { w: 960, h: 540, name: 'vLandscape' },
+  s: { w: 540, h: 540, name: 'vSquare' },
 };
 function videoLayout(fmt) {
   if (fmt === 'h') {
@@ -3485,7 +3681,7 @@ function exportBitrate(W, H) {
 function updateExportInfo() {
   const F = VIDEO_FORMATS[EX.format], W = F.w * 2, H = F.h * 2, [t0, t1] = exportRange();
   const mb = ((exportBitrate(W, H) + 192000) * (t1 - t0)) / 8 / 1e6;
-  $('#exInfo').textContent = W + '×' + H + ' ・ ' + EX.fps + 'fps ・ ' + fmtTime(t1 - t0) + ' ・ 約 ' + (mb < 10 ? mb.toFixed(1) : Math.round(mb)) + ' MB ・ MP4';
+  $('#exInfo').textContent = W + '×' + H + ' ・ ' + EX.fps + 'fps ・ ' + fmtTime(t1 - t0) + ' ・ ' + tl('approx') + (mb < 10 ? mb.toFixed(1) : Math.round(mb)) + ' MB ・ MP4';
 }
 async function pickVideoConfig(W, H, fps, bitrate) {
   const lv = fps > 30 ? '2a' : '28';
@@ -3519,10 +3715,10 @@ async function renderAudioSlice(buf, t0, t1, sr) {
 
 async function encodeVideo(o, onProgress) {
   const vc = await pickVideoConfig(o.W, o.H, o.fps, o.bitrate), ac = await pickAudioConfig();
-  if (!vc || !ac) throw new Error('このブラウザでは動画をエンコードできません');
+  if (!vc || !ac) throw new Error(tl('noEncoder'));
   try { await Promise.all(['900 20px "Zen Maru Gothic"', '500 12px "Zen Maru Gothic"', '700 12px Quicksand'].map((f) => document.fonts.load(f))); } catch (e) { /* fallback fonts */ }
   const icon = EX.icon || (await getIconImage().catch(() => null));
-  onProgress(0, '音声を準備中…');
+  onProgress(0, tl('exAudioPrep'));
   const abuf = await renderAudioSlice(engine.buffer, o.t0, o.t1, 48000);
   let fail = null, vDesc = null, aDesc = null;
   const vS = [], aS = [];
@@ -3581,7 +3777,7 @@ async function encodeVideo(o, onProgress) {
       if (venc.encodeQueueSize > 4) await waitQueue(venc);
       if (i % 4 === 0) {
         const el2 = (performance.now() - began) / 1000, left = i > 8 ? (el2 / i) * (n - i) : 0;
-        onProgress(i / n, left ? 'のこり ' + fmtTime(left) : '書き出し中…');
+        onProgress(i / n, left ? tl('remaining', fmtTime(left)) : tl('writing'));
         if (i % 12 === 0) { pg.setTransform(1, 0, 0, 1, 0, 0); pg.drawImage(cv, 0, 0, pv.width, pv.height); }
         await yieldUI();
       }
@@ -3593,8 +3789,8 @@ async function encodeVideo(o, onProgress) {
     try { venc.close(); } catch (e) { /* closed */ }
     try { aenc.close(); } catch (e) { /* closed */ }
   }
-  if (vc.kind === 'avc' && !vDesc) throw new Error('H.264 の設定情報が取れませんでした');
-  onProgress(1, 'ファイルにまとめています…');
+  if (vc.kind === 'avc' && !vDesc) throw new Error(tl('noAvcDesc'));
+  onProgress(1, tl('muxing'));
   await yieldUI();
   const parts = MP4.mux(
     { codec: vc.kind, width: o.W, height: o.H, timescale: 90000, description: vDesc, vpcc: vc.vpcc, samples: vS },
@@ -3624,7 +3820,7 @@ function clearExportResult() {
 }
 async function openExport() {
   closePops();
-  if (!engine.buffer) { toast('音声の準備ができてからためしてね'); return; }
+  if (!engine.buffer) { toast(tl('notReady')); return; }
   engine.pause();
   clearExportResult();
   $('#exportModal').hidden = false;
@@ -3632,7 +3828,7 @@ async function openExport() {
   updateExportInfo();
   const ok = typeof VideoEncoder === 'function' && typeof AudioEncoder === 'function' && typeof VideoFrame === 'function';
   $('#exStart').disabled = !ok;
-  if (!ok) $('#exNote').textContent = 'このブラウザは動画の書き出しに対応していません。Chrome・Edge・Firefox・Safari の最新版でためしてね。';
+  if (!ok) $('#exNote').textContent = tl('noExport');
   $('#exClose').focus();
   EX.icon = await getIconImage().catch(() => null);
   if (EX.dl === undefined) {
@@ -3678,11 +3874,11 @@ async function startExport() {
     const v = $('#exVideo');
     v.src = EX.url; v.hidden = false; $('#exPreview').hidden = true;
     $('#exSave').hidden = false; $('#exAgain').hidden = false;
-    $('#exNote').textContent = (res.blob.size / 1e6).toFixed(1) + ' MB ・ ' + res.label + (EX.dl || !window.claude ? '' : ' ・ この画面では保存できません（claude.ai でひらくと保存できます）');
-    toast('動画ができました ♪');
+    $('#exNote').textContent = (res.blob.size / 1e6).toFixed(1) + ' MB ・ ' + res.label + (EX.dl || !window.claude ? '' : tl('cantSaveHere'));
+    toast(tl('videoDone'));
   } catch (e) {
-    if (e && e.name === 'AbortError') toast('書き出しをやめました');
-    else { console.error(e); toast('書き出しに失敗しました（' + ((e && e.message) || e) + '）', 4200); }
+    if (e && e.name === 'AbortError') toast(tl('exCancelled'));
+    else { console.error(e); toast(tl('exFailed', (e && e.message) || e), 4200); }
   } finally {
     EX.running = false;
     S.exporting = false;
@@ -3693,10 +3889,10 @@ async function startExport() {
 async function saveExport() {
   if (!EX.blob) return;
   const base = songTitle().replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' ').trim() || 'utakata';
-  const filename = base + '-' + VIDEO_FORMATS[EX.format].name + '.mp4';
+  const filename = base + '-' + tl(VIDEO_FORMATS[EX.format].name) + '.mp4';
   if (!EX.dl) {
     /* claude.ai's sandbox needs its downloads capability; anywhere else (own site, local file) a plain download works */
-    if (window.claude) { toast('この画面では保存できません。claude.ai でひらいてためしてね', 3600); return; }
+    if (window.claude) { toast(tl('cantSaveToast'), 3600); return; }
     const a = document.createElement('a');
     a.href = EX.url || URL.createObjectURL(EX.blob);
     a.download = filename;
@@ -3704,18 +3900,18 @@ async function saveExport() {
     document.body.appendChild(a);
     a.click();
     a.remove();
-    toast('ダウンロードをはじめました ♪');
+    toast(tl('dlStarted'));
     return;
   }
   try {
     const r = await EX.dl.save({ filename, data: EX.blob });
-    if (r && r.status === 'saved') toast('保存しました ♪');
+    if (r && r.status === 'saved') toast(tl('saved'));
   } catch (e) {
     const code = e && e.code;
-    if (code === 'declined') toast('保存をキャンセルしました');
-    else if (code === 'rate_limited') toast('少し待ってから、もう一度ためしてね');
-    else if (code === 'too_large') toast('ファイルが大きすぎました。「いまから30秒」や「ふつう」でためしてね', 4200);
-    else toast('保存できませんでした（' + (code || (e && e.message) || e) + '）', 3600);
+    if (code === 'declined') toast(tl('saveDeclined'));
+    else if (code === 'rate_limited') toast(tl('rateLimited'));
+    else if (code === 'too_large') toast(tl('tooLarge'), 4200);
+    else toast(tl('saveFailed', code || (e && e.message) || e), 3600);
   }
 }
 function bindExport() {
@@ -3747,11 +3943,14 @@ function init() {
   pressSeg($('#scaleSeg'), 'data-scale', S.scale);
   setSwitch('#drumSw', S.showDrums);
   setSwitch('#gridSw', S.showGrid);
+  setShowSync(S.showSync, true);
+  setMidiHeight(S.midiH, true);
   setOffset(0, true);
   setStretch(0, true);
   bindUI();
   bindExport();
   initIcon();
+  applyLang(lang);
   requestAnimationFrame(frame);
   window.__utakata = {
     S, spec, mv, engine, EX, MP4, setOffset, setStretch, setMode, setTheme, setDir, seekTo, resetAll, togglePlay,
