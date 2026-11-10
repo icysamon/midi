@@ -22,8 +22,7 @@
   --accent: #db2777;
   --on-accent: #ffffff;
   --danger: #b91c1c;
-  --win: #eff1f4;
-  --shadow: 0 12px 32px -12px rgba(15, 23, 42, .28), 0 2px 8px -2px rgba(15, 23, 42, .12);
+  --win: #eef0f2;
   --scrim: rgba(17, 24, 39, .4);
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -39,7 +38,7 @@
     --ctl: #1a191c; --field: #1a191c; --field-line: rgba(0, 0, 0, 0);
     --text: #f9fafb; --text-2: #d1d5db; --muted: #9ca3af; --line: rgba(255, 255, 255, .2);
     --accent: #f472b6; --on-accent: #242327; --danger: #fca5a5;
-    --win: #3a393d; --shadow: 0 12px 32px -12px rgba(0, 0, 0, .7), 0 2px 8px -2px rgba(0, 0, 0, .5); --scrim: rgba(0, 0, 0, .55);
+    --win: #3c3b3f; --scrim: rgba(0, 0, 0, .55);
     color-scheme: dark;
   }
 }
@@ -48,8 +47,16 @@
   --ctl: #1a191c; --field: #1a191c; --field-line: rgba(0, 0, 0, 0);
   --text: #f9fafb; --text-2: #d1d5db; --muted: #9ca3af; --line: rgba(255, 255, 255, .2);
   --accent: #f472b6; --on-accent: #242327; --danger: #fca5a5;
-  --win: #3a393d; --shadow: 0 12px 32px -12px rgba(0, 0, 0, .7), 0 2px 8px -2px rgba(0, 0, 0, .5); --scrim: rgba(0, 0, 0, .55);
+  --win: #3c3b3f; --scrim: rgba(0, 0, 0, .55);
   color-scheme: dark;
+}
+
+/* the "ダーク" color: Cubase-like DAW greys (script sets it together with data-theme="dark") */
+:root[data-palette="daw"] {
+  --bg: #1f2024; --panel: rgba(255, 255, 255, .04); --panel-hover: rgba(255, 255, 255, .08); --band: rgba(43, 45, 51, .95);
+  --ctl: #2b2d33; --field: #17181b; --field-line: rgba(0, 0, 0, 0);
+  --text: #e6e8ee; --text-2: #b4b9c4; --muted: #8a8f9a; --line: #3b3e46;
+  --win: #2b2d33; color-scheme: dark;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -104,10 +111,10 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 .chip:disabled { opacity: .45; cursor: default; }
 .round { width: 40px; height: 40px; border-radius: var(--radius-sm); display: grid; place-items: center; flex: none; background: var(--ctl); color: var(--text-2); transition: color .15s, background-color .15s; }
 .round:hover { color: var(--text); }
-.round.small { width: 36px; height: 36px; }
+.round.small { width: 40px; height: 40px; }
 .round[aria-pressed="true"] { background: var(--panel-hover); color: var(--text); }
-.play { width: 64px; height: 48px; border-radius: var(--radius-sm); display: grid; place-items: center; background: var(--accent); color: var(--on-accent); transition: opacity .15s; }
-.play svg.i { width: 24px; height: 24px; fill: currentColor; stroke-width: 1.5; }
+.play { width: 40px; height: 40px; border-radius: var(--radius-sm); display: grid; place-items: center; background: var(--accent); color: var(--on-accent); transition: opacity .15s; }
+.play svg.i { width: 20px; height: 20px; fill: currentColor; stroke-width: 1.5; }
 .play:hover { opacity: .88; }
 .primary { height: 40px; padding: 0 12px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 6px; font-size: 14px; line-height: 20px; font-weight: 500;
   background: var(--accent); color: var(--on-accent); transition: opacity .15s; }
@@ -121,9 +128,10 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 
 /* ───── segmented tabs ───── */
 .seg, .mini-seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: var(--radius-sm); background: var(--ctl); min-width: 0; }
-.seg button, .mini-seg button { height: 32px; padding: 0 10px; border-radius: 3px; display: inline-flex; align-items: center; gap: 6px;
+.seg button, .mini-seg button { height: 36px; padding: 0 10px; border-radius: 3px; display: inline-flex; align-items: center; gap: 6px;
   font-size: 14px; line-height: 20px; font-weight: 500; color: var(--text-2); white-space: nowrap; transition: color .15s, background-color .15s; }
 .mini-seg button { height: 28px; padding: 0 9px; font-size: 13px; }
+.nudger .nudge { height: 40px; min-width: 48px; }
 .seg button svg.i { width: 16px; height: 16px; }
 .seg button:hover, .mini-seg button:hover { color: var(--text); }
 .seg button[aria-selected="true"], .mini-seg button[aria-pressed="true"] { background: var(--bg); color: var(--text); }
@@ -165,7 +173,7 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
 .seek canvas { display: block; width: 100%; height: 100%; }
 .times { display: flex; justify-content: space-between; font-size: 12px; line-height: 16px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .seek-tip { position: absolute; z-index: 4; bottom: calc(100% + 6px); transform: translateX(-50%); padding: 2px 8px; border-radius: var(--radius-sm);
-  background: var(--ctl); color: var(--text); box-shadow: var(--shadow); font-size: 12px; line-height: 16px; font-weight: 500; font-variant-numeric: tabular-nums; pointer-events: none; white-space: nowrap; }
+  background: var(--text); color: var(--bg); font-size: 12px; line-height: 16px; font-weight: 500; font-variant-numeric: tabular-nums; pointer-events: none; white-space: nowrap; }
 .controls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--space-2); margin-top: var(--space-1); }
 .ctl-left { display: flex; gap: var(--space-2); }
 .ctl-mid { display: flex; align-items: center; gap: var(--space-2); }
@@ -215,9 +223,9 @@ input[type="range"]::-moz-range-thumb { width: 8px; height: 18px; border: 0; bor
 .help { font-size: 12px; line-height: 18px; color: var(--muted); }
 .help b { color: var(--text); font-weight: 700; }
 
-/* ───── popovers (floating: the only place besides toasts with a shadow) ───── */
+/* ───── popovers: no shadow, a 1px line keeps them apart from what is under them ───── */
 .pop { position: absolute; z-index: 30; width: min(280px, calc(100% - 20px)); padding: var(--space-4); border-radius: var(--radius-sm); background: var(--bg); display: grid; gap: var(--space-3);
-  box-shadow: var(--shadow); }
+  outline: 1px solid var(--line); outline-offset: -1px; }
 :root[data-theme="dark"] .pop { background: var(--ctl); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pop { background: var(--ctl); } }
 .pop .row > .lbl, .pop .row > label { min-width: 84px; }
@@ -262,17 +270,17 @@ kbd { font-family: var(--font-mono); font-size: 12px; line-height: 16px; padding
 .foot { width: 90%; max-width: 800px; margin: auto auto var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--line); text-align: center; }
 .toast { position: fixed; z-index: 90; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); width: max-content; max-width: calc(100vw - 32px); text-align: center;
   transform: translate(-50%, 8px); opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s;
-  padding: 10px 16px; border-radius: var(--radius-sm); background: var(--ctl); color: var(--text); font-size: 14px; line-height: 20px; font-weight: 500; box-shadow: var(--shadow); }
+  padding: 10px 16px; border-radius: var(--radius-sm); background: var(--text); color: var(--bg); font-size: 14px; line-height: 20px; font-weight: 500; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .drop { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: var(--scrim); }
-.drop-inner { padding: var(--space-8); border-radius: var(--radius-md); background: var(--bg); text-align: center; color: var(--text); font-size: 18px; line-height: 28px; font-weight: 700; display: grid; gap: var(--space-1); box-shadow: var(--shadow); }
+.drop-inner { padding: var(--space-8); border-radius: var(--radius-md); background: var(--bg); text-align: center; color: var(--text); font-size: 18px; line-height: 28px; font-weight: 700; display: grid; gap: var(--space-1); }
 .drop-inner small { font-size: 14px; line-height: 20px; color: var(--text-2); font-weight: 400; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* ───── export dialog ───── */
 .modal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   background: var(--scrim); }
-.modal-card { width: min(100%, 640px); max-height: calc(100vh - 32px); overflow: auto; background: var(--bg); border-radius: var(--radius-md); padding: var(--space-5); display: grid; gap: var(--space-4); box-shadow: var(--shadow); }
+.modal-card { width: min(100%, 640px); max-height: calc(100vh - 32px); overflow: auto; background: var(--bg); border-radius: var(--radius-md); padding: var(--space-5); display: grid; gap: var(--space-4); }
 .modal-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .modal-head h2 { font-size: 18px; line-height: 28px; font-weight: 700; color: var(--text); }
 .ex-body { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-5); align-items: start; }
@@ -332,12 +340,12 @@ kbd { font-family: var(--font-mono); font-size: 12px; line-height: 16px; padding
   <symbol id="i-note" viewBox="0 0 24 24"><path d="M9 17.5V6.2l10-2.2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.3" r="2.5"/></symbol>
   <symbol id="i-piano" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 12.5V19M12 12.5V19M16 12.5V19"/><path d="M7 5v7.5h2V5M15 5v7.5h2V5M11 5v7.5h2V5"/></symbol>
   <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M5 19.5h14"/></symbol>
-  <symbol id="i-bubble" viewBox="0 0 24 24"><circle cx="11" cy="13" r="7"/><path d="M7.8 10.6a3.8 3.8 0 0 1 2.6-2"/><circle cx="19" cy="5" r="2"/></symbol>
+  <symbol id="i-block" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="4" height="9" rx="1"/><rect x="10" y="10" width="4" height="9" rx="1"/><rect x="16" y="4" width="4" height="7" rx="1"/></symbol>
+  <symbol id="i-outline" viewBox="0 0 24 24"><rect x="4" y="5" width="4" height="9" rx="1"/><rect x="10" y="10" width="4" height="9" rx="1"/><rect x="16" y="4" width="4" height="7" rx="1"/></symbol>
   <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol>
   <symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M5.5 18.5l2.1-2.1M16.4 7.6l2.1-2.1"/></symbol>
   <symbol id="i-bars" viewBox="0 0 24 24"><path d="M5 20v-7M9.7 20V6M14.3 20v-9.5M19 20V4"/></symbol>
   <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 9.5c2.5 0 2.5-2.2 5-2.2s2.5 2.2 5 2.2 2.5-2.2 5-2.2 2.5 2.2 5 2.2"/><path d="M2 15.5c2.5 0 2.5-2.2 5-2.2s2.5 2.2 5 2.2 2.5-2.2 5-2.2 2.5 2.2 5 2.2"/></symbol>
-  <symbol id="i-crystal" viewBox="0 0 24 24"><path d="M7 3.5h10l4 5.5-9 11.5L3 9z"/><path d="M3 9h18M9.6 3.5L8 9l4 11.5L16 9l-1.6-5.5"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.6A7.8 7.8 0 1 1 9.4 4.5a6.2 6.2 0 0 0 10.1 10.1z"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol>
   <symbol id="i-wand" viewBox="0 0 24 24"><path d="M4.5 19.5l10-10"/><path d="M17 3l.9 2.1L20 6l-2.1.9L17 9l-.9-2.1L14 6l2.1-.9z"/></symbol>
@@ -447,9 +455,9 @@ kbd { font-family: var(--font-mono); font-size: 12px; line-height: 16px; padding
       <div class="panel-head">
         <p class="eyebrow">MIDI</p>
         <div class="seg" role="tablist" id="themeTabs" aria-label="MIDIのテーマ" data-i-label="midiThemes">
-          <button role="tab" data-theme="bubble" aria-selected="true"><svg class="i"><use href="#i-bubble"/></svg><span data-i="themeBubble">泡</span></button>
-          <button role="tab" data-theme="crystal" aria-selected="false"><svg class="i"><use href="#i-crystal"/></svg><span data-i="themeCrystal">水晶</span></button>
-          <button role="tab" data-theme="abyss" aria-selected="false"><svg class="i"><use href="#i-moon"/></svg><span data-i="themeAbyss">深海</span></button>
+          <button role="tab" data-theme="bubble" aria-selected="true"><svg class="i"><use href="#i-block"/></svg><span data-i="themeBubble">ブロック</span></button>
+          <button role="tab" data-theme="crystal" aria-selected="false"><svg class="i"><use href="#i-outline"/></svg><span data-i="themeCrystal">枠線</span></button>
+          <button role="tab" data-theme="abyss" aria-selected="false"><svg class="i"><use href="#i-moon"/></svg><span data-i="themeAbyss">ナイト</span></button>
         </div>
         <button class="round small" id="midiGear" aria-label="MIDI表示の設定" aria-haspopup="dialog" aria-expanded="false" title="MIDI表示の設定" data-i-label="midiSettings" data-i-title="midiSettings"><svg class="i"><use href="#i-sliders"/></svg></button>
       </div>
@@ -577,11 +585,6 @@ function fmtMs(ms) {
   const v = Math.round(ms);
   return (v < 0 ? '−' : '+') + Math.abs(v);
 }
-function hash(n) {
-  n = (n ^ 61) ^ (n >>> 16); n = n + (n << 3); n = n ^ (n >>> 4);
-  n = Math.imul(n, 0x27d4eb2d); n = n ^ (n >>> 15);
-  return (n >>> 0) / 4294967296;
-}
 function lowerBound(arr, x, key) {
   let lo = 0, hi = arr.length;
   while (lo < hi) { const mid = (lo + hi) >> 1; if (key(arr[mid]) < x) lo = mid + 1; else hi = mid; }
@@ -607,7 +610,7 @@ const I18N = {
     modeCircle: '円', modeLine: 'ライン', modeWaves: '波', spectrum: 'スペクトラム', freqAxis: '周波数軸', log: 'ログ', linear: 'リニア', sensitivity: '感度',
     playback: '再生', position: '再生位置', loop: 'ループ再生', resetAll: '位置をリセット（0:00・ずれ補正 0）', back5: '5秒戻る', fwd5: '5秒進む',
     play: '再生', pause: '一時停止', mute: 'ミュート', volume: '音量',
-    midiLabel: 'MIDIビジュアライザ', midiThemes: 'MIDIのテーマ', themeBubble: '泡', themeCrystal: '水晶', themeAbyss: '深海',
+    midiLabel: 'MIDIビジュアライザ', midiThemes: 'MIDIのテーマ', themeBubble: 'ブロック', themeCrystal: '枠線', themeAbyss: 'ナイト',
     midiSettings: 'MIDI表示の設定', midiEmpty: 'MIDIファイルを選ぶか、<br>このページにドロップしてください。', chooseMidi: 'MIDIを選ぶ', dragHint: 'ドラッグでずれを調整',
     midiDisplay: 'MIDI 表示', direction: '流れる向き', dirUp: '上へ', dirDown: '下へ', dirLeft: '横', visibleTime: '見える秒数',
     keyRange: '鍵盤の範囲', keyAuto: '自動', keyManual: '手動', keyLow: '最低音', keyHigh: '最高音', keysN: (n) => n + '鍵',
@@ -651,7 +654,7 @@ const I18N = {
     exFailed: (m) => '書き出しに失敗しました（' + m + '）', cantSaveToast: 'この画面では保存できません。claude.ai で開いて試してください', dlStarted: 'ダウンロードを始めました',
     saved: '保存しました', saveDeclined: '保存をキャンセルしました', rateLimited: '少し待ってから、もう一度試してください',
     tooLarge: 'ファイルが大きすぎます。「今から30秒」か「標準」で試してください', saveFailed: (m) => '保存できませんでした（' + m + '）',
-    colorNames: { icy: 'ピンク', umi: 'ブルー', orange: 'オレンジ', green: 'グリーン', mono: 'モノクロ', cubase: 'ベロシティ' },
+    colorNames: { icy: 'ピンク', umi: 'ブルー', orange: 'オレンジ', green: 'グリーン', mono: 'モノクロ', cubase: 'ダーク' },
   },
   en: {
     preparing: 'Preparing…', docTitle: 'MIDI Player', langCode: 'JA', langOther: '日本語', langSwitch: '日本語に切り替え',
@@ -663,7 +666,7 @@ const I18N = {
     modeCircle: 'Circle', modeLine: 'Line', modeWaves: 'Waves', spectrum: 'Spectrum', freqAxis: 'Freq. axis', log: 'Log', linear: 'Linear', sensitivity: 'Sensitivity',
     playback: 'Playback', position: 'Position', loop: 'Loop', resetAll: 'Reset (0:00, offset 0)', back5: 'Back 5 s', fwd5: 'Forward 5 s',
     play: 'Play', pause: 'Pause', mute: 'Mute', volume: 'Volume',
-    midiLabel: 'MIDI visualizer', midiThemes: 'MIDI theme', themeBubble: 'Bubble', themeCrystal: 'Crystal', themeAbyss: 'Abyss',
+    midiLabel: 'MIDI visualizer', midiThemes: 'MIDI theme', themeBubble: 'Block', themeCrystal: 'Outline', themeAbyss: 'Night',
     midiSettings: 'MIDI display settings', midiEmpty: 'Choose a MIDI file,<br>or drop it onto this page.', chooseMidi: 'Choose MIDI', dragHint: 'Drag to adjust offset',
     midiDisplay: 'MIDI display', direction: 'Direction', dirUp: 'Up', dirDown: 'Down', dirLeft: 'Side', visibleTime: 'Visible time',
     keyRange: 'Key range', keyAuto: 'Auto', keyManual: 'Manual', keyLow: 'Lowest', keyHigh: 'Highest', keysN: (n) => n + ' keys',
@@ -706,7 +709,7 @@ const I18N = {
     exFailed: (m) => 'Export failed (' + m + ')', cantSaveToast: 'Cannot save in this view. Try opening it on claude.ai', dlStarted: 'Download started.',
     saved: 'Saved.', saveDeclined: 'Save cancelled', rateLimited: 'Please wait a moment and try again',
     tooLarge: 'The file is too large. Try “30 s from here” or “Standard”', saveFailed: (m) => 'Could not save (' + m + ')',
-    colorNames: { icy: 'Pink', umi: 'Blue', orange: 'Orange', green: 'Green', mono: 'Mono', cubase: 'Velocity' },
+    colorNames: { icy: 'Pink', umi: 'Blue', orange: 'Orange', green: 'Green', mono: 'Mono', cubase: 'Dark' },
   },
 };
 let lang = I18N[store.get('lang')] ? store.get('lang') : 'ja';
@@ -758,70 +761,6 @@ function roundRect(g, x, y, w, h, r) {
   g.arcTo(x, y, x + w, y, r);
   g.closePath();
 }
-function starPath(g, x, y, r, rot) {
-  g.beginPath();
-  for (let i = 0; i < 8; i++) {
-    const a = (rot || 0) + (i * Math.PI) / 4;
-    const rad = i % 2 ? r * 0.3 : r;
-    g.lineTo(x + Math.cos(a) * rad, y + Math.sin(a) * rad);
-  }
-  g.closePath();
-}
-
-/* ───────── sprites: bubbles and glows are pre-rendered once per size/tint ───────── */
-const spriteCache = new Map();
-function sprite(kind, r, tint, painter) {
-  const rr = r < 10 ? Math.max(1, Math.round(r)) : Math.round(r / 2) * 2;
-  const key = kind + rr + tint;
-  let s = spriteCache.get(key);
-  if (s) return s;
-  const pad = 3, dpr = 2;
-  const size = Math.ceil((rr + pad) * 2 * dpr);
-  const c = document.createElement('canvas');
-  c.width = c.height = size;
-  const g = c.getContext('2d');
-  g.scale(dpr, dpr);
-  painter(g, rr + pad, rr + pad, rr, tint);
-  s = { c, r: rr, half: rr + pad };
-  spriteCache.set(key, s);
-  if (spriteCache.size > 400) spriteCache.delete(spriteCache.keys().next().value);
-  return s;
-}
-function blit(g, s, x, y, r, alpha) {
-  const k = r / s.r, h = s.half * k;
-  g.globalAlpha = alpha;
-  g.drawImage(s.c, x - h, y - h, h * 2, h * 2);
-  g.globalAlpha = 1;
-}
-function paintBubble(g, x, y, r, tint) {
-  const grd = g.createRadialGradient(x - r * 0.25, y - r * 0.3, r * 0.05, x, y, r);
-  grd.addColorStop(0, 'rgba(255,255,255,.55)');
-  grd.addColorStop(0.5, 'rgba(255,255,255,.12)');
-  grd.addColorStop(0.82, rgba(tint, 0.22));
-  grd.addColorStop(1, rgba(tint, 0.6));
-  g.fillStyle = grd;
-  g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
-  g.lineWidth = Math.max(0.7, r * 0.07);
-  g.strokeStyle = rgba(tint, 0.8);
-  g.stroke();
-  g.lineCap = 'round';
-  g.strokeStyle = 'rgba(255,255,255,.95)';
-  g.lineWidth = Math.max(0.8, r * 0.14);
-  g.beginPath(); g.arc(x, y, r * 0.68, Math.PI * 1.08, Math.PI * 1.42); g.stroke();
-  g.fillStyle = 'rgba(255,255,255,.9)';
-  g.beginPath(); g.arc(x + r * 0.42, y + r * 0.4, Math.max(0.6, r * 0.1), 0, TAU); g.fill();
-}
-function paintGlow(g, x, y, r, tint) {
-  const grd = g.createRadialGradient(x, y, 0, x, y, r);
-  grd.addColorStop(0, rgba(tint, 0.9));
-  grd.addColorStop(0.25, rgba(tint, 0.45));
-  grd.addColorStop(1, rgba(tint, 0));
-  g.fillStyle = grd;
-  g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
-}
-const drawBubble = (g, x, y, r, tint, a) => { if (r >= 0.6) blit(g, sprite('b', r, tint, paintBubble), x, y, r, a); };
-const drawGlow = (g, x, y, r, tint, a) => { if (r >= 0.6) blit(g, sprite('g', r, tint, paintGlow), x, y, r, a); };
-
 /* ───────── toast ───────── */
 let toastTimer = 0;
 function toast(msg, ms) {
@@ -839,6 +778,9 @@ function toast(msg, ms) {
 const NEUTRALS = {
   light: { bg: '#ffffff', panel: '#f7f8f9', win: '#eef0f2', ink: '#111827', ink2: '#4b5563', ink3: '#6b7280', line: '#e5e7eb', accent: '#db2777', key: '#1f2937' },
   dark: { bg: '#242327', panel: '#2f2e32', win: '#3c3b3f', ink: '#f9fafb', ink2: '#d1d5db', ink3: '#9ca3af', line: '#504f52', accent: '#f472b6', key: '#1a191c' },
+  /* the Cubase-like dark: neutral DAW greys, used by the "ダーク" color (it always turns the page dark) */
+  daw: { bg: '#1f2024', panel: '#25272b', win: '#2b2d33', ink: '#e6e8ee', ink2: '#b4b9c4', ink3: '#8a8f9a', line: '#3b3e46', accent: '#f472b6', key: '#2a2b30',
+    kbW: '#d5d7dc', kbBg: '#17181b', grid: '#7a808c', drum: '#8a909c' },
 };
 const COLOR_THEMES = {
   icy: { name: 'ピンク',
@@ -868,7 +810,7 @@ const COLOR_THEMES = {
     dark: { a1: '#e4e4e8', a2: '#b5b5bd', a3: '#c9c9cf', a4: '#8f8f99',
       pal: ['#8f8f99', '#a6a6ae', '#bdbdc4', '#d4d4d9', '#ececef'], notes: ['#e4e4e8', '#b5b5bd', '#d0d0d6', '#9a9aa3', '#f4f4f6', '#c2c2c9'] },
     deep: ['#1e1e22', '#161619', '#0e0e10'], deepNotes: ['#f2f2f5', '#c9c9cf', '#e0e0e6', '#b5b5bd', '#ffffff', '#d4d4da'], glowLine: '#ffffff' },
-  cubase: { name: 'ベロシティ',
+  cubase: { name: 'ダーク', scheme: 'dark',
     a1: '#3d9bff', a2: '#6fb5ff', a3: '#2a78d6', a4: '#37c6c0', blush: '#f2994a',
     pal: ['#2f80ed', '#29b6d8', '#3ccf8e', '#e5c04b', '#f2994a'],
     notes: ['#3d9bff', '#37c6c0', '#3ccf8e', '#e5c04b', '#f2994a', '#e0565b'],
@@ -879,14 +821,17 @@ const DEFAULT_COLOR = 'icy';
 const C = {};
 let colorId = DEFAULT_COLOR;
 
-/* light / dark: follows the system unless the viewer picked one with the header button */
+/* light / dark: follows the system unless the viewer picked one with the header button.
+   The "ダーク" color (Cubase-like) always uses its own dark greys. */
 const schemeMQ = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
 let schemePick = pick0(store.get('scheme', ''), ['light', 'dark'], '');
 function pick0(v, list, d) { return list.indexOf(v) >= 0 ? v : d; }
-const isDarkScheme = () => (schemePick ? schemePick === 'dark' : !!(schemeMQ && schemeMQ.matches));
+const forcedDark = () => COLOR_THEMES[colorId] && COLOR_THEMES[colorId].scheme === 'dark';
+const isDarkScheme = () => forcedDark() || (schemePick ? schemePick === 'dark' : !!(schemeMQ && schemeMQ.matches));
 function applyScheme() {
   const root = document.documentElement;
-  if (schemePick) root.dataset.theme = schemePick; else delete root.dataset.theme;
+  if (forcedDark()) root.dataset.theme = 'dark'; else if (schemePick) root.dataset.theme = schemePick; else delete root.dataset.theme;
+  if (forcedDark()) root.dataset.palette = 'daw'; else delete root.dataset.palette;
   const dark = isDarkScheme(), btn = document.getElementById('btnScheme');
   if (btn) {
     const label = tl(dark ? 'toLight' : 'toDark');
@@ -897,48 +842,47 @@ function applyScheme() {
   applyColorTheme(colorId);
 }
 function toggleScheme() {
-  schemePick = isDarkScheme() ? 'light' : 'dark';
+  /* leaving the forced dark of the DAW color goes back to the default color in light */
+  if (forcedDark()) { colorId = DEFAULT_COLOR; store.set('color', colorId); schemePick = 'light'; }
+  else schemePick = isDarkScheme() ? 'light' : 'dark';
   store.set('scheme', schemePick);
   applyScheme();
 }
 
 function buildColors(T0, dark) {
-  const N = dark ? NEUTRALS.dark : NEUTRALS.light;
+  const N = T0.scheme === 'dark' ? NEUTRALS.daw : dark ? NEUTRALS.dark : NEUTRALS.light;
   const T = Object.assign({}, T0, dark && T0.dark ? T0.dark : {});
   const card = N.win;
-  const flat = [card, card, card];
-  const light = {
-    bg: flat, pal: T.notes, drum: mix(N.ink3, T.a3, 0.3), grid: mix(T.a1, N.ink2, 0.4), kbW: dark ? '#d1d5db' : '#ffffff',
-    kbB: dark ? N.key : mix(N.key, T.a1, 0.2), kbBg: mix(card, dark ? '#000000' : N.ink3, 0.18), line: T.a2, rayA: 0,
-    bands: [mix(T.a4, card, 0.3), mix(T.a2, card, 0.3)], dust: T.a2, dark: false,
+  /* block: solid notes on the window surface */
+  const block = {
+    bg: card, pal: T.notes, drum: N.drum || mix(N.ink3, T.a3, 0.3), grid: N.grid || mix(T.a1, N.ink2, 0.4),
+    kbW: N.kbW || (dark ? '#d1d5db' : '#ffffff'), kbB: N.key, kbBg: N.kbBg || mix(card, dark ? '#000000' : N.ink3, 0.18),
+    line: rgba(N.ink, 0.5), dark,
   };
-  const crystal = Object.assign({}, light, {
-    pal: [T.notes[3], T.notes[1], T.notes[2], T.notes[0], T.notes[4], T.notes[5]],
-    line: mix(T.a2, card, 0.2),
-  });
-  const abyss = {
-    bg: T.deep, pal: T.deepNotes, drum: mix(T.deepNotes[0], T.deep[0], 0.5), grid: T.a2,
-    kbW: mix(T.deep[0], T.a1, 0.18), kbB: mix(T.deep[2], '#000000', 0.3), kbBg: mix(T.deep[2], '#000000', 0.2),
-    line: T.glowLine, plankton: [T.glowLine, T.a2], ray: mix(T.a3, '#ffffff', 0.3), rayA: 0.12, dark: true,
+  /* outline: same stage, framed notes */
+  const outline = Object.assign({}, block, { pal: [T.notes[3], T.notes[1], T.notes[2], T.notes[0], T.notes[4], T.notes[5]] });
+  /* night: a dark stage in every scheme, bright notes */
+  const night = {
+    bg: T.scheme === 'dark' ? '#17181b' : T.deep[1], pal: T.deepNotes, drum: mix(T.deepNotes[0], T.deep[0], 0.5), grid: T.a2,
+    kbW: mix(T.deep[0], '#ffffff', 0.78), kbB: mix(T.deep[2], '#000000', 0.3), kbBg: mix(T.deep[2], '#000000', 0.2),
+    line: rgba(T.glowLine, 0.7), dark: true,
   };
   const vel = T.velocity ? Array.from({ length: 128 }, (_, i) => ramp(T.velocity, i / 127)) : null;
   return {
     id: colorId, dark, accent: T.a1, accent2: T.a2, accent3: T.a3, accent4: T.a4, ui: N.accent,
     ink: N.ink, ink2: N.ink2, ink3: N.ink3, card, line: N.line, page: N.bg, panel: N.panel,
     spec: {
-      pal: T.pal, bg: flat, rayA: 0, glow: mix(T.a2, card, 0.3), ring: T.a2, wave: T.a1,
-      label: rgba(N.ink2, 0.75), water: dark ? 'rgba(255,255,255,.35)' : 'rgba(255,255,255,.9)',
-      waves: [mix(T.pal[0], card, 0.55), mix(T.pal[1], card, 0.45), mix(T.pal[2], card, 0.4), mix(T.pal[4], card, 0.35)],
+      pal: T.pal, bg: card, wave: T.a1, peak: N.ink2, axis: N.line, label: N.ink3,
+      waves: [mix(T.pal[0], card, 0.7), mix(T.pal[1], card, 0.55), mix(T.pal[2], card, 0.38), mix(T.pal[4], card, 0.2)],
     },
-    midi: { bubble: light, crystal, abyss },
+    midi: { bubble: block, crystal: outline, abyss: night },
     vel,
     seek: { pal: [T.a2, T.a1, T.a3], idle: mix(N.panel, N.ink3, dark ? 0.35 : 0.25), strip: T.a4, knob: N.ink, line: rgba(N.ink, 0.25) },
     zoom: {
       laneA: mix(card, T.a1, 0.05), laneM: mix(card, T.a3, 0.06), laneDrag: mix(card, T.a3, 0.14), text: N.ink3,
-      wave: rgba(T.a2, 0.55), onset: rgba(T.a4, 0.95), tick: rgba(T.a1, 0.9), midiLabel: N.ink2, head: N.ink,
-      labelBg: dark ? 'rgba(26,25,28,.85)' : 'rgba(255,255,255,.92)', notes: T.notes,
+      wave: rgba(T.a2, 0.6), onset: rgba(T.a4, 0.95), tick: rgba(T.a1, 0.9), midiLabel: N.ink2, head: N.ink,
+      labelBg: N.panel, notes: T.notes,
     },
-    icon: [T.a2, T.a3, T.a4], glyphAccent: T.blush, glyphLine: mix(T.a2, '#ffffff', 0.15),
   };
 }
 function applyColorTheme(id) {
@@ -1661,13 +1605,13 @@ const spec = {
   bands: new Float32Array(SPEC_N), peaks: new Float32Array(SPEC_N), hold: new Float32Array(SPEC_N),
   wave: new Float32Array(96),
   level: 0, bass: 0, mid: 0, high: 0, bassAvg: 0.15, pulse: 0, lastBeat: -9, now: 0, beatN: 0,
-  bubbles: [], pulses: [], edges: null, edgeKey: '',
+  pulses: [], edges: null, edgeKey: '',
 };
 function resetSpectrumState() {
   for (const k of ['raw', 'prev', 'bands', 'peaks', 'hold', 'wave']) spec[k].fill(0);
   spec.level = spec.bass = spec.mid = spec.high = spec.pulse = 0;
   spec.bassAvg = 0.15; spec.lastBeat = -9;
-  spec.bubbles.length = 0; spec.pulses.length = 0;
+  spec.pulses.length = 0;
   for (const L of WAVE_LAYERS) { L.e = 0; L.ph = 0; L.pk = 0; L.rel.fill(0); }
 }
 
@@ -1733,134 +1677,83 @@ function updateSpectrum(dt, t, src) {
   }
 }
 
-let specSize = { w: 300, h: 200 };
 function onSpecBeat(strength) {
   spec.pulse = 1;
   spec.pulses.push({ t: spec.now, a: clamp(0.45 + strength, 0.5, 1.4), dir: spec.beatN++ % 2 ? 1 : -1 });
   if (spec.pulses.length > 8) spec.pulses.shift();
-  const { w, h } = specSize;
-  const n = 2 + Math.floor(spec.level * 4);
-  for (let i = 0; i < n; i++) spawnSpecBubble(w, h);
-}
-function spawnSpecBubble(w, h, x, y, r) {
-  if (spec.bubbles.length > 80) return;
-  spec.bubbles.push({
-    x: x != null ? x : Math.random() * w, y: y != null ? y : h + 8,
-    r: r != null ? r : 1.4 + Math.random() * 4.6, vy: 16 + Math.random() * 26,
-    ph: Math.random() * TAU, sw: 0.6 + Math.random() * 1.4,
-    col: C.spec.pal[(Math.random() * C.spec.pal.length) | 0], a: 0.55 + Math.random() * 0.4,
-  });
 }
 
-function drawSpecBg(g, w, h, t) {
-  const grd = g.createLinearGradient(0, 0, 0, h);
-  grd.addColorStop(0, C.spec.bg[0]); grd.addColorStop(0.55, C.spec.bg[1]); grd.addColorStop(1, C.spec.bg[2]);
-  g.fillStyle = grd;
+function drawSpecBg(g, w, h) {
+  g.fillStyle = C.spec.bg;
   g.fillRect(0, 0, w, h);
-  for (let i = 0; i < 3; i++) {
-    g.save();
-    g.translate(w * (0.18 + i * 0.32) + Math.sin(t * 0.25 + i * 2.1) * w * 0.04, -12);
-    g.rotate(-0.28 + i * 0.16 + Math.sin(t * 0.2 + i) * 0.03);
-    const rg = g.createLinearGradient(0, 0, 0, h * 1.1);
-    rg.addColorStop(0, 'rgba(255,255,255,' + (C.spec.rayA * (1 + spec.level * 0.5)).toFixed(3) + ')');
-    rg.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = rg;
-    g.fillRect(-w * 0.035 - i * 4, 0, w * 0.07 + i * 8, h * 1.25);
-    g.restore();
-  }
 }
 
-/* ── まる: a ring of rays, flat and open in the middle ── */
+/* ── 円: flat radial bars around a thin waveform ring ── */
 function drawCircle(g, w, h, t) {
-  const cx = w / 2, cy = h / 2 + 2, R = Math.min(w, h * 1.05);
-  const r0 = R * 0.19 * (1 + spec.pulse * 0.06), maxL = R * 0.23, N = SPEC_N;
-  drawGlow(g, cx, cy, r0 * 2.6, C.spec.glow, 0.22 + spec.level * 0.3);
-  g.save();
-  g.translate(cx, cy);
-  g.rotate(t * 0.07);
-  g.fillStyle = rgba(C.spec.ring, 0.4);
-  const ring = r0 + maxL + 12;
-  for (let k = 0; k < 56; k++) { const a = (k / 56) * TAU; g.beginPath(); g.arc(Math.cos(a) * ring, Math.sin(a) * ring, k % 7 === 0 ? 1.8 : 1, 0, TAU); g.fill(); }
-  g.restore();
-  g.lineCap = 'round';
+  const cx = w / 2, cy = h / 2, R = Math.min(w, h * 1.05);
+  const r0 = R * 0.19 * (1 + spec.pulse * 0.04), maxL = R * 0.25, N = SPEC_N;
   const unit = (TAU * r0) / (N * 2);
-  for (let pass = 0; pass < 2; pass++) {
-    g.lineWidth = pass ? Math.max(1.6, unit * 0.55) : Math.max(4, unit * 1.5);
-    for (let side = -1; side <= 1; side += 2) {
-      for (let i = 0; i < N; i++) {
-        const v = spec.bands[i], L = 2 + v * maxL;
-        const a = -Math.PI / 2 + (side * (i + 0.5) * Math.PI) / N, ca = Math.cos(a), sa = Math.sin(a);
-        g.strokeStyle = pass ? SPEC_COL[i] : rgba(SPEC_COL[i], 0.16);
+  g.lineCap = 'butt';
+  g.lineWidth = Math.max(2, unit * 0.7);
+  for (let side = -1; side <= 1; side += 2) {
+    for (let i = 0; i < N; i++) {
+      const L = 2 + spec.bands[i] * maxL;
+      const a = -Math.PI / 2 + (side * (i + 0.5) * Math.PI) / N, ca = Math.cos(a), sa = Math.sin(a);
+      g.strokeStyle = SPEC_COL[i];
+      g.beginPath();
+      g.moveTo(cx + ca * (r0 + 4), cy + sa * (r0 + 4));
+      g.lineTo(cx + ca * (r0 + 4 + L), cy + sa * (r0 + 4 + L));
+      g.stroke();
+      const pk = spec.peaks[i];
+      if (pk > 0.06) {
+        const rr = r0 + 7 + pk * maxL;
+        g.strokeStyle = C.spec.peak;
         g.beginPath();
-        g.moveTo(cx + ca * (r0 + 5), cy + sa * (r0 + 5));
-        g.lineTo(cx + ca * (r0 + 5 + L), cy + sa * (r0 + 5 + L));
+        g.moveTo(cx + ca * rr, cy + sa * rr);
+        g.lineTo(cx + ca * (rr + 2), cy + sa * (rr + 2));
         g.stroke();
       }
-    }
-  }
-  for (let side = -1; side <= 1; side += 2) {
-    for (let i = 1; i < N; i += 2) {
-      const pk = spec.peaks[i];
-      if (pk < 0.1) continue;
-      const a = -Math.PI / 2 + (side * (i + 0.5) * Math.PI) / N, rr = r0 + 11 + pk * maxL;
-      drawBubble(g, cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, 1.6 + pk * 2.2, SPEC_COL[i], 0.9);
     }
   }
   const M = spec.wave.length;
   g.beginPath();
   for (let j = 0; j <= M; j++) {
-    const a = (j / M) * TAU - Math.PI / 2, rr = r0 + spec.wave[j % M] * r0 * 0.3;
+    const a = (j / M) * TAU - Math.PI / 2, rr = r0 - 2 + spec.wave[j % M] * r0 * 0.3;
     const x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr;
     j ? g.lineTo(x, y) : g.moveTo(x, y);
   }
-  g.strokeStyle = rgba(C.spec.wave, 0.55);
-  g.lineWidth = 1.4;
+  g.strokeStyle = C.spec.wave;
+  g.lineWidth = 1.5;
   g.stroke();
-  g.fillStyle = 'rgba(255,255,255,.9)';
-  for (let k = 0; k < 3; k++) {
-    const a = t * 0.5 + (k * TAU) / 3, rr = r0 + maxL * 0.62 + Math.sin(t * 2 + k) * 4;
-    starPath(g, cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, 3 + spec.high * 4, t);
-    g.fill();
-  }
 }
 
-/* ── ライン ── */
-function drawLineSpec(g, w, h, t) {
-  const N = 48, padX = 16, base = Math.round(h * 0.64), maxH = h * 0.52, gap = 3;
+/* ── ライン: flat bars on a baseline, a short cap marks each peak ── */
+function drawLineSpec(g, w, h) {
+  const N = 48, padX = 16, base = Math.round(h - 28), maxH = h - 56, gap = 3;
   const bw = (w - padX * 2 - gap * (N - 1)) / N;
   for (let j = 0; j < N; j++) {
     const pos = (j * (SPEC_N - 1)) / (N - 1), i0 = Math.floor(pos), fr = pos - i0;
     const v = lerp(spec.bands[i0], spec.bands[Math.min(SPEC_N - 1, i0 + 1)], fr);
     const pk = lerp(spec.peaks[i0], spec.peaks[Math.min(SPEC_N - 1, i0 + 1)], fr);
-    const col = SPEC_COL[Math.round(pos)];
-    const bh = Math.max(bw, v * maxH), x = padX + j * (bw + gap);
-    const gr = g.createLinearGradient(0, base - bh, 0, base);
-    gr.addColorStop(0, rgba(col, 0.98)); gr.addColorStop(1, rgba(col, 0.5));
-    g.fillStyle = gr;
-    roundRect(g, x, base - bh, bw, bh, bw / 2); g.fill();
-    if (bh > bw * 1.4) { g.fillStyle = 'rgba(255,255,255,.5)'; roundRect(g, x + bw * 0.22, base - bh + bw * 0.4, bw * 0.22, bh - bw * 0.8, bw * 0.11); g.fill(); }
-    const rh = bh * 0.36, off = Math.sin(t * 2.2 + j * 0.55) * 1.4;
-    const rg = g.createLinearGradient(0, base + 3, 0, base + 3 + rh);
-    rg.addColorStop(0, rgba(col, 0.22)); rg.addColorStop(1, rgba(col, 0));
-    g.fillStyle = rg;
-    roundRect(g, x + off, base + 3, bw, rh, bw / 2); g.fill();
-    drawBubble(g, x + bw / 2, base - Math.max(bw, pk * maxH) - bw * 0.75 - 2, bw * 0.48 + 0.6, col, 0.95);
-    if (spec.raw[Math.round(pos)] - spec.prev[Math.round(pos)] > 0.2 && Math.random() < 0.5) spawnSpecBubble(w, h, x + bw / 2, base - bh - 4, 1.2 + Math.random() * 2.5);
+    const bh = Math.max(2, v * maxH), x = padX + j * (bw + gap);
+    g.fillStyle = SPEC_COL[Math.round(pos)];
+    g.fillRect(x, base - bh, bw, bh);
+    g.fillStyle = C.spec.peak;
+    g.fillRect(x, base - Math.max(2, pk * maxH) - 5, bw, 2);
   }
-  g.beginPath();
-  for (let x = 0; x <= w; x += 8) { const y = base + 1.5 + Math.sin(x * 0.05 + t * 2) * 1.2; x ? g.lineTo(x, y) : g.moveTo(x, y); }
-  g.strokeStyle = C.spec.water; g.lineWidth = 1.4; g.stroke();
-  g.font = '500 9px ' + FONT;
+  g.fillStyle = C.spec.axis;
+  g.fillRect(padX, base + 2, w - padX * 2, 1);
+  g.font = '400 10px ' + FONT;
   g.fillStyle = C.spec.label;
   g.textAlign = 'center';
   const labels = S.scale === 'lin' ? [[30, '0'], [3000, '3k'], [6000, '6k'], [9000, '9k'], [12000, '12k']] : [[60, '60'], [250, '250'], [1000, '1k'], [4000, '4k'], [12000, '12k']];
   const fMax = Math.min(16000, (spec.sr || 48000) / 2 * 0.95);
   for (const [f, s] of labels) {
     const u = S.scale === 'lin' ? (f - 30) / (Math.min(12000, fMax) - 30) : Math.log(f / 30) / Math.log(fMax / 30);
-    g.fillText(s, clamp(padX + u * (w - padX * 2), 12, w - 12), base + 15);
+    g.fillText(s, clamp(padX + u * (w - padX * 2), 12, w - 12), base + 17);
   }
   g.textAlign = 'left';
-  g.fillText('Hz', 4, base + 15);
+  g.fillText('Hz', 4, base + 17);
 }
 
 /* ── なみ: sea level, swell speed, relief and travelling swells all come from the music ──
@@ -1912,45 +1805,17 @@ function drawWaves(g, w, h, t, dt) {
       g.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
     };
     g.beginPath(); crest(); g.lineTo(w, h); g.lineTo(0, h); g.closePath();
-    const gr = g.createLinearGradient(0, h * (L.y - 0.2), 0, h);
-    const lc = C.spec.waves[li];
-    gr.addColorStop(0, rgba(lc, L.a)); gr.addColorStop(1, rgba(lc, L.a * 0.35));
-    g.fillStyle = gr;
+    g.fillStyle = C.spec.waves[li];
     g.fill();
-    g.beginPath(); crest();
-    g.strokeStyle = 'rgba(255,255,255,' + (0.55 + li * 0.08 + L.e * 0.2) + ')';
-    g.lineWidth = 1.4 + li * 0.2 + L.e * 0.8;
-    g.stroke();
     front = pts;
   });
   spec.front = front;
-  /* glints drift slowly along the front crest instead of hopping */
-  const hi = clamp(spec.high * 6, 0, 1);
-  if (front && hi > 0.05) {
-    for (let k = 0; k < 6; k++) {
-      const u = (k / 6 + t * 0.025) % 1, f = u * steps, i = Math.min(steps - 1, Math.floor(f)), q = f - i;
-      const x = lerp(front[i][0], front[i + 1][0], q), y = lerp(front[i][1], front[i + 1][1], q);
-      g.fillStyle = 'rgba(255,255,255,' + (hi * (0.35 + 0.65 * Math.abs(Math.sin(t * 1.2 + k * 1.7)))).toFixed(3) + ')';
-      starPath(g, x, y - 3, 1.6 + hi * 2.6, k);
-      g.fill();
-    }
-  }
-  if (Math.random() < (0.3 + spec.level * 5) * dt) spawnSpecBubble(w, h, Math.random() * w, h + 6, 1 + Math.random() * 3);
 }
 
 const SPEC_MODES = { circle: drawCircle, line: drawLineSpec, waves: drawWaves };
 function drawSpectrumScene(g, w, h, dt, t) {
-  specSize = { w, h };
-  if (Math.random() < (0.6 + spec.level * 4) * dt) spawnSpecBubble(w, h);
-  for (let i = spec.bubbles.length - 1; i >= 0; i--) {
-    const b = spec.bubbles[i];
-    b.y -= b.vy * dt * (1 + b.r * 0.05);
-    b.x += Math.sin(t * b.sw + b.ph) * 9 * dt;
-    if (b.y < -b.r - 4) spec.bubbles.splice(i, 1);
-  }
-  drawSpecBg(g, w, h, t);
+  drawSpecBg(g, w, h);
   SPEC_MODES[S.mode](g, w, h, t, dt);
-  for (const b of spec.bubbles) drawBubble(g, b.x, b.y, b.r, b.col, b.a);
 }
 function drawSpectrum(cv, dt, t) {
   const { w, h, dpr } = fitCanvas(cv);
@@ -2020,184 +1885,31 @@ function noteRect(G, kp, t0, t1, round) {
   return G.horiz ? { x: a, y: c - span / 2, w: b - a, h: span } : { x: c - span / 2, y: a, w: span, h: b - a };
 }
 
-/* ── あわ: translucent capsules with a rim tint and a shine ── */
-function bubbleNote(g, r, col, act, n, G) {
-  const rad = Math.min(r.w, r.h) / 2, a = act ? 1 : 0.6 + 0.4 * n.v;
-  roundRect(g, r.x, r.y, r.w, r.h, rad);
-  const gr = G.horiz ? g.createLinearGradient(0, r.y, 0, r.y + r.h) : g.createLinearGradient(r.x, 0, r.x + r.w, 0);
-  gr.addColorStop(0, rgba(col, 0.62 * a));
-  gr.addColorStop(0.32, rgba(col, 0.16 * a));
-  gr.addColorStop(0.62, 'rgba(255,255,255,' + 0.42 * a + ')');
-  gr.addColorStop(1, rgba(col, 0.72 * a));
-  g.fillStyle = gr;
-  g.fill();
-  g.lineWidth = act ? 1.8 : 1.15;
-  g.strokeStyle = rgba(col, act ? 1 : 0.15 + 0.75 * a);
-  g.stroke();
-  if (rad >= 2.5) {
-    g.lineCap = 'round';
-    g.strokeStyle = 'rgba(255,255,255,.95)';
-    g.lineWidth = Math.max(1, rad * 0.32);
-    g.beginPath();
-    if (G.horiz) {
-      const len = Math.min(r.w - rad * 1.8, rad * 2.6), yy = r.y + r.h * 0.3;
-      if (len > 0.5) { g.moveTo(r.x + rad * 0.9, yy); g.lineTo(r.x + rad * 0.9 + len, yy); }
-      else g.arc(r.x + r.w / 2, r.y + r.h / 2, rad * 0.6, Math.PI * 1.05, Math.PI * 1.45);
-    } else {
-      const len = Math.min(r.h - rad * 1.8, rad * 2.6), xx = r.x + r.w * 0.3;
-      if (len > 0.5) { g.moveTo(xx, r.y + rad * 0.9); g.lineTo(xx, r.y + rad * 0.9 + len); }
-      else g.arc(r.x + r.w / 2, r.y + r.h / 2, rad * 0.6, Math.PI * 1.05, Math.PI * 1.45);
-    }
-    g.stroke();
-    g.fillStyle = 'rgba(255,255,255,.9)';
-    g.beginPath(); g.arc(r.x + r.w - rad * 0.72, r.y + r.h - rad * 0.72, Math.max(0.7, rad * 0.16), 0, TAU); g.fill();
-  }
-  if (act) {
-    roundRect(g, r.x - 3, r.y - 3, r.w + 6, r.h + 6, rad + 3);
-    g.strokeStyle = rgba(col, 0.28);
-    g.lineWidth = 3;
-    g.stroke();
-  }
-}
-
-/* ── すいしょう: elongated faceted prisms ── */
-const crystalCache = new Map();
-function crystalCols(col) {
-  let c = crystalCache.get(col);
-  if (!c) {
-    c = { hi: mix('#ffffff', col, 0.2), mid: mix('#ffffff', col, 0.58), deep: mix(col, '#23232d', 0.25), edge: mix(col, '#23232d', 0.45) };
-    crystalCache.set(col, c);
-  }
-  return c;
-}
-function crystalNote(g, r, col, act, n, G, t) {
-  const K = crystalCols(col);
-  let P;
-  if (G.horiz) {
-    const tip = Math.min(r.h * 0.65, r.w / 2);
-    P = [[r.x, r.y + r.h / 2], [r.x + tip, r.y], [r.x + r.w - tip, r.y], [r.x + r.w, r.y + r.h / 2], [r.x + r.w - tip, r.y + r.h], [r.x + tip, r.y + r.h]];
-  } else {
-    const tip = Math.min(r.w * 0.65, r.h / 2);
-    P = [[r.x + r.w / 2, r.y], [r.x + r.w, r.y + tip], [r.x + r.w, r.y + r.h - tip], [r.x + r.w / 2, r.y + r.h], [r.x, r.y + r.h - tip], [r.x, r.y + tip]];
-  }
-  const path = () => { g.beginPath(); for (let i = 0; i < 6; i++) i ? g.lineTo(P[i][0], P[i][1]) : g.moveTo(P[i][0], P[i][1]); g.closePath(); };
-  if (act) { path(); g.strokeStyle = rgba(col, 0.35); g.lineWidth = 6; g.lineJoin = 'round'; g.stroke(); }
-  path();
-  const gr = G.horiz ? g.createLinearGradient(0, r.y, 0, r.y + r.h) : g.createLinearGradient(r.x, 0, r.x + r.w, 0);
-  gr.addColorStop(0, K.hi); gr.addColorStop(0.46, K.mid); gr.addColorStop(0.54, col); gr.addColorStop(1, K.deep);
-  g.globalAlpha = act ? 1 : 0.68 + 0.32 * n.v;
-  g.fillStyle = gr;
+/* ── note painters: flat shapes only, no gloss, glow or shadow ──
+   block: solid bars · outline: a thin frame with a faint fill · night: solid bars on a dark stage */
+function blockNote(g, r, col, act, n) {
+  g.globalAlpha = act ? 1 : 0.55 + 0.4 * n.v;
+  roundRect(g, r.x, r.y, r.w, r.h, Math.min(2, r.w / 2, r.h / 2));
+  g.fillStyle = col;
   g.fill();
   g.globalAlpha = 1;
-  g.lineJoin = 'round';
-  g.strokeStyle = act ? '#ffffff' : rgba(K.edge, 0.65);
-  g.lineWidth = act ? 1.5 : 1;
-  g.stroke();
-  g.fillStyle = 'rgba(255,255,255,.3)';
-  g.beginPath(); g.moveTo(P[0][0], P[0][1]); g.lineTo(P[5][0], P[5][1]); g.lineTo(P[4][0], P[4][1]); g.lineTo(P[3][0], P[3][1]); g.closePath(); g.fill();
-  g.strokeStyle = 'rgba(255,255,255,.8)';
-  g.lineWidth = 0.9;
-  g.beginPath(); g.moveTo(P[0][0], P[0][1]); g.lineTo(P[3][0], P[3][1]); g.stroke();
-  const hs = hash(n.i * 7 + 3);
-  if (hs > 0.5 || act) {
-    const tw = act ? 1 : 0.5 + 0.5 * Math.sin(t * 3.5 + hs * 40);
-    if (tw > 0.3) {
-      const sx = G.horiz ? r.x + Math.min(r.w * 0.3, 14) : r.x + r.w * 0.28, sy = G.horiz ? r.y + r.h * 0.28 : r.y + Math.min(r.h * 0.3, 14);
-      g.fillStyle = 'rgba(255,255,255,' + tw + ')';
-      starPath(g, sx, sy, 2 + tw * 3.2, 0);
-      g.fill();
-    }
-  }
 }
-
-/* ── しんかい: bioluminescent capsules, bright at the head ── */
-function abyssNote(g, r, col, act, n, G) {
-  const rad = Math.min(r.w, r.h) / 2;
-  g.globalCompositeOperation = 'lighter';
-  roundRect(g, r.x - 3, r.y - 3, r.w + 6, r.h + 6, rad + 3);
-  g.fillStyle = rgba(col, act ? 0.32 : 0.1 + 0.06 * n.v);
+function outlineNote(g, r, col, act, n) {
+  roundRect(g, r.x + 0.75, r.y + 0.75, Math.max(0.5, r.w - 1.5), Math.max(0.5, r.h - 1.5), Math.min(2, r.w / 2, r.h / 2));
+  g.fillStyle = rgba(col, act ? 0.85 : 0.12 + 0.12 * n.v);
   g.fill();
-  const gr = G.horiz ? g.createLinearGradient(r.x, 0, r.x + r.w, 0) : g.createLinearGradient(0, r.y, 0, r.y + r.h);
-  const headFirst = G.dir !== 'down';
-  const hi = rgba(col, act ? 1 : 0.55 + 0.4 * n.v), lo = rgba(col, 0.18);
-  gr.addColorStop(0, headFirst ? hi : lo);
-  gr.addColorStop(1, headFirst ? lo : hi);
-  roundRect(g, r.x, r.y, r.w, r.h, rad);
-  g.fillStyle = gr;
-  g.fill();
-  g.strokeStyle = 'rgba(255,255,255,' + (act ? 0.9 : 0.4) + ')';
-  g.lineWidth = Math.max(1, rad * 0.4);
-  g.lineCap = 'round';
-  g.beginPath();
-  if (G.horiz) { g.moveTo(r.x + rad, r.y + r.h / 2); g.lineTo(Math.max(r.x + rad, r.x + r.w - rad), r.y + r.h / 2); }
-  else { g.moveTo(r.x + r.w / 2, r.y + rad); g.lineTo(r.x + r.w / 2, Math.max(r.y + rad, r.y + r.h - rad)); }
+  g.strokeStyle = col;
+  g.lineWidth = 1.5;
   g.stroke();
-  g.globalCompositeOperation = 'source-over';
 }
-const NOTE_PAINT = { bubble: bubbleNote, crystal: crystalNote, abyss: abyssNote };
+const NOTE_PAINT = { bubble: blockNote, crystal: outlineNote, abyss: blockNote };
 
-/* ───────── MIDI visualizer: scene, keyboard, particles, main draw ───────── */
-const mv = { parts: [], amb: [], ambTheme: '', prevNow: null, glow: new Float32Array(128), kcol: new Array(128).fill('#8a68ff'), G: null };
+/* ───────── MIDI visualizer: scene, keyboard, main draw ───────── */
+const mv = { prevNow: null, glow: new Float32Array(128), kcol: new Array(128).fill('#db2777'), G: null };
 
-function drawMidiBg(g, G, th, wt) {
-  const gr = g.createLinearGradient(0, 0, 0, G.h);
-  gr.addColorStop(0, th.bg[0]); gr.addColorStop(0.55, th.bg[1]); gr.addColorStop(1, th.bg[2]);
-  g.fillStyle = gr;
+function drawMidiBg(g, G, th) {
+  g.fillStyle = th.bg;
   g.fillRect(0, 0, G.w, G.h);
-  if (S.theme === 'crystal') {
-    for (let i = 0; i < 3; i++) {
-      g.save();
-      g.translate(G.w * (0.15 + i * 0.35) + Math.sin(wt * 0.15 + i) * 20, G.h * 0.5);
-      g.rotate(0.6);
-      const c = th.bands[i % 2];
-      const sg = g.createLinearGradient(-30, 0, 30, 0);
-      sg.addColorStop(0, rgba(c, 0)); sg.addColorStop(0.5, rgba(c, 0.18)); sg.addColorStop(1, rgba(c, 0));
-      g.fillStyle = sg;
-      g.fillRect(-30, -G.h, 60, G.h * 2);
-      g.restore();
-    }
-  } else {
-    const fromTop = true;
-    for (let i = 0; i < 3; i++) {
-      g.save();
-      g.translate(G.w * (0.2 + i * 0.3) + Math.sin(wt * 0.22 + i * 1.7) * 18, fromTop ? -10 : G.h + 10);
-      g.rotate((fromTop ? 1 : -1) * (-0.25 + i * 0.15));
-      const rg = g.createLinearGradient(0, 0, 0, (fromTop ? 1 : -1) * G.h);
-      rg.addColorStop(0, th.dark ? rgba(th.ray, th.rayA) : 'rgba(255,255,255,' + th.rayA + ')');
-      rg.addColorStop(1, 'rgba(255,255,255,0)');
-      g.fillStyle = rg;
-      g.fillRect(-14 - i * 3, fromTop ? 0 : -G.h * 1.2, 28 + i * 6, G.h * 1.2);
-      g.restore();
-    }
-  }
-}
-
-function drawAmbient(g, G, th, dt, wt) {
-  if (mv.ambTheme !== S.theme) { mv.amb = []; mv.ambTheme = S.theme; }
-  const want = S.theme === 'abyss' ? 46 : S.theme === 'crystal' ? 22 : 14;
-  while (mv.amb.length < want) {
-    mv.amb.push({ x: Math.random() * G.w, y: Math.random() * G.h, r: Math.random(), ph: Math.random() * TAU, v: 0.4 + Math.random() * 0.6 });
-  }
-  for (const p of mv.amb) {
-    if (S.theme === 'bubble') {
-      p.y -= (8 + p.v * 14) * dt; p.x += Math.sin(wt * p.v + p.ph) * 6 * dt;
-      if (p.y < -6) { p.y = G.h + 6; p.x = Math.random() * G.w; }
-      drawBubble(g, p.x, p.y, 1 + p.r * 2.6, th.pal[(p.ph * 2) % th.pal.length | 0], 0.45);
-    } else if (S.theme === 'crystal') {
-      p.y += 3 * p.v * dt; if (p.y > G.h + 4) p.y = -4;
-      const tw = 0.5 + 0.5 * Math.sin(wt * (1.5 + p.v * 2) + p.ph);
-      g.fillStyle = rgba(th.dust, (0.15 + tw * 0.45).toFixed(3));
-      starPath(g, p.x, p.y, 1 + tw * 2.5 * p.r + 0.6, 0);
-      g.fill();
-    } else {
-      p.y -= 2 * p.v * dt; p.x += Math.sin(wt * 0.5 + p.ph) * 3 * dt;
-      if (p.y < -4) { p.y = G.h + 4; p.x = Math.random() * G.w; }
-      const tw = 0.4 + 0.6 * Math.abs(Math.sin(wt * (0.6 + p.v) + p.ph));
-      g.globalCompositeOperation = 'lighter';
-      drawGlow(g, p.x, p.y, 2 + p.r * 4, th.plankton[p.r > 0.6 ? 0 : 1], tw * 0.7);
-      g.globalCompositeOperation = 'source-over';
-    }
-  }
 }
 
 function playRect(G) {
@@ -2233,24 +1945,9 @@ function drawGridLines(g, G, th, song, now, O, st, kl) {
   }
 }
 
-function drawHitLine(g, G, th, wt) {
-  const L = G.horiz ? G.h : G.w;
-  g.save();
-  if (th.dark) g.globalCompositeOperation = 'lighter';
-  const band = g.createLinearGradient(G.horiz ? G.hit - 8 : 0, G.horiz ? 0 : G.hit - 8, G.horiz ? G.hit + 8 : 0, G.horiz ? 0 : G.hit + 8);
-  band.addColorStop(0, rgba(th.line, 0)); band.addColorStop(0.5, rgba(th.line, th.dark ? 0.5 : 0.35)); band.addColorStop(1, rgba(th.line, 0));
-  g.fillStyle = band;
-  if (G.horiz) g.fillRect(G.hit - 8, 0, 16, G.h); else g.fillRect(0, G.hit - 8, G.w, 16);
-  g.beginPath();
-  for (let s = 0; s <= L; s += 6) {
-    const wv = S.theme === 'bubble' ? Math.sin(s * 0.06 + wt * 2.4) * 1.6 : 0;
-    const x = G.horiz ? G.hit + wv : s, y = G.horiz ? s : G.hit + wv;
-    s ? g.lineTo(x, y) : g.moveTo(x, y);
-  }
-  g.strokeStyle = th.dark ? rgba(th.line, 0.9) : 'rgba(255,255,255,.95)';
-  g.lineWidth = 2;
-  g.stroke();
-  g.restore();
+function drawHitLine(g, G, th) {
+  g.fillStyle = th.line;
+  if (G.horiz) g.fillRect(G.hit, 0, 1, G.h); else g.fillRect(0, G.dir === 'down' ? G.hit - 1 : G.hit, G.w, 1);
 }
 
 function drawKeyboard(g, G, kl, th) {
@@ -2259,7 +1956,7 @@ function drawKeyboard(g, G, kl, th) {
   if (dir === 'down') g.fillRect(0, G.h - kb, G.w, kb);
   else if (dir === 'up') g.fillRect(0, 0, G.w, kb);
   else g.fillRect(0, 0, kb, G.h);
-  const rad = Math.min(4, G.unit * 0.3);
+  const rad = Math.min(2, G.unit * 0.2);
   for (let p = kl.a; p <= kl.b; p++) {
     const kp = kl.pos[p];
     if (kp.black) continue;
@@ -2269,9 +1966,8 @@ function drawKeyboard(g, G, kl, th) {
     else { x = s0 + 0.5; w = G.unit - 1; y = dir === 'down' ? G.h - kb + 1.5 : 0; h = kb - 1.5; }
     const gl = mv.glow[p];
     roundRect(g, x, y, w, h, rad);
-    g.fillStyle = gl > 0.01 ? mix(th.kbW, mv.kcol[p], 0.25 + gl * 0.55) : th.kbW;
+    g.fillStyle = gl > 0.5 ? mv.kcol[p] : th.kbW;
     g.fill();
-    if (th.dark) { g.strokeStyle = rgba(th.grid, 0.25); g.lineWidth = 1; g.stroke(); }
   }
   for (let p = kl.a; p <= kl.b; p++) {
     const kp = kl.pos[p];
@@ -2282,77 +1978,13 @@ function drawKeyboard(g, G, kl, th) {
     else if (dir === 'up') { x = c - span / 2; y = kb * 0.4; w = span; h = kb * 0.6; }
     else { x = kb * 0.4; y = c - span / 2; w = kb * 0.6; h = span; }
     const gl = mv.glow[p];
-    roundRect(g, x, y, w, h, Math.min(2.5, span * 0.3));
-    g.fillStyle = gl > 0.01 ? mix(th.kbB, mv.kcol[p], 0.35 + gl * 0.6) : th.kbB;
+    roundRect(g, x, y, w, h, Math.min(1.5, span * 0.2));
+    g.fillStyle = gl > 0.5 ? mv.kcol[p] : th.kbB;
     g.fill();
-    g.fillStyle = 'rgba(255,255,255,.22)';
-    if (horiz) g.fillRect(x + 2, y + 1, w - 4, Math.max(1, h * 0.3)); else g.fillRect(x + 1, y + 2, Math.max(1, w * 0.3), h - 4);
-  }
-  for (let p = kl.a; p <= kl.b; p++) {
-    const gl = mv.glow[p];
-    if (gl < 0.05) continue;
-    const kp = kl.pos[p], c = pitchPos(G, kp);
-    if (th.dark) g.globalCompositeOperation = 'lighter';
-    drawGlow(g, horiz ? G.hit : c, horiz ? c : G.hit, G.unit * 1.6 + 6, mv.kcol[p], gl * (th.dark ? 0.8 : 0.6));
-    g.globalCompositeOperation = 'source-over';
   }
 }
 
-function spawnHit(G, x, y, col) {
-  if (mv.parts.length > 280) return;
-  const into = G.dir === 'down' ? -Math.PI / 2 : G.dir === 'up' ? Math.PI / 2 : 0;
-  if (S.theme === 'bubble') {
-    for (let k = 0; k < 4; k++) mv.parts.push({ k: 'b', x: x + (Math.random() - 0.5) * 6, y, vx: (Math.random() - 0.5) * 34, vy: -(26 + Math.random() * 46), r: 1.2 + Math.random() * 3, life: 1.3, max: 1.3, col });
-    mv.parts.push({ k: 'ring', x, y, r: 2, life: 0.55, max: 0.55, col });
-  } else if (S.theme === 'crystal') {
-    for (let k = 0; k < 6; k++) {
-      const a = into + (Math.random() - 0.5) * 2.2, sp = 50 + Math.random() * 70;
-      mv.parts.push({ k: 's', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 2 + Math.random() * 3, rot: Math.random() * TAU, vr: (Math.random() - 0.5) * 8, life: 0.75, max: 0.75, col });
-    }
-  } else {
-    for (let k = 0; k < 8; k++) { const a = into + (Math.random() - 0.5) * 3, sp = 30 + Math.random() * 60; mv.parts.push({ k: 'g', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 1 + Math.random() * 2, life: 1, max: 1, col }); }
-    mv.parts.push({ k: 'beam', x, y, r: G.unit, life: 0.45, max: 0.45, col });
-  }
-}
-
-function drawParticles(g, G, dt) {
-  for (let i = mv.parts.length - 1; i >= 0; i--) {
-    const p = mv.parts[i];
-    p.life -= dt;
-    if (p.life <= 0) { mv.parts.splice(i, 1); continue; }
-    const a = p.life / p.max;
-    if (p.k === 'ring') {
-      p.r += dt * 55;
-      g.strokeStyle = rgba(p.col, a * 0.7);
-      g.lineWidth = 1.4;
-      g.beginPath();
-      if (G.horiz) g.ellipse(p.x, p.y, p.r * 0.55, p.r * 1.5, 0, 0, TAU); else g.ellipse(p.x, p.y, p.r * 1.5, p.r * 0.55, 0, 0, TAU);
-      g.stroke();
-      continue;
-    }
-    if (p.k === 'beam') {
-      const len = 60 * a + 20;
-      const [x0, y0, x1, y1] = G.dir === 'down' ? [p.x, p.y, p.x, p.y - len] : G.dir === 'up' ? [p.x, p.y, p.x, p.y + len] : [p.x, p.y, p.x + len, p.y];
-      const gr = g.createLinearGradient(x0, y0, x1, y1);
-      gr.addColorStop(0, rgba(p.col, 0.45 * a)); gr.addColorStop(1, rgba(p.col, 0));
-      g.globalCompositeOperation = 'lighter';
-      g.fillStyle = gr;
-      if (G.horiz) g.fillRect(x0, p.y - p.r / 2, len, p.r); else g.fillRect(p.x - p.r / 2, Math.min(y0, y1), p.r, len);
-      g.globalCompositeOperation = 'source-over';
-      continue;
-    }
-    p.x += p.vx * dt; p.y += p.vy * dt;
-    if (p.k === 'b') { p.vx *= 0.97; p.x += Math.sin(p.life * 9) * 0.3; drawBubble(g, p.x, p.y, p.r, p.col, a); }
-    else if (p.k === 's') {
-      p.vx *= 0.93; p.vy *= 0.93; p.rot += p.vr * dt;
-      g.fillStyle = 'rgba(255,255,255,' + a + ')';
-      starPath(g, p.x, p.y, p.r * (0.6 + a * 0.6), p.rot); g.fill();
-      g.strokeStyle = rgba(p.col, a * 0.7); g.lineWidth = 1; g.stroke();
-    } else { p.vx *= 0.96; p.vy *= 0.96; g.globalCompositeOperation = 'lighter'; drawGlow(g, p.x, p.y, p.r * 3.2, p.col, a); g.globalCompositeOperation = 'source-over'; }
-  }
-}
-
-function resetMidiVisualState() { mv.parts.length = 0; mv.prevNow = null; mv.glow.fill(0); }
+function resetMidiVisualState() { mv.prevNow = null; mv.glow.fill(0); }
 function drawMidi(cv, dt, now, wt) {
   const { w, h, dpr } = fitCanvas(cv);
   const g = cv.getContext('2d');
@@ -2364,9 +1996,8 @@ function drawMidiScene(g, w, h, dt, now, wt) {
   const kl = getKeyLayout(song, S.showDrums);
   if (kl !== mv.kl) { mv.kl = kl; updateKeysUI(); }
   const G = midiGeom(w, h, S.dir, kl, S.look);
-  drawMidiBg(g, G, th, wt);
-  drawAmbient(g, G, th, dt, wt);
-  for (let p = 0; p < 128; p++) if (mv.glow[p] > 0) mv.glow[p] = Math.max(0, mv.glow[p] - dt * 4.5);
+  drawMidiBg(g, G, th);
+  mv.glow.fill(0);
   if (song) {
     const O = S.offset, st = S.stretch;
     const pr = playRect(G);
@@ -2376,7 +2007,6 @@ function drawMidiScene(g, w, h, dt, now, wt) {
     const behind = G.kb / G.pps + 0.05;
     const tm0 = (now - behind - O) / st - song.maxDur, tm1 = (now + G.look - O) / st;
     const paint = NOTE_PAINT[S.theme];
-    const prev = mv.prevNow, jumped = prev == null || now < prev || now - prev > 0.3;
     const actives = [];
     for (let i = lowerBound(song.notes, tm0, (n) => n.s); i < song.notes.length; i++) {
       const n = song.notes[i];
@@ -2389,19 +2019,14 @@ function drawMidiScene(g, w, h, dt, now, wt) {
       const col = n.drum ? th.drum : C.vel ? C.vel[Math.round(n.v * 127)] : th.pal[n.ci % th.pal.length];
       const act = as <= now && now < ae + (n.drum ? 0.08 : 0);
       if (act) { mv.glow[n.p] = 1; mv.kcol[n.p] = col; }
-      if (!jumped && as > prev && as <= now) {
-        const c = pitchPos(G, kp);
-        spawnHit(G, G.horiz ? G.hit : c, G.horiz ? c : G.hit, col);
-      }
       const r = noteRect(G, kp, as - now, ae - now, n.drum);
       if (act) actives.push([r, col, n]); else paint(g, r, col, false, n, G, wt);
     }
     for (const [r, col, n] of actives) paint(g, r, col, true, n, G, wt);
     g.restore();
   }
-  drawHitLine(g, G, th, wt);
+  drawHitLine(g, G, th);
   drawKeyboard(g, G, kl, th);
-  drawParticles(g, G, dt);
   mv.prevNow = now;
   return G;
 }
@@ -2438,7 +2063,7 @@ function drawSeekScene(g, w, h, t, dur, preview) {
   for (let i = 0; i < n; i++) {
     const x = x0 + i * (bw + gap), bh = Math.max(3, Math.pow(seekCache.cols[i], 0.8) * h * 0.64);
     g.fillStyle = (x + bw / 2 - x0) / span <= prog ? ramp(C.seek.pal, i / n) : C.seek.idle;
-    roundRect(g, x, midY - bh / 2, bw, bh, bw / 2);
+    roundRect(g, x, midY - bh / 2, bw, bh, 1);
     g.fill();
   }
   if (S.song && dur > 0) {
@@ -2891,7 +2516,6 @@ function setTheme(th) {
   selectTab($('#themeTabs'), 'data-theme', th);
   setDir(pick(store.get('dir2.' + th), ['up', 'down', 'left'], THEMES[th].dir), true);
   el.midiWin.classList.toggle('dark-theme', THEMES[th].dark || C.dark);
-  mv.parts.length = 0;
 }
 function setDir(d, quiet) { S.dir = d; if (!quiet) store.set('dir2.' + S.theme, d); pressSeg($('#dirSeg'), 'data-dir', d); }
 const cycle = (list, v) => list[(list.indexOf(v) + 1) % list.length];
@@ -3001,7 +2625,7 @@ function bindUI() {
   const sens = $('#sens');
   sens.value = S.sens; setRangeFill(sens); $('#sensVal').textContent = S.sens.toFixed(2) + '×';
   sens.addEventListener('input', () => { S.sens = +sens.value; store.set('sens', S.sens); setRangeFill(sens); $('#sensVal').textContent = S.sens.toFixed(2) + '×'; });
-  $('#dirSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-dir]'); if (b) { setDir(b.dataset.dir); mv.parts.length = 0; } });
+  $('#dirSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-dir]'); if (b) setDir(b.dataset.dir); });
   const speed = $('#speed');
   speed.value = S.look; setRangeFill(speed); $('#speedVal').textContent = speedText();
   speed.addEventListener('input', () => { S.look = +speed.value; store.set('look', S.look); setRangeFill(speed); $('#speedVal').textContent = speedText(); });
@@ -3181,8 +2805,9 @@ function bindGridUI() {
 
 /* ── colour themes ── */
 function setColor(id) {
-  applyColorTheme(id);
+  colorId = COLOR_THEMES[id] ? id : DEFAULT_COLOR;
   store.set('color', colorId);
+  applyScheme();
 }
 function onColorThemeChange() {
   refreshSpecColors();
@@ -3559,7 +3184,7 @@ function composeFrame(g, fmt, now, dt, wt, icon) {
     roundRect(g, H.x, H.y, s, s, 6);
     g.clip();
     if (icon) g.drawImage(icon, H.x, H.y, s, s);
-    else { const ig = g.createLinearGradient(H.x, H.y, H.x + s, H.y + s); ig.addColorStop(0, C.icon[0]); ig.addColorStop(1, C.icon[2]); g.fillStyle = ig; g.fillRect(H.x, H.y, s, s); }
+
     g.restore();
   }
   const tx = showIcon ? H.x + s + 12 : H.x + 2, tw = showIcon ? H.w - s - 12 : H.w - 2;
