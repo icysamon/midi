@@ -831,12 +831,12 @@ function buildColors(T0, dark) {
   };
   /* outline: same stage, framed notes */
   const outline = Object.assign({}, block, { pal: [T.notes[3], T.notes[1], T.notes[2], T.notes[0], T.notes[4], T.notes[5]] });
-  /* night: a dark stage in every scheme, bright notes */
-  const night = {
+  /* night: a deep stage with bright notes in dark; in light it follows the light surfaces like the other themes */
+  const night = dark ? {
     bg: '#1a191c', pal: T.deepNotes, drum: '#8a8f9a', grid: '#9ca3af',
     kbW: '#d1d5db', kbB: '#242327', kbBg: '#111013',
     line: rgba(T.glowLine, 0.7), dark: true,
-  };
+  } : Object.assign({}, block);
   const vel = T.velocity ? Array.from({ length: 128 }, (_, i) => ramp(T.velocity, i / 127)) : null;
   return {
     id: colorId, dark, accent: T.a1, accent2: T.a2, accent3: T.a3, accent4: T.a4, ui: N.accent,
