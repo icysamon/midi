@@ -540,6 +540,7 @@ kbd { font-family: var(--font-mono); font-size: 12px; line-height: 16px; padding
         <div class="row"><span class="lbl" data-i="exShape">形</span><div class="mini-seg" id="exFormat"><button data-v="v" aria-pressed="true" data-i="exPortrait">縦 9:16</button><button data-v="h" aria-pressed="false" data-i="exLandscape">横 16:9</button><button data-v="s" aria-pressed="false" data-i="exSquare">正方形</button></div></div>
         <div class="row"><span class="lbl" data-i="exSmooth">フレームレート</span><div class="mini-seg" id="exFps"><button data-v="30" aria-pressed="true">30fps</button><button data-v="60" aria-pressed="false">60fps</button></div></div>
         <div class="row"><span class="lbl" data-i="exRange">範囲</span><div class="mini-seg" id="exRange"><button data-v="all" aria-pressed="true" data-i="exAll">曲全体</button><button data-v="here" aria-pressed="false" data-i="exHere">今から30秒</button></div></div>
+        <div class="row"><span class="lbl" data-i="exScheme">背景</span><div class="mini-seg" id="exScheme"><button data-v="light" aria-pressed="true" data-i="exLight">ライト</button><button data-v="dark" aria-pressed="false" data-i="exDark">ダーク</button></div></div>
         <div class="row"><span class="lbl" data-i="exQuality">画質</span><div class="mini-seg" id="exQuality"><button data-v="std" aria-pressed="true" data-i="exStd">標準</button><button data-v="high" aria-pressed="false" data-i="exHigh">高画質</button></div></div>
         <p class="help" id="exInfo"></p>
         <p class="help" data-i="exHelp">スペクトラムとMIDIは、今のモード・テーマ・ずれ補正のまま動画になります（ずれ補正のパネルは入りません）。</p>
@@ -626,7 +627,7 @@ const I18N = {
     keysList: '<li><span>再生・一時停止</span><span><kbd>Space</kbd></span></li><li><span>5秒戻る・進む</span><span><kbd>←</kbd><kbd>→</kbd></span></li><li><span>ずれ ±10ms</span><span><kbd>[</kbd><kbd>]</kbd></span></li><li><span>スペクトラムのモード</span><span><kbd>M</kbd></span></li><li><span>MIDIのテーマ</span><span><kbd>T</kbd></span></li><li><span>配色</span><span><kbd>C</kbd></span></li>',
     dropHere: 'ここにドロップしてください<small>音声ファイルとMIDIファイル（両方同時でも読み込めます）</small>',
     close: '閉じる', exShape: '形', exPortrait: '縦 9:16', exLandscape: '横 16:9', exSquare: '正方形', exSmooth: 'フレームレート', exRange: '範囲',
-    exAll: '曲全体', exHere: '今から30秒', exQuality: '画質', exStd: '標準', exHigh: '高画質',
+    exAll: '曲全体', exHere: '今から30秒', exQuality: '画質', exStd: '標準', exHigh: '高画質', exScheme: '背景', exLight: 'ライト', exDark: 'ダーク',
     exHelp: 'スペクトラムとMIDIは、今のモード・テーマ・ずれ補正のまま動画になります（ずれ補正のパネルは入りません）。',
     cancel: '中止', again: 'やり直す', exStart: '書き出す', save: '保存',
     /* script strings */
@@ -682,7 +683,7 @@ const I18N = {
     keysList: '<li><span>Play / pause</span><span><kbd>Space</kbd></span></li><li><span>Back / forward 5 s</span><span><kbd>←</kbd><kbd>→</kbd></span></li><li><span>Offset ±10 ms</span><span><kbd>[</kbd><kbd>]</kbd></span></li><li><span>Spectrum mode</span><span><kbd>M</kbd></span></li><li><span>MIDI theme</span><span><kbd>T</kbd></span></li><li><span>Colors</span><span><kbd>C</kbd></span></li>',
     dropHere: 'Drop files here<small>Audio and MIDI files, one or both</small>',
     close: 'Close', exShape: 'Shape', exPortrait: 'Portrait 9:16', exLandscape: 'Landscape 16:9', exSquare: 'Square', exSmooth: 'Frame rate', exRange: 'Range',
-    exAll: 'Whole song', exHere: '30 s from here', exQuality: 'Quality', exStd: 'Standard', exHigh: 'High',
+    exAll: 'Whole song', exHere: '30 s from here', exQuality: 'Quality', exStd: 'Standard', exHigh: 'High', exScheme: 'Background', exLight: 'Light', exDark: 'Dark',
     exHelp: 'The spectrum and MIDI are rendered with the current mode, theme and offset (the offset panel is left out).',
     cancel: 'Cancel', again: 'Again', exStart: 'Export', save: 'Save',
     pickSong: 'Pick a song', canLoad: 'Load an audio file and a MIDI file', synthAudio: 'synthesized from MIDI', noMidi: 'no MIDI',
@@ -846,7 +847,7 @@ function buildColors(T0, dark) {
     },
     midi: { bubble: block, crystal: outline, abyss: night },
     vel,
-    seek: { pal: [T.a2, T.a1, T.a3], idle: mix(N.panel, N.ink3, dark ? 0.35 : 0.25), strip: T.a4, knob: N.ink, line: rgba(N.ink, 0.25) },
+    seek: { pal: [T.a2, T.a1, T.a3], idle: mix(N.panel, N.ink3, dark ? 0.35 : 0.25), knob: N.ink, line: rgba(N.ink, 0.25) },
     zoom: {
       laneA: mix(card, T.a1, 0.05), laneM: mix(card, T.a3, 0.06), laneDrag: mix(card, T.a3, 0.14), text: N.ink3,
       wave: rgba(T.a2, 0.6), onset: rgba(T.a4, 0.95), tick: rgba(T.a1, 0.9), midiLabel: N.ink2, head: N.ink,
@@ -1728,6 +1729,7 @@ function drawLineSpec(g, w, h) {
 /* ── なみ: sea level, swell speed, relief and travelling swells all come from the music ──
    Every input is eased over time and across the width, so the water moves without twitching. */
 const WAVE_STEPS = 56;
+const WAVE_GAIN = 2; /* the waves react more strongly than the circle and line */
 const WAVE_LAYERS = [
   { y: 0.42, amp: 0.055, shape: 0.16, a: 0.42, sp: 0.6, k: 1.2, b: [0, 14], pw: 0.45, rs: 0.07 },
   { y: 0.53, amp: 0.06, shape: 0.13, a: 0.45, sp: 0.8, k: 1.7, b: [10, 28], pw: 0.65, rs: 0.06 },
@@ -1743,9 +1745,9 @@ function drawWaves(g, w, h, t, dt) {
   WAVE_LAYERS.forEach((L, li) => {
     let e = 0;
     for (let i = L.b[0]; i < L.b[1]; i++) e += spec.bands[i];
-    e /= L.b[1] - L.b[0];
+    e = (e / (L.b[1] - L.b[0])) * WAVE_GAIN;
     /* loudness relative to what this song has done lately: calm verses stay calm, choruses swell */
-    L.pk = Math.max(L.pk * Math.exp(-dt / 12), e, 0.42);
+    L.pk = Math.max(L.pk * Math.exp(-dt / 12), e, 0.3);
     L.e += (clamp(e / L.pk, 0, 1) - L.e) * ease(0.12, dt);
     L.ph += dt * L.e * 2.4 * L.sp;
     const A = h * L.amp * (0.06 + Math.pow(L.e, 1.6) * 3.2);
@@ -2036,27 +2038,6 @@ function drawSeekScene(g, w, h, t, dur, preview) {
     g.fillStyle = (x + bw / 2 - x0) / span <= prog ? ramp(C.seek.pal, i / n) : C.seek.idle;
     roundRect(g, x, midY - bh / 2, bw, bh, 1);
     g.fill();
-  }
-  if (S.song && dur > 0) {
-    const mk = n + ':' + S.offset.toFixed(4) + ':' + S.stretch + ':' + S.songId + ':' + dur.toFixed(2);
-    if (seekCache.midiKey !== mk) {
-      seekCache.midiKey = mk;
-      const dens = new Float32Array(n);
-      for (const no of S.song.notes) {
-        const i = Math.floor(((S.offset + no.s * S.stretch) / dur) * n);
-        if (i >= 0 && i < n) dens[i]++;
-      }
-      let mx = 0;
-      for (let i = 0; i < n; i++) mx = Math.max(mx, dens[i]);
-      if (mx) for (let i = 0; i < n; i++) dens[i] = dens[i] ? 0.25 + 0.75 * Math.sqrt(dens[i] / mx) : 0;
-      seekCache.midi = dens;
-    }
-    for (let i = 0; i < n; i++) {
-      const d = seekCache.midi[i];
-      if (!d) continue;
-      g.fillStyle = rgba(C.seek.strip, (0.25 + d * 0.65).toFixed(3));
-      g.fillRect(x0 + i * (bw + gap) - gap / 2, h - 6, bw + gap, 3);
-    }
   }
   /* playhead: a flat bar in the text colour */
   const kx = x0 + prog * span;
@@ -3142,7 +3123,17 @@ function panel(g, R, r, draw) {
   g.restore();
 }
 /* one frame of the video card: header, spectrum, progress, MIDI — the sync panel is left out */
+/* the video can be light or dark whatever the page is showing */
 function composeFrame(g, fmt, now, dt, wt, icon) {
+  const dark = EX.scheme ? EX.scheme === 'dark' : C.dark;
+  if (dark === C.dark) { composeFrameInner(g, fmt, now, dt, wt, icon); return; }
+  const page = Object.assign({}, C);
+  Object.assign(C, buildColors(COLOR_THEMES[colorId], dark));
+  refreshSpecColors();
+  try { composeFrameInner(g, fmt, now, dt, wt, icon); }
+  finally { Object.assign(C, page); refreshSpecColors(); }
+}
+function composeFrameInner(g, fmt, now, dt, wt, icon) {
   const F = VIDEO_FORMATS[fmt], L = videoLayout(fmt), dur = getDuration();
   drawVideoBg(g, F.w, F.h);
   roundRect(g, L.card.x, L.card.y, L.card.w, L.card.h, 6);
@@ -3193,7 +3184,7 @@ function composeFrame(g, fmt, now, dt, wt, icon) {
 }
 
 /* ───────── video export: dialog, WebCodecs encoding, saving ───────── */
-const EX = { format: 'v', fps: 30, range: 'all', quality: 'std', icon: null, blob: null, url: '', running: false, cancel: false, dl: undefined, meta: '' };
+const EX = { format: 'v', fps: 30, range: 'all', quality: 'std', scheme: '', icon: null, blob: null, url: '', running: false, cancel: false, dl: undefined, meta: '' };
 const toU8 = (d) => (d instanceof ArrayBuffer ? new Uint8Array(d.slice(0)) : new Uint8Array(d.buffer.slice(d.byteOffset, d.byteOffset + d.byteLength)));
 const opusPreSkip = (d) => (d && d.length >= 12 && d[0] === 0x4f ? d[10] | (d[11] << 8) : 312);
 const yieldUI = (() => {
@@ -3361,6 +3352,8 @@ async function openExport() {
   if (!engine.buffer) { toast(tl('notReady')); return; }
   engine.pause();
   clearExportResult();
+  if (!EX.scheme) EX.scheme = C.dark ? 'dark' : 'light';
+  pressSeg($('#exScheme'), 'data-v', EX.scheme);
   $('#exportModal').hidden = false;
   S.previewing = true;
   updateExportInfo();
@@ -3453,7 +3446,7 @@ async function saveExport() {
   }
 }
 function bindExport() {
-  const segs = [['#exFormat', 'format', (v) => v], ['#exFps', 'fps', Number], ['#exRange', 'range', (v) => v], ['#exQuality', 'quality', (v) => v]];
+  const segs = [['#exFormat', 'format', (v) => v], ['#exFps', 'fps', Number], ['#exRange', 'range', (v) => v], ['#exQuality', 'quality', (v) => v], ['#exScheme', 'scheme', (v) => v]];
   for (const [id, key, conv] of segs) {
     $(id).addEventListener('click', (e) => {
       const b = e.target.closest('[data-v]');
