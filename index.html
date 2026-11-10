@@ -1729,7 +1729,7 @@ function drawCircle(g, w, h, t) {
 
 /* ── ライン: flat bars on a baseline, a short cap marks each peak ── */
 function drawLineSpec(g, w, h) {
-  const N = 48, padX = 16, base = Math.round(h * 0.7), maxH = h * 0.58, gap = 3;
+  const N = 48, padX = 16, base = Math.round(h - 28), maxH = h - 56, gap = 3;
   const bw = (w - padX * 2 - gap * (N - 1)) / N;
   for (let j = 0; j < N; j++) {
     const pos = (j * (SPEC_N - 1)) / (N - 1), i0 = Math.floor(pos), fr = pos - i0;
