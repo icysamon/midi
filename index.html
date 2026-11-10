@@ -4,377 +4,325 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MIDI プレイヤー</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
 <style>
-/* Layout: one white card adrift in a lavender sea — spectrum porthole on top, controls in the middle, MIDI porthole below, sync drawer at the foot */
+/* icysamon UI: surfaces are separated by faint fills only, grey scale plus one pink accent.
+   Layout: header bar; at 768px+ a fixed 320px side column (song, colors, keys) and a fluid player column. */
 :root {
-  --sea-1: #f4f2ff;
-  --sea-2: #dcdfff;
-  --sea-3: #adb5f3;
-  --sea-4: #858bdd;
-  --ray: rgba(255, 255, 255, .62);
-  --page-ink: #4d4892;
-  --card: #ffffff;
-  --card-line: #ebe6ff;
-  --ink: #3b3772;
-  --ink-2: #6e6aa7;
-  --ink-3: #a9a5d2;
-  --violet: #8a68ff;
-  --violet-2: #ab93ff;
-  --blue: #5d9cff;
-  --aqua: #6fd3ee;
-  --lav: #ece7ff;
-  --mist: #f6f4ff;
-  --blush: #f5bde6;
-  --blush-2: #ec94d2;
+  --bg: #ffffff;
+  --panel: rgba(100, 116, 139, .05);
+  --panel-hover: rgba(100, 116, 139, .1);
+  --band: rgba(250, 250, 251, .95);
+  --ctl: #f3f4f6;
+  --field: #ffffff;
+  --field-line: #e5e7eb;
+  --text: #111827;
+  --text-2: #4b5563;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --accent: #db2777;
   --on-accent: #ffffff;
-  --shadow-rgb: 92, 76, 190;
-  --hl: rgba(255, 255, 255, .6);
-  --hl-2: rgba(255, 255, 255, .9);
-  --glass: rgba(255, 255, 255, .8);
-  --kbd-bg: rgba(255, 255, 255, .55);
-  --tint-a: rgba(171, 147, 255, .1);
-  --tint-b: rgba(111, 211, 238, .1);
-  --tip-bg: #3b3772;
-  --tip-fg: #ffffff;
-  --font-ui: "Zen Maru Gothic", "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", "Yu Gothic UI", system-ui, sans-serif;
-  --font-num: "Quicksand", "Zen Maru Gothic", ui-rounded, system-ui, sans-serif;
+  --danger: #b91c1c;
+  --win: #eff1f4;
+  --shadow: 0 12px 32px -12px rgba(15, 23, 42, .28), 0 2px 8px -2px rgba(15, 23, 42, .12);
+  --scrim: rgba(17, 24, 39, .4);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-8: 32px;
+  --header-height: 64px; --sidebar-width: 320px; --content-max: 1024px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-full: 999px;
+  --ease: cubic-bezier(.2, 0, 0, 1);
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --sea-1: #2b2a6e; --sea-2: #1e1f5a; --sea-3: #15174a; --sea-4: #0b0c2c;
-    --ray: rgba(170, 160, 255, .22); --page-ink: #d3cfff;
-    --card: #fcfbff; --card-line: #e2dcff; --shadow-rgb: 6, 4, 30;
+    --bg: #242327; --panel: rgba(255, 255, 255, .05); --panel-hover: rgba(255, 255, 255, .1); --band: rgba(47, 46, 50, .95);
+    --ctl: #1a191c; --field: #1a191c; --field-line: rgba(0, 0, 0, 0);
+    --text: #f9fafb; --text-2: #d1d5db; --muted: #9ca3af; --line: rgba(255, 255, 255, .2);
+    --accent: #f472b6; --on-accent: #242327; --danger: #fca5a5;
+    --win: #3a393d; --shadow: 0 12px 32px -12px rgba(0, 0, 0, .7), 0 2px 8px -2px rgba(0, 0, 0, .5); --scrim: rgba(0, 0, 0, .55);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --sea-1: #2b2a6e; --sea-2: #1e1f5a; --sea-3: #15174a; --sea-4: #0b0c2c;
-  --ray: rgba(170, 160, 255, .22); --page-ink: #d3cfff;
-  --card: #fcfbff; --card-line: #e2dcff; --shadow-rgb: 6, 4, 30;
+  --bg: #242327; --panel: rgba(255, 255, 255, .05); --panel-hover: rgba(255, 255, 255, .1); --band: rgba(47, 46, 50, .95);
+  --ctl: #1a191c; --field: #1a191c; --field-line: rgba(0, 0, 0, 0);
+  --text: #f9fafb; --text-2: #d1d5db; --muted: #9ca3af; --line: rgba(255, 255, 255, .2);
+  --accent: #f472b6; --on-accent: #242327; --danger: #fca5a5;
+  --win: #3a393d; --shadow: 0 12px 32px -12px rgba(0, 0, 0, .7), 0 2px 8px -2px rgba(0, 0, 0, .5); --scrim: rgba(0, 0, 0, .55);
   color-scheme: dark;
 }
 
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html, body { min-height: 100%; }
-body {
-  margin: 0;
-  background: var(--sea-2);
-  color: var(--ink);
-  font-family: var(--font-ui);
-  font-weight: 500;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+html { -webkit-text-size-adjust: 100%; touch-action: manipulation; }
+html, body { margin: 0; background: var(--bg); }
+body { min-height: 100dvh; display: flex; flex-direction: column; font-family: var(--font-sans); font-size: 16px; line-height: 24px; color: var(--text); overflow-x: hidden; }
+h1, h2, h3, p, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+button, input { font: inherit; color: inherit; }
+button { border: 0; background: none; cursor: pointer; padding: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ───── type ───── */
+.eyebrow { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.heading { font-size: 18px; line-height: 28px; font-weight: 700; }
+.caption { font-size: 12px; line-height: 16px; color: var(--muted); }
+.num-font { font-variant-numeric: tabular-nums; }
+
+/* ───── header ───── */
+.top { position: sticky; top: 0; z-index: 20; background: var(--bg); }
+.top-in { margin: 0 auto; max-width: 1280px; height: var(--header-height); padding: 0 var(--space-4); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+.brand { font-size: 16px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
+.head-actions { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+
+/* ───── layout ───── */
+.stage { width: 90%; max-width: 672px; margin: var(--space-4) auto var(--space-8); display: flex; flex-direction: column; gap: var(--space-4); }
+.side { display: contents; }
+.col { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; order: 1; }
+.side > .now { order: 0; }
+.side > .colors, .side > .keys { order: 2; }
+@media (min-width: 768px) {
+  .top-in { padding: 0 24px; }
+  .stage { max-width: var(--content-max); flex-direction: row; align-items: flex-start; gap: var(--space-8); }
+  .side { display: flex; flex-direction: column; gap: var(--space-4); width: var(--sidebar-width); flex: none; position: sticky; top: calc(var(--header-height) + var(--space-4)); }
+  .col { flex: 1; }
 }
-button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; padding: 0; }
-button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
-svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* ───── the sea ───── */
-.ocean { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
-  background: linear-gradient(180deg, var(--sea-1) 0%, var(--sea-2) 36%, var(--sea-3) 74%, var(--sea-4) 100%); }
-.ray { position: absolute; top: -12vh; width: 16vw; min-width: 90px; height: 125vh; transform-origin: 50% 0;
-  background: linear-gradient(180deg, var(--ray), transparent 72%); filter: blur(16px); opacity: .55;
-  animation: sway 12s ease-in-out infinite alternate; }
-.ray:nth-child(1) { left: 8%; --r: 14deg; animation-duration: 13s; }
-.ray:nth-child(2) { left: 34%; --r: 8deg; width: 9vw; animation-duration: 9s; opacity: .45; }
-.ray:nth-child(3) { left: 58%; --r: 3deg; width: 20vw; animation-duration: 15s; }
-.ray:nth-child(4) { left: 82%; --r: -6deg; width: 8vw; animation-duration: 11s; opacity: .4; }
-@keyframes sway { from { transform: rotate(calc(var(--r) - 4deg)); } to { transform: rotate(calc(var(--r) + 4deg)); } }
-.bub { position: absolute; bottom: -40px; left: var(--x); width: var(--s); height: var(--s); border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, .7);
-  background: radial-gradient(circle at 32% 30%, rgba(255,255,255,.95) 0 11%, rgba(255,255,255,.22) 12% 58%, rgba(255,255,255,.06) 60%);
-  animation: rise var(--d) linear infinite; animation-delay: var(--w); opacity: .8; }
-@keyframes rise {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(14px, -30vh); }
-  50% { transform: translate(-10px, -60vh); }
-  75% { transform: translate(12px, -90vh); }
-  100% { transform: translate(-6px, -122vh); }
-}
+/* ───── panel ───── */
+.panel { position: relative; background: var(--panel); border-radius: var(--radius-md); padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.panel-head { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.panel-head .eyebrow { margin-right: auto; white-space: nowrap; }
 
-/* ───── stage + card ───── */
-.stage { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 14px;
-  padding-block: 28px 36px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.card { position: relative; width: min(100%, 500px); background: var(--card); border-radius: 34px; padding: 18px 18px 16px;
-  display: flex; flex-direction: column; gap: 12px;
-  box-shadow: 0 46px 90px -34px rgba(var(--shadow-rgb), .55), 0 12px 32px -14px rgba(var(--shadow-rgb), .3), inset 0 0 0 1px var(--card-line); }
-.card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: radial-gradient(120% 60% at 0% 0%, var(--tint-a), transparent 60%), radial-gradient(90% 50% at 100% 100%, var(--tint-b), transparent 60%); }
+/* ───── buttons ───── */
+.chip { height: 40px; padding: 0 12px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  background: var(--ctl); color: var(--text-2); font-size: 14px; line-height: 20px; font-weight: 500; white-space: nowrap; transition: color .15s, opacity .15s; }
+.chip svg.i { width: 18px; height: 18px; }
+.chip:hover { color: var(--text); }
+.chip.is-loaded { color: var(--text); background: var(--panel-hover); }
+.chip:disabled { opacity: .45; cursor: default; }
+.round { width: 40px; height: 40px; border-radius: var(--radius-sm); display: grid; place-items: center; flex: none; background: var(--ctl); color: var(--text-2); transition: color .15s, background-color .15s; }
+.round:hover { color: var(--text); }
+.round.small { width: 36px; height: 36px; }
+.round[aria-pressed="true"] { background: var(--panel-hover); color: var(--text); }
+.play { width: 64px; height: 48px; border-radius: var(--radius-sm); display: grid; place-items: center; background: var(--accent); color: var(--on-accent); transition: opacity .15s; }
+.play svg.i { width: 24px; height: 24px; fill: currentColor; stroke-width: 1.5; }
+.play:hover { opacity: .88; }
+.primary { height: 40px; padding: 0 12px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 6px; font-size: 14px; line-height: 20px; font-weight: 500;
+  background: var(--accent); color: var(--on-accent); transition: opacity .15s; }
+.primary:hover { opacity: .88; }
+.primary:disabled { opacity: .45; cursor: default; }
+.primary svg.i { width: 16px; height: 16px; }
+.nudge { height: 32px; min-width: 44px; padding: 0 8px; border-radius: var(--radius-sm); background: var(--ctl); color: var(--text-2);
+  font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; transition: color .15s; }
+.nudge:hover { color: var(--text); }
+.nudge.sm { min-width: 32px; padding: 0 7px; }
 
-/* head */
-.head { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; }
-.art { position: relative; width: 52px; height: 52px; border-radius: 18px; overflow: hidden;
-  background: linear-gradient(150deg, var(--violet-2), var(--blue) 62%, var(--aqua));
-  box-shadow: 0 8px 18px -8px rgba(var(--shadow-rgb), .6), inset 0 1px 0 rgba(255,255,255,.5); }
-.art svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.titles { min-width: 0; display: grid; gap: 1px; }
-.eyebrow { font-family: var(--font-num); font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--violet); text-transform: lowercase; }
-.title { font-size: 18px; font-weight: 900; letter-spacing: .02em; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.artist { font-size: 12px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.head-actions { display: flex; gap: 4px; }
-.head-actions .chip { padding: 0 9px; }
-.head-actions .chip.icon-only { width: 30px; padding: 0; justify-content: center; }
-.chip.lang { font-family: var(--font-num); letter-spacing: .04em; }
-.chip { height: 30px; padding: 0 11px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px;
-  background: var(--mist); color: var(--ink-2); font-size: 12px; font-weight: 700; box-shadow: inset 0 0 0 1px var(--card-line);
-  transition: background .15s, color .15s, transform .15s; white-space: nowrap; }
-.chip svg.i { width: 15px; height: 15px; }
-.chip:hover { background: var(--lav); color: var(--violet); }
-.chip:active { transform: translateY(1px); }
-.chip.is-loaded { color: var(--violet); background: var(--lav); }
+/* ───── segmented tabs ───── */
+.seg, .mini-seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: var(--radius-sm); background: var(--ctl); min-width: 0; }
+.seg button, .mini-seg button { height: 32px; padding: 0 10px; border-radius: 3px; display: inline-flex; align-items: center; gap: 6px;
+  font-size: 14px; line-height: 20px; font-weight: 500; color: var(--text-2); white-space: nowrap; transition: color .15s, background-color .15s; }
+.mini-seg button { height: 28px; padding: 0 9px; font-size: 13px; }
+.seg button svg.i { width: 16px; height: 16px; }
+.seg button:hover, .mini-seg button:hover { color: var(--text); }
+.seg button[aria-selected="true"], .mini-seg button[aria-pressed="true"] { background: var(--bg); color: var(--text); }
+.seg { overflow-x: auto; scrollbar-width: none; }
+.seg::-webkit-scrollbar { display: none; }
 
-/* portholes */
-.window { position: relative; border-radius: 24px; overflow: hidden; background: var(--mist); box-shadow: inset 0 0 0 1px var(--card-line); }
-.window canvas { display: block; width: 100%; height: 100%; }
-.window::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  box-shadow: inset 0 0 0 1px var(--hl), inset 0 10px 24px -14px var(--hl-2); }
-.spec-wrap { position: relative; margin-bottom: 14px; }
-.spec { height: 212px; }
-.float-btn { position: absolute; z-index: 2; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--glass); color: var(--violet); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 4px 12px -6px rgba(var(--shadow-rgb), .5); }
-.float-btn:hover { background: var(--card); }
-.spec-wrap .float-btn { top: 10px; right: 10px; }
-.mode-name { position: absolute; z-index: 2; top: 12px; left: 14px; font-family: var(--font-num); font-size: 11px; font-weight: 700;
-  letter-spacing: .16em; color: var(--violet); text-transform: uppercase; opacity: .8; pointer-events: none; }
-
-/* segmented tabs */
-.seg { display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--card); box-shadow: 0 8px 18px -8px rgba(var(--shadow-rgb), .4), inset 0 0 0 1px var(--card-line); }
-.seg button { height: 28px; padding: 0 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px;
-  font-size: 12px; font-weight: 700; color: var(--ink-2); white-space: nowrap; transition: background .2s, color .2s; }
-.seg button svg.i { width: 15px; height: 15px; }
-.seg button:hover { color: var(--violet); }
-.seg button[aria-selected="true"] { color: var(--on-accent); background: linear-gradient(135deg, var(--violet-2), var(--violet) 50%, var(--blue));
-  box-shadow: 0 4px 10px -4px rgba(var(--shadow-rgb), .7), inset 0 1px 0 rgba(255,255,255,.35); }
-.spec-wrap .seg { position: absolute; z-index: 3; left: 50%; bottom: -15px; transform: translateX(-50%); }
-
-/* transport */
-.transport { display: grid; gap: 4px; }
-.seek { position: relative; height: 40px; cursor: pointer; touch-action: none; border-radius: 12px; }
-.seek canvas { display: block; width: 100%; height: 100%; }
-.times { display: flex; justify-content: space-between; font-family: var(--font-num); font-size: 12px; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.seek-tip { position: absolute; z-index: 4; bottom: calc(100% + 4px); transform: translateX(-50%); padding: 3px 8px; border-radius: 999px;
-  background: var(--tip-bg); color: var(--tip-fg); font-family: var(--font-num); font-size: 11px; font-weight: 700; pointer-events: none; white-space: nowrap; }
-.controls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
-.ctl-left { display: flex; gap: 6px; }
-.ctl-mid { display: flex; align-items: center; gap: 14px; }
-.ctl-right { display: flex; justify-content: flex-end; align-items: center; gap: 6px; min-width: 0; }
-.round { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--mist); color: var(--violet);
-  box-shadow: inset 0 0 0 1px var(--card-line); transition: transform .15s, background .15s; }
-.round:hover { background: var(--lav); }
-.round:active { transform: scale(.94); }
-.round.small { width: 34px; height: 34px; }
-.round[aria-pressed="true"] { background: var(--lav); color: var(--violet); box-shadow: inset 0 0 0 1.5px var(--violet-2); }
-.play { position: relative; width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center; color: var(--on-accent);
-  background: radial-gradient(circle at 30% 24%, rgba(255,255,255,.9) 0 7%, rgba(255,255,255,0) 8%), linear-gradient(150deg, var(--violet-2), var(--violet) 46%, var(--blue));
-  box-shadow: 0 14px 26px -10px rgba(var(--shadow-rgb), .75), inset 0 -3px 0 rgba(40, 20, 120, .12), inset 0 2px 0 rgba(255,255,255,.4);
-  transition: transform .15s; }
-.play svg.i { width: 26px; height: 26px; fill: currentColor; stroke-width: 1.5; }
-.play:hover { transform: scale(1.04); }
-.play:active { transform: scale(.95); }
-.play::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--violet-2); opacity: 0; pointer-events: none; }
-.card.is-playing .play::after { animation: halo 2.2s ease-out infinite; }
-@keyframes halo { 0% { transform: scale(.9); opacity: .7; } 100% { transform: scale(1.25); opacity: 0; } }
-.vol { width: 84px; min-width: 0; }
-
-/* range inputs, flat thumb */
-input[type="range"] { -webkit-appearance: none; appearance: none; height: 22px; background: transparent; cursor: pointer; }
-input[type="range"]::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--violet-2) var(--p, 50%), var(--lav) var(--p, 50%)); }
-input[type="range"]::-moz-range-track { height: 6px; border-radius: 999px; background: var(--lav); }
-input[type="range"]::-moz-range-progress { height: 6px; border-radius: 999px; background: var(--violet-2); }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -5px; border-radius: 50%;
-  background: var(--violet); box-shadow: 0 0 0 2px var(--card); }
-input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border: 2px solid var(--card); border-radius: 50%; background: var(--violet); }
-
-.divider { display: block; width: 100%; height: 10px; color: var(--lav); }
-
-/* MIDI */
-.midi { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; min-width: 0; }
-.midi-head { display: flex; align-items: center; gap: 8px; }
-.sec-label { font-family: var(--font-num); font-size: 12px; font-weight: 700; letter-spacing: .1em; color: var(--violet); white-space: nowrap; }
-.midi-head .seg { flex: 0 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; box-shadow: inset 0 0 0 1px var(--card-line); background: var(--mist); }
-.midi-head .seg::-webkit-scrollbar { display: none; }
-.midi-head .spacer { flex: 1; }
-.midi-head .round.small { flex: none; }
-.midi-win { height: 252px; touch-action: pan-y; cursor: grab; }
-.midi-win.dragging { cursor: grabbing; }
-.midi-win.touch-drag { touch-action: none; }
-.midi-win.no-drag { cursor: default; }
-.midi-win.no-drag .drag-hint { display: none; }
-.empty { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: 10px; text-align: center; padding: 16px; color: var(--ink-2); font-size: 13px; }
-.empty p { margin: 0; line-height: 1.7; }
-.empty .chip { background: var(--glass); }
-.drag-hint { position: absolute; z-index: 2; right: 10px; bottom: 8px; font-size: 11px; color: var(--ink-2); background: var(--glass);
-  padding: 3px 9px; border-radius: 999px; opacity: 0; transition: opacity .2s; pointer-events: none; }
-.midi-win:hover .drag-hint { opacity: 1; }
-.midi-win.dark-theme .drag-hint { background: rgba(20, 18, 60, .6); color: #d8d3ff; }
-.flash { position: absolute; z-index: 3; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 8px 16px; border-radius: 999px;
-  background: var(--glass); color: var(--violet); font-family: var(--font-num); font-size: 18px; font-weight: 700; pointer-events: none;
-  box-shadow: 0 8px 20px -8px rgba(var(--shadow-rgb), .5); font-variant-numeric: tabular-nums; }
-
-/* sync drawer */
-.sync { border-radius: 22px; background: var(--mist); padding: 8px 10px; display: grid; gap: 10px; box-shadow: inset 0 0 0 1px var(--card-line); }
-.sync-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.sync-label { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: var(--ink); margin-right: auto; white-space: nowrap; }
-.nudger { display: flex; align-items: center; gap: 6px; }
-.sync-label svg.i { color: var(--violet); }
-.nudge { height: 30px; min-width: 42px; padding: 0 8px; border-radius: 999px; background: var(--card); color: var(--violet);
-  font-family: var(--font-num); font-size: 12px; font-weight: 700; box-shadow: inset 0 0 0 1px var(--card-line); font-variant-numeric: tabular-nums; }
-.nudge:hover { background: var(--lav); }
-.nudge:active { transform: translateY(1px); }
-.offset-out { min-width: 82px; text-align: center; font-family: var(--font-num); font-size: 17px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
-.offset-out small { font-size: 11px; color: var(--ink-2); margin-left: 2px; }
-.chip.auto { color: var(--violet); background: var(--card); }
-.expand svg.i { transition: transform .25s; }
-.expand[aria-expanded="true"] svg.i { transform: rotate(180deg); }
-.sync-panel { display: grid; gap: 10px; padding: 2px 2px 4px; }
-.zoom { position: relative; height: 116px; border-radius: 16px; overflow: hidden; background: var(--card); box-shadow: inset 0 0 0 1px var(--card-line); cursor: ew-resize; touch-action: pan-y; }
-.zoom canvas { display: block; width: 100%; height: 100%; }
-.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.row > label, .row > .lbl { font-size: 12px; font-weight: 700; color: var(--ink-2); min-width: 72px; }
-.row input[type="range"] { flex: 1; min-width: 120px; }
-.row .val { font-family: var(--font-num); font-size: 12px; font-weight: 700; color: var(--ink); min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
-.help { margin: 0; font-size: 11.5px; line-height: 1.7; color: var(--ink-2); }
-.help b { color: var(--violet); font-weight: 700; }
-.mini-seg { display: inline-flex; padding: 2px; border-radius: 999px; background: var(--card); box-shadow: inset 0 0 0 1px var(--card-line); }
-.mini-seg button { height: 24px; padding: 0 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; color: var(--ink-2); }
-.mini-seg button[aria-pressed="true"] { background: var(--lav); color: var(--violet); }
-
-/* popovers */
-.pop { position: absolute; z-index: 30; width: min(260px, calc(100% - 20px)); padding: 12px; border-radius: 18px; background: var(--card); display: grid; gap: 10px;
-  box-shadow: 0 22px 44px -16px rgba(var(--shadow-rgb), .55), inset 0 0 0 1px var(--card-line); }
-.pop .row > .lbl { min-width: 84px; }
-.pop h3 { margin: 0; font-size: 12px; font-weight: 900; letter-spacing: .08em; color: var(--violet); }
-.switch { position: relative; width: 40px; height: 24px; border-radius: 999px; background: var(--lav); transition: background .2s; }
-.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(var(--shadow-rgb), .4); transition: transform .2s; }
-.switch[aria-checked="true"] { background: var(--violet-2); }
-.switch[aria-checked="true"]::after { transform: translateX(16px); }
-
-/* toast, drop, hint */
-.toast { position: fixed; z-index: 90; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); width: max-content; max-width: calc(100vw - 32px); text-align: center; line-height: 1.5;
-  transform: translate(-50%, 16px); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
-  padding: 10px 18px; border-radius: 20px; background: var(--card); color: var(--ink); font-size: 13px; font-weight: 700;
-  box-shadow: 0 16px 36px -12px rgba(var(--shadow-rgb), .6), inset 0 0 0 1px var(--card-line); }
-.toast.show { opacity: 1; transform: translate(-50%, 0); }
-.drop { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: rgba(var(--shadow-rgb), .28); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
-.drop-inner { padding: 30px 38px; border-radius: 30px; background: var(--card); border: 2px dashed var(--violet-2); text-align: center; color: var(--ink); font-size: 15px; font-weight: 700; display: grid; gap: 6px; }
-.drop-inner small { font-size: 12px; color: var(--ink-2); font-weight: 500; }
-.hint { margin: 0; max-width: 500px; text-align: center; font-size: 12px; line-height: 2; color: var(--page-ink); }
-.hint span { display: inline-block; white-space: nowrap; margin: 0 5px; }
-kbd { font-family: var(--font-num); font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 6px; background: var(--kbd-bg); color: var(--page-ink); }
-.busy { position: absolute; z-index: 4; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 8px 16px; border-radius: 999px;
-  background: var(--glass); color: var(--violet); font-size: 12px; font-weight: 700; box-shadow: 0 8px 18px -10px rgba(var(--shadow-rgb), .6); white-space: nowrap; }
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-
-/* icon tile + picker */
+/* ───── now playing ───── */
+.head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-4); align-items: center; }
+.art { position: relative; width: 64px; height: 64px; border-radius: var(--radius-md); overflow: hidden; background: var(--panel-hover); }
 button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none; }
 .art-face { position: absolute; inset: 0; display: block; }
 .art-face svg, .art-face img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .art-face img { object-fit: cover; }
-.art-face .art-ph { position: absolute; inset: 0; margin: auto; width: 22px; height: 22px; color: rgba(255,255,255,.88); }
-.art-badge { position: absolute; right: 3px; bottom: 3px; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--glass); color: var(--violet); opacity: 0; transform: scale(.8); transition: opacity .15s, transform .15s; }
-.art-badge svg.i { width: 11px; height: 11px; }
-.art:hover .art-badge, .art:focus-visible .art-badge, .art[aria-expanded="true"] .art-badge { opacity: 1; transform: none; }
-.icon-pop { width: min(236px, calc(100vw - 48px)); }
+.art-face .art-ph { position: absolute; inset: 0; margin: auto; width: 24px; height: 24px; color: var(--muted); }
+.art-badge { position: absolute; right: 4px; bottom: 4px; width: 22px; height: 22px; border-radius: var(--radius-sm); display: grid; place-items: center;
+  background: var(--band); color: var(--text); opacity: 0; transition: opacity .15s; }
+.art-badge svg.i { width: 13px; height: 13px; }
+.art:hover .art-badge, .art:focus-visible .art-badge, .art[aria-expanded="true"] .art-badge { opacity: 1; }
+.titles { min-width: 0; display: grid; gap: 2px; }
+.title { font-size: 18px; line-height: 28px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.artist { font-size: 14px; line-height: 20px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.head.no-art { grid-template-columns: minmax(0, 1fr); }
+.head.no-art .art { display: none; }
+.head.no-art .titles { cursor: pointer; border-radius: var(--radius-sm); }
+.edit-hint { display: none; order: 3; }
+.edit-hint::after { content: attr(data-edit); }
+.head.no-art .titles:hover .edit-hint, .head.no-art .titles:focus-visible .edit-hint { display: block; }
+.icon-pop { width: min(260px, calc(100% - 20px)); }
 
-/* export dialog */
-.modal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  background: rgba(var(--shadow-rgb), .32); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-.modal-card { width: min(100%, 640px); max-height: calc(100vh - 32px); overflow: auto; background: var(--card); border-radius: 28px; padding: 18px; display: grid; gap: 14px;
-  box-shadow: 0 40px 80px -30px rgba(var(--shadow-rgb), .6), inset 0 0 0 1px var(--card-line); }
-.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.modal-head h2 { margin: 0; font-size: 17px; font-weight: 900; color: var(--ink); }
-.modal-head h2 span[aria-hidden] { color: var(--violet); }
-.ex-body { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: start; }
-.ex-stage { width: 240px; height: 300px; display: grid; place-items: center; border-radius: 18px; background: var(--mist); box-shadow: inset 0 0 0 1px var(--card-line); overflow: hidden; }
-.ex-stage canvas, .ex-stage video { display: block; max-width: 100%; max-height: 100%; border-radius: 10px; }
-.ex-stage video { width: 100%; height: 100%; object-fit: contain; background: transparent; }
-.ex-opts { display: grid; gap: 10px; align-content: start; min-width: 0; }
-.ex-opts .row > .lbl { min-width: 76px; }
-.ex-progress { display: flex; align-items: center; gap: 10px; }
-.ex-bar { flex: 1; height: 10px; border-radius: 999px; background: var(--lav); overflow: hidden; }
-.ex-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--violet-2), var(--violet), var(--blue)); transition: width .2s; }
-#exPct { font-family: var(--font-num); font-size: 12px; font-weight: 700; color: var(--ink-2); min-width: 128px; text-align: right; font-variant-numeric: tabular-nums; }
-.modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
-.ex-note { margin-right: auto; font-size: 12px; color: var(--ink-2); line-height: 1.6; }
-.primary { height: 38px; padding: 0 18px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 900; color: var(--on-accent);
-  background: linear-gradient(135deg, var(--violet-2), var(--violet) 50%, var(--blue)); box-shadow: 0 8px 18px -8px rgba(var(--shadow-rgb), .7); }
-.primary:disabled { opacity: .5; cursor: default; }
-.primary svg.i { width: 16px; height: 16px; }
+/* ───── windows (canvas) ───── */
+.window { position: relative; border-radius: var(--radius-md); overflow: hidden; background: var(--win); }
+.window canvas { display: block; width: 100%; height: 100%; }
+.spec { height: 220px; }
+.mode-name { position: absolute; z-index: 2; top: 12px; left: 14px; pointer-events: none; }
 
-.midi-pop { width: min(318px, calc(100% - 4px)); }
-.grid-box { display: grid; gap: 8px; padding: 10px; border-radius: 14px; background: var(--mist); box-shadow: inset 0 0 0 1px var(--card-line); }
+/* ───── transport ───── */
+.transport { gap: var(--space-2); }
+.seek { position: relative; height: 40px; cursor: pointer; touch-action: none; border-radius: var(--radius-sm); }
+.seek canvas { display: block; width: 100%; height: 100%; }
+.times { display: flex; justify-content: space-between; font-size: 12px; line-height: 16px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.seek-tip { position: absolute; z-index: 4; bottom: calc(100% + 6px); transform: translateX(-50%); padding: 2px 8px; border-radius: var(--radius-sm);
+  background: var(--ctl); color: var(--text); box-shadow: var(--shadow); font-size: 12px; line-height: 16px; font-weight: 500; font-variant-numeric: tabular-nums; pointer-events: none; white-space: nowrap; }
+.controls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--space-2); margin-top: var(--space-1); }
+.ctl-left { display: flex; gap: var(--space-2); }
+.ctl-mid { display: flex; align-items: center; gap: var(--space-2); }
+.ctl-right { display: flex; justify-content: flex-end; align-items: center; gap: var(--space-2); min-width: 0; }
+.vol { width: 96px; min-width: 0; }
+
+/* ───── range: flat track, accent fill ───── */
+input[type="range"] { -webkit-appearance: none; appearance: none; height: 24px; background: transparent; cursor: pointer; margin: 0; }
+input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--accent) var(--p, 50%), var(--panel-hover) var(--p, 50%)); }
+input[type="range"]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--panel-hover); }
+input[type="range"]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--accent); }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 8px; height: 18px; margin-top: -7px; border-radius: 2px; background: var(--text); }
+input[type="range"]::-moz-range-thumb { width: 8px; height: 18px; border: 0; border-radius: 2px; background: var(--text); }
+
+/* ───── MIDI ───── */
+.midi-win { height: 260px; touch-action: pan-y; cursor: grab; }
+.midi-win.dragging { cursor: grabbing; }
+.midi-win.touch-drag { touch-action: none; }
+.midi-win.no-drag { cursor: default; }
+.midi-win.no-drag .drag-hint { display: none; }
+.empty { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: var(--space-3); text-align: center; padding: var(--space-4);
+  color: var(--text-2); font-size: 14px; line-height: 20px; }
+.empty svg.i { width: 28px; height: 28px; color: var(--muted); }
+.drag-hint { position: absolute; z-index: 2; right: 8px; bottom: 8px; font-size: 12px; line-height: 16px; color: var(--text); background: var(--band);
+  padding: 4px 8px; border-radius: var(--radius-sm); opacity: 0; transition: opacity .15s; pointer-events: none; }
+.midi-win:hover .drag-hint { opacity: 1; }
+.midi-win.dark-theme .drag-hint { background: rgba(26, 25, 28, .85); color: #f9fafb; }
+.flash, .busy { position: absolute; z-index: 3; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: var(--space-2) var(--space-4); border-radius: var(--radius-sm);
+  background: var(--band); color: var(--text); font-size: 18px; line-height: 28px; font-weight: 700; pointer-events: none; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.busy { z-index: 4; font-size: 14px; line-height: 20px; font-weight: 500; }
+
+/* ───── sync ───── */
+.sync-row { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.sync-label { font-size: 18px; line-height: 28px; font-weight: 700; margin-right: auto; white-space: nowrap; }
+.nudger { display: flex; align-items: center; gap: var(--space-2); }
+.offset-out { min-width: 84px; text-align: center; font-size: 18px; line-height: 28px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.offset-out small { font-size: 12px; font-weight: 400; color: var(--muted); margin-left: 2px; }
+.expand svg.i { transition: transform .15s; }
+.expand[aria-expanded="true"] svg.i { transform: rotate(180deg); }
+.sync-panel { display: grid; gap: var(--space-3); }
+.zoom { position: relative; height: 120px; border-radius: var(--radius-md); overflow: hidden; background: var(--win); cursor: ew-resize; touch-action: pan-y; }
+.zoom canvas { display: block; width: 100%; height: 100%; }
+.row { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.row > label, .row > .lbl { font-size: 14px; line-height: 20px; font-weight: 500; color: var(--text-2); min-width: 80px; }
+.row input[type="range"] { flex: 1; min-width: 120px; }
+.row .val { font-size: 14px; line-height: 20px; color: var(--text); min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
+.help { font-size: 12px; line-height: 18px; color: var(--muted); }
+.help b { color: var(--text); font-weight: 700; }
+
+/* ───── popovers (floating: the only place besides toasts with a shadow) ───── */
+.pop { position: absolute; z-index: 30; width: min(280px, calc(100% - 20px)); padding: var(--space-4); border-radius: var(--radius-sm); background: var(--bg); display: grid; gap: var(--space-3);
+  box-shadow: var(--shadow); }
+:root[data-theme="dark"] .pop { background: var(--ctl); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pop { background: var(--ctl); } }
+.pop .row > .lbl, .pop .row > label { min-width: 84px; }
+.pop h3 { font-size: 14px; line-height: 20px; font-weight: 700; color: var(--text); }
+.pop .row h3 { margin: 0; }
+.pop .spacer { flex: 1; }
+.pop .chip { height: 36px; }
+.switch { position: relative; width: 36px; height: 20px; flex: none; border-radius: var(--radius-sm); background: var(--panel-hover); transition: background-color .15s; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 2px; background: var(--text-2); transition: transform .15s, background-color .15s; }
+.switch[aria-checked="true"] { background: var(--accent); }
+.switch[aria-checked="true"]::after { transform: translateX(16px); background: var(--on-accent); }
+.midi-pop { width: min(340px, calc(100% - 4px)); }
+.grid-box { display: grid; gap: var(--space-2); padding: var(--space-3); border-radius: var(--radius-md); background: var(--panel); }
 .grid-box .row { gap: 6px; flex-wrap: nowrap; }
 .grid-box .row > .lbl { min-width: 52px; flex: none; }
 .grid-box .chip { justify-self: start; }
-.nudge.sm { min-width: 32px; padding: 0 7px; }
-.num { width: 62px; height: 30px; flex: none; border-radius: 10px; border: 1px solid var(--card-line); background: var(--card); color: var(--ink); text-align: center;
-  font-family: var(--font-num); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.num { width: 64px; height: 32px; flex: none; border-radius: var(--radius-sm); border: 0; background: var(--field); box-shadow: inset 0 0 0 1px var(--field-line); color: var(--text); text-align: center;
+  font-size: 16px; font-variant-numeric: tabular-nums; }
 #gridStartOut { min-width: 64px; text-align: center; flex: none; }
 .row .key-name { min-width: 46px; text-align: center; flex: none; }
 .key-sum { margin-top: -6px; }
-.key-sum .val { text-align: left; color: var(--ink-2); }
+.key-sum .val { text-align: left; color: var(--muted); }
 .grid-box .key-presets { flex-wrap: wrap; }
 #tapBtn { min-width: 0; padding: 0 9px; }
-.sw-lbl { font-size: 12px; font-weight: 700; color: var(--ink-2); }
-.pop .row h3 { margin: 0; }
-.pop .spacer { flex: 1; }
-.head.no-art { grid-template-columns: minmax(0, 1fr) auto; }
-.head.no-art .art { display: none; }
-.head.no-art .titles { cursor: pointer; border-radius: 10px; }
-.head.no-art .titles:hover .eyebrow::after, .head.no-art .titles:focus-visible .eyebrow::after { content: "  ✎ " attr(data-edit); color: var(--ink-3); letter-spacing: 0; }
+.sw-lbl { font-size: 12px; color: var(--muted); }
 
-/* colour themes */
-.colors { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; max-width: 500px; }
-.colors-label { font-size: 12px; font-weight: 700; color: var(--page-ink); }
-.swatches { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
-.swatch { display: grid; justify-items: center; gap: 4px; padding: 5px 6px; border-radius: 14px; color: var(--page-ink); font-size: 11px; font-weight: 700; }
-.swatch .dot { width: 26px; height: 26px; border-radius: 50%; box-shadow: 0 0 0 2px var(--kbd-bg), 0 4px 10px -4px rgba(var(--shadow-rgb), .55); transition: transform .15s; }
-.swatch:hover .dot { transform: scale(1.08); }
-.swatch[aria-checked="true"] .dot { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--violet); }
-.swatch[aria-checked="true"] { color: var(--page-ink); background: var(--kbd-bg); }
+/* ───── colors ───── */
+.swatches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.swatch { display: flex; align-items: center; gap: var(--space-2); min-width: 0; padding: 6px 8px; border-radius: var(--radius-sm); font-size: 13px; line-height: 20px; color: var(--text-2); text-align: left; transition: background-color .15s, color .15s; }
+.swatch .dot { flex: none; width: 20px; height: 20px; border-radius: var(--radius-sm); }
+.swatch > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.swatch:hover { background: var(--panel-hover); color: var(--text); }
+.swatch[aria-checked="true"] { background: var(--panel-hover); color: var(--text); font-weight: 500; }
 
-@media (max-width: 460px) {
+/* ───── keys (link-list style rows) ───── */
+.keys-list li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) 0; font-size: 14px; line-height: 20px; color: var(--text-2); }
+.keys-list li + li { border-top: 1px solid var(--line); }
+.keys-list li > span:last-child { display: inline-flex; gap: 4px; flex: none; }
+kbd { font-family: var(--font-mono); font-size: 12px; line-height: 16px; padding: 2px 6px; border-radius: var(--radius-sm); background: var(--ctl); color: var(--text); }
+
+/* ───── footer, toast, drop ───── */
+.foot { width: 90%; max-width: 800px; margin: auto auto var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--line); text-align: center; }
+.toast { position: fixed; z-index: 90; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); width: max-content; max-width: calc(100vw - 32px); text-align: center;
+  transform: translate(-50%, 8px); opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s;
+  padding: 10px 16px; border-radius: var(--radius-sm); background: var(--ctl); color: var(--text); font-size: 14px; line-height: 20px; font-weight: 500; box-shadow: var(--shadow); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.drop { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: var(--scrim); }
+.drop-inner { padding: var(--space-8); border-radius: var(--radius-md); background: var(--bg); text-align: center; color: var(--text); font-size: 18px; line-height: 28px; font-weight: 700; display: grid; gap: var(--space-1); box-shadow: var(--shadow); }
+.drop-inner small { font-size: 14px; line-height: 20px; color: var(--text-2); font-weight: 400; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ───── export dialog ───── */
+.modal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: var(--scrim); }
+.modal-card { width: min(100%, 640px); max-height: calc(100vh - 32px); overflow: auto; background: var(--bg); border-radius: var(--radius-md); padding: var(--space-5); display: grid; gap: var(--space-4); box-shadow: var(--shadow); }
+.modal-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.modal-head h2 { font-size: 18px; line-height: 28px; font-weight: 700; color: var(--text); }
+.ex-body { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.ex-stage { width: 240px; height: 300px; display: grid; place-items: center; border-radius: var(--radius-md); background: var(--panel); overflow: hidden; }
+.ex-stage canvas, .ex-stage video { display: block; max-width: 100%; max-height: 100%; border-radius: var(--radius-sm); }
+.ex-stage video { width: 100%; height: 100%; object-fit: contain; background: transparent; }
+.ex-opts { display: grid; gap: var(--space-3); align-content: start; min-width: 0; }
+.ex-opts .row > .lbl { min-width: 84px; }
+.ex-progress { display: flex; align-items: center; gap: var(--space-3); }
+.ex-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--panel-hover); overflow: hidden; }
+.ex-bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .15s; }
+#exPct { font-size: 12px; line-height: 16px; color: var(--muted); min-width: 128px; text-align: right; font-variant-numeric: tabular-nums; }
+.modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); flex-wrap: wrap; }
+.ex-note { margin-right: auto; font-size: 12px; line-height: 18px; color: var(--muted); }
+
+@media (max-width: 520px) {
+  .head-actions { gap: 4px; }
+  .head-actions .chip { padding: 0 10px; }
+  .head-actions .chip .lbl { display: none; }
+  .chip.lang svg.i { display: none; }
+  .panel { padding: var(--space-4); }
+  .spec { height: 190px; }
+  .midi-win { height: 236px; }
+  .vol { display: none; }
+  .seg button { padding: 0 8px; font-size: 13px; }
+  .midi .seg button svg.i { display: none; }
   .ex-body { grid-template-columns: minmax(0, 1fr); }
   .ex-stage { width: 100%; height: 250px; }
-  .vol { display: none; }
-  .card { padding: 14px 13px 13px; border-radius: 28px; gap: 10px; }
-  .spec { height: 190px; }
-  .midi-win { height: 232px; }
-  .chip .lbl { display: none; }
-  .chip.lang svg.i { display: none; }
-  .chip { padding: 0 9px; }
-  .seg button { padding: 0 9px; font-size: 11.5px; }
-  .midi-head .seg button svg.i { display: none; }
-  .midi-head .sec-label { display: none; }
-  .ctl-mid { gap: 10px; }
-  .vol { width: 64px; }
-  .title { font-size: 16px; }
   .sync-label { order: 0; }
-  .sync .chip.auto { order: 1; }
-  .sync .expand { order: 2; }
+  #btnAuto { order: 1; }
+  .expand { order: 2; }
   .nudger { order: 3; flex: 1 0 100%; justify-content: space-between; }
   .nudger .nudge { min-width: 64px; }
 }
-@media (max-width: 360px) {
+@media (max-width: 380px) {
   .spec-wrap .seg button svg.i { display: none; }
-  .vol { display: none; }
+  .brand { display: none; }
+}
+@media (hover: none) and (pointer: coarse) {
+  .keys { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ray, .bub, .card.is-playing .play::after { animation: none; }
-  .bub { display: none; }
+  *, *::before, *::after { transition: none !important; }
 }
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8.5 5.6c0-.8.9-1.3 1.6-.9l9 5.6c.7.4.7 1.4 0 1.8l-9 5.6c-.7.4-1.6-.1-1.6-.9z"/></symbol>
-  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.6"/><rect x="13.5" y="5" width="4" height="14" rx="1.6"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></symbol>
   <symbol id="i-back" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/><path d="M10.5 9.5v5M13.5 9.5h-3"/></symbol>
   <symbol id="i-fwd" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4h-4"/><path d="M13.5 9.5v5M10.5 9.5h3"/></symbol>
   <symbol id="i-loop" viewBox="0 0 24 24"><path d="M17 3l3 3-3 3"/><path d="M4 11V9.5A3.5 3.5 0 0 1 7.5 6H20"/><path d="M7 21l-3-3 3-3"/><path d="M20 13v1.5a3.5 3.5 0 0 1-3.5 3.5H4"/></symbol>
@@ -382,83 +330,97 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
   <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5l4.5 4V5.5l-4.5 4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></symbol>
   <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></symbol>
   <symbol id="i-note" viewBox="0 0 24 24"><path d="M9 17.5V6.2l10-2.2v11.3"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.3" r="2.5"/></symbol>
-  <symbol id="i-piano" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M8 12.5V19M12 12.5V19M16 12.5V19"/><path d="M7 5v7.5h2V5M15 5v7.5h2V5M11 5v7.5h2V5"/></symbol>
-  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M11 3.5l1.6 4.6 4.6 1.6-4.6 1.6L11 16l-1.6-4.7L4.8 9.7l4.6-1.6z"/><path d="M18 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></symbol>
+  <symbol id="i-piano" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 12.5V19M12 12.5V19M16 12.5V19"/><path d="M7 5v7.5h2V5M15 5v7.5h2V5M11 5v7.5h2V5"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M5 19.5h14"/></symbol>
   <symbol id="i-bubble" viewBox="0 0 24 24"><circle cx="11" cy="13" r="7"/><path d="M7.8 10.6a3.8 3.8 0 0 1 2.6-2"/><circle cx="19" cy="5" r="2"/></symbol>
   <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol>
   <symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M5.5 18.5l2.1-2.1M16.4 7.6l2.1-2.1"/></symbol>
   <symbol id="i-bars" viewBox="0 0 24 24"><path d="M5 20v-7M9.7 20V6M14.3 20v-9.5M19 20V4"/></symbol>
   <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 9.5c2.5 0 2.5-2.2 5-2.2s2.5 2.2 5 2.2 2.5-2.2 5-2.2 2.5 2.2 5 2.2"/><path d="M2 15.5c2.5 0 2.5-2.2 5-2.2s2.5 2.2 5 2.2 2.5-2.2 5-2.2 2.5 2.2 5 2.2"/></symbol>
   <symbol id="i-crystal" viewBox="0 0 24 24"><path d="M7 3.5h10l4 5.5-9 11.5L3 9z"/><path d="M3 9h18M9.6 3.5L8 9l4 11.5L16 9l-1.6-5.5"/></symbol>
-  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.6A7.8 7.8 0 1 1 9.4 4.5a6.2 6.2 0 0 0 10.1 10.1z"/><path d="M17 3.5v3M15.5 5h3"/></symbol>
-  <symbol id="i-wand" viewBox="0 0 24 24"><path d="M4.5 19.5l10-10"/><path d="M17 3l.9 2.1L20 6l-2.1.9L17 9l-.9-2.1L14 6l2.1-.9z"/><path d="M8 4.5v2M7 5.5h2M19.5 13.5v2M18.5 14.5h2"/></symbol>
-  <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="3"/><path d="M16 10.5l5-3v9l-5-3"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.6A7.8 7.8 0 1 1 9.4 4.5a6.2 6.2 0 0 0 10.1 10.1z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol>
+  <symbol id="i-wand" viewBox="0 0 24 24"><path d="M4.5 19.5l10-10"/><path d="M17 3l.9 2.1L20 6l-2.1.9L17 9l-.9-2.1L14 6l2.1-.9z"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10.5l5-3v9l-5-3"/></symbol>
   <symbol id="i-restart" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5"/><path d="M4.5 4.5v4h4"/><circle cx="12" cy="12" r="1.6"/></symbol>
   <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M5 19l1-4L15.5 5.5a2.1 2.1 0 0 1 3 3L9 18z"/><path d="M13.5 7.5l3 3"/></symbol>
-  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M20.5 16l-5-5-8.5 8.5"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M20.5 16l-5-5-8.5 8.5"/></symbol>
   <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.4 5.4 3.4 8.5s-1 6.1-3.4 8.5c-2.4-2.4-3.4-5.4-3.4-8.5s1-6.1 3.4-8.5z"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
 </svg>
 
-<div class="ocean" aria-hidden="true">
-  <div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div>
-  <span class="bub" style="--x:5%;--s:9px;--d:21s;--w:-2s"></span>
-  <span class="bub" style="--x:12%;--s:16px;--d:27s;--w:-14s"></span>
-  <span class="bub" style="--x:21%;--s:7px;--d:18s;--w:-9s"></span>
-  <span class="bub" style="--x:29%;--s:12px;--d:24s;--w:-20s"></span>
-  <span class="bub" style="--x:38%;--s:6px;--d:16s;--w:-5s"></span>
-  <span class="bub" style="--x:63%;--s:10px;--d:22s;--w:-11s"></span>
-  <span class="bub" style="--x:71%;--s:18px;--d:30s;--w:-25s"></span>
-  <span class="bub" style="--x:79%;--s:8px;--d:19s;--w:-7s"></span>
-  <span class="bub" style="--x:87%;--s:13px;--d:26s;--w:-17s"></span>
-  <span class="bub" style="--x:94%;--s:7px;--d:17s;--w:-3s"></span>
-</div>
+<header class="top">
+  <div class="top-in">
+    <span class="brand">MIDI</span>
+    <div class="head-actions">
+      <button class="chip" id="btnAudio" title="音声ファイルを開く" data-i-title="openAudio"><svg class="i"><use href="#i-note"/></svg><span class="lbl" data-i="audio">音声</span></button>
+      <button class="chip" id="btnMidi" title="MIDIファイルを開く" data-i-title="openMidi"><svg class="i"><use href="#i-piano"/></svg><span class="lbl">MIDI</span></button>
+      <button class="chip" id="btnVideo" title="動画にする" data-i-title="makeVideo"><svg class="i"><use href="#i-video"/></svg><span class="lbl" data-i="video">動画</span></button>
+      <button class="chip lang" id="btnLang" title="English" aria-label="Switch to English" data-i-title="langOther" data-i-label="langSwitch"><svg class="i"><use href="#i-globe"/></svg><span data-i="langCode">EN</span></button>
+      <button class="round" id="btnScheme" aria-label="ダークにする" title="ダークにする"><svg class="i"><use id="schemeUse" href="#i-moon"/></svg></button>
+    </div>
+  </div>
+</header>
 
-<main class="stage">
-  <article class="card" id="card" aria-label="うたかたプレイヤー" data-i-label="cardLabel">
-    <header class="head">
-      <button class="art" id="artBtn" aria-label="アイコンを変える" aria-haspopup="dialog" aria-expanded="false" title="アイコンを変える" data-i-label="changeIcon" data-i-title="changeIcon">
-        <span class="art-face" id="artFace"></span>
-        <span class="art-badge" aria-hidden="true"><svg class="i"><use href="#i-pencil"/></svg></span>
-      </button>
-      <div class="titles" id="titles">
-        <span class="eyebrow" data-edit="アイコン" data-i-edit="icon">♡ now playing</span>
-        <div class="title" id="title">曲をえらんでね</div>
-        <div class="artist" id="artist">音声ファイルとMIDIファイルを読み込めます</div>
+<main class="stage" id="card" aria-label="MIDI プレイヤー" data-i-label="cardLabel">
+  <div class="side">
+    <section class="panel now">
+      <p class="eyebrow">Now playing</p>
+      <div class="head">
+        <button class="art" id="artBtn" aria-label="アイコンを変える" aria-haspopup="dialog" aria-expanded="false" title="アイコンを変える" data-i-label="changeIcon" data-i-title="changeIcon">
+          <span class="art-face" id="artFace"></span>
+          <span class="art-badge" aria-hidden="true"><svg class="i"><use href="#i-pencil"/></svg></span>
+        </button>
+        <div class="titles" id="titles">
+          <span class="edit-hint caption" data-edit="アイコンを表示" data-i-edit="showIcon"></span>
+          <h1 class="title" id="title">曲を選んでください</h1>
+          <div class="artist" id="artist">音声ファイルとMIDIファイルを読み込めます</div>
+        </div>
       </div>
-      <div class="head-actions">
-        <button class="chip" id="btnAudio" title="音声ファイルをひらく" data-i-title="openAudio"><svg class="i"><use href="#i-note"/></svg><span class="lbl" data-i="audio">おと</span></button>
-        <button class="chip" id="btnMidi" title="MIDIファイルをひらく" data-i-title="openMidi"><svg class="i"><use href="#i-piano"/></svg><span class="lbl">MIDI</span></button>
-        <button class="chip" id="btnVideo" title="動画にする" data-i-title="makeVideo"><svg class="i"><use href="#i-video"/></svg><span class="lbl" data-i="video">動画</span></button>
-        <button class="chip lang" id="btnLang" title="English" aria-label="Switch to English" data-i-title="langOther" data-i-label="langSwitch"><svg class="i"><use href="#i-globe"/></svg><span data-i="langCode">EN</span></button>
-      </div>
-      <div class="pop icon-pop" id="iconPop" role="dialog" aria-label="アイコンをえらぶ" data-i-label="chooseIcon" style="top:62px;left:0" hidden>
+      <div class="pop icon-pop" id="iconPop" role="dialog" aria-label="アイコンを選ぶ" data-i-label="chooseIcon" style="top:116px;left:20px" hidden>
         <div class="row"><h3 data-i="icon">アイコン</h3><span class="spacer"></span><span class="lbl sw-lbl" data-i="show">表示</span><button class="switch" id="iconShowSw" role="switch" aria-checked="true" aria-label="アイコンを表示" data-i-label="showIcon"></button></div>
-        <div class="row"><button class="chip" id="btnIconImg"><svg class="i"><use href="#i-image"/></svg><span data-i="chooseImage">画像をえらぶ</span></button><button class="chip" id="btnIconClear" data-i="removeImage" hidden>画像をはずす</button></div>
-        <p class="help" data-i="iconHelp">好きな画像をアイコンにできます。画像はこのブラウザにだけ保存されます。かくしたアイコンは、曲名をタップすると戻せます。</p>
+        <div class="row"><button class="chip" id="btnIconImg"><svg class="i"><use href="#i-image"/></svg><span data-i="chooseImage">画像を選ぶ</span></button><button class="chip" id="btnIconClear" data-i="removeImage" hidden>画像を外す</button></div>
+        <p class="help" data-i="iconHelp">好きな画像をアイコンにできます。画像はこのブラウザにだけ保存されます。アイコンを隠したときは、曲名を押すと戻せます。</p>
       </div>
-    </header>
+    </section>
 
-    <section class="spec-wrap" aria-label="オーディオスペクトラム" data-i-label="spectrumLabel">
+    <section class="panel colors">
+      <p class="eyebrow">Color</p>
+      <h2 class="heading" data-i="color">配色</h2>
+      <div class="swatches" id="swatches" role="radiogroup" aria-label="配色" data-i-label="color"></div>
+    </section>
+
+    <section class="panel keys">
+      <p class="eyebrow">Keys</p>
+      <h2 class="heading" data-i="keysTitle">キーボード操作</h2>
+      <ul class="keys-list" data-i-html="keysList"></ul>
+    </section>
+  </div>
+
+  <div class="col">
+    <section class="panel spec-wrap" aria-label="オーディオスペクトラム" data-i-label="spectrumLabel">
+      <div class="panel-head">
+        <p class="eyebrow">Spectrum</p>
+        <div class="seg" role="tablist" id="specModes" aria-label="スペクトラムのモード" data-i-label="specModes">
+          <button role="tab" data-mode="circle" aria-selected="true"><svg class="i"><use href="#i-circle"/></svg><span data-i="modeCircle">円</span></button>
+          <button role="tab" data-mode="line" aria-selected="false"><svg class="i"><use href="#i-bars"/></svg><span data-i="modeLine">ライン</span></button>
+          <button role="tab" data-mode="waves" aria-selected="false"><svg class="i"><use href="#i-wave"/></svg><span data-i="modeWaves">波</span></button>
+        </div>
+        <button class="round small" id="specGear" aria-label="スペクトラムの設定" title="スペクトラムの設定" aria-haspopup="dialog" aria-expanded="false" data-i-label="specSettings" data-i-title="specSettings"><svg class="i"><use href="#i-sliders"/></svg></button>
+      </div>
       <div class="window spec" id="specWin">
         <canvas id="specCanvas"></canvas>
-        <span class="mode-name" id="modeName">circle</span>
-        <button class="float-btn" id="specGear" aria-label="スペクトラムの設定" aria-haspopup="dialog" aria-expanded="false" data-i-label="specSettings"><svg class="i"><use href="#i-sliders"/></svg></button>
+        <span class="mode-name eyebrow" id="modeName">circle</span>
         <div class="busy" id="busy" data-i="preparing" hidden>準備中…</div>
       </div>
-      <div class="seg" role="tablist" id="specModes" aria-label="スペクトラムのモード" data-i-label="specModes">
-        <button role="tab" data-mode="circle" aria-selected="true"><svg class="i"><use href="#i-circle"/></svg><span data-i="modeCircle">まる</span></button>
-        <button role="tab" data-mode="line" aria-selected="false"><svg class="i"><use href="#i-bars"/></svg><span data-i="modeLine">ライン</span></button>
-        <button role="tab" data-mode="waves" aria-selected="false"><svg class="i"><use href="#i-wave"/></svg><span data-i="modeWaves">なみ</span></button>
-      </div>
-      <div class="pop" id="specPop" role="dialog" aria-label="スペクトラムの設定" data-i-label="specSettings" style="top:48px;right:10px" hidden>
+      <div class="pop" id="specPop" role="dialog" aria-label="スペクトラムの設定" data-i-label="specSettings" style="top:64px;right:20px" hidden>
         <h3 data-i="spectrum">スペクトラム</h3>
         <div class="row"><span class="lbl" data-i="freqAxis">周波数軸</span><div class="mini-seg" id="scaleSeg"><button data-scale="log" aria-pressed="true" data-i="log">ログ</button><button data-scale="lin" aria-pressed="false" data-i="linear">リニア</button></div></div>
         <div class="row"><label for="sens" data-i="sensitivity">感度</label><input type="range" id="sens" min="0.5" max="2" step="0.05" value="1"><span class="val" id="sensVal">1.00×</span></div>
       </div>
     </section>
 
-    <section class="transport" aria-label="再生" data-i-label="playback">
+    <section class="panel transport" aria-label="再生" data-i-label="playback">
       <div class="seek" id="seek" role="slider" tabindex="0" aria-label="再生位置" data-i-label="position" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00">
         <canvas id="seekCanvas"></canvas>
         <div class="seek-tip" id="seekTip" hidden>0:00</div>
@@ -470,9 +432,9 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
           <button class="round small" id="btnResetAll" aria-label="位置をリセット（0:00・ずれ補正 0）" title="位置をリセット（0:00・ずれ補正 0）" data-i-label="resetAll" data-i-title="resetAll"><svg class="i"><use href="#i-restart"/></svg></button>
         </div>
         <div class="ctl-mid">
-          <button class="round" id="btnBack" aria-label="5秒もどる" title="5秒もどる" data-i-label="back5" data-i-title="back5"><svg class="i"><use href="#i-back"/></svg></button>
+          <button class="round" id="btnBack" aria-label="5秒戻る" title="5秒戻る" data-i-label="back5" data-i-title="back5"><svg class="i"><use href="#i-back"/></svg></button>
           <button class="play" id="btnPlay" aria-label="再生"><svg class="i"><use id="playUse" href="#i-play"/></svg></button>
-          <button class="round" id="btnFwd" aria-label="5秒すすむ" title="5秒すすむ" data-i-label="fwd5" data-i-title="fwd5"><svg class="i"><use href="#i-fwd"/></svg></button>
+          <button class="round" id="btnFwd" aria-label="5秒進む" title="5秒進む" data-i-label="fwd5" data-i-title="fwd5"><svg class="i"><use href="#i-fwd"/></svg></button>
         </div>
         <div class="ctl-right">
           <button class="round small" id="btnMute" aria-label="ミュート" title="ミュート" data-i-label="mute" data-i-title="mute"><svg class="i"><use id="volUse" href="#i-vol"/></svg></button>
@@ -481,32 +443,29 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
       </div>
     </section>
 
-    <svg class="divider" viewBox="0 0 400 10" preserveAspectRatio="none" aria-hidden="true"><path d="M0 5q10-5 20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0t20 0" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
-
-    <section class="midi" aria-label="MIDIビジュアライザ" data-i-label="midiLabel">
-      <div class="midi-head">
-        <span class="sec-label">MIDI ✧</span>
+    <section class="panel midi" aria-label="MIDIビジュアライザ" data-i-label="midiLabel">
+      <div class="panel-head">
+        <p class="eyebrow">MIDI</p>
         <div class="seg" role="tablist" id="themeTabs" aria-label="MIDIのテーマ" data-i-label="midiThemes">
-          <button role="tab" data-theme="bubble" aria-selected="true"><svg class="i"><use href="#i-bubble"/></svg><span data-i="themeBubble">あわ</span></button>
-          <button role="tab" data-theme="crystal" aria-selected="false"><svg class="i"><use href="#i-crystal"/></svg><span data-i="themeCrystal">すいしょう</span></button>
-          <button role="tab" data-theme="abyss" aria-selected="false"><svg class="i"><use href="#i-moon"/></svg><span data-i="themeAbyss">しんかい</span></button>
+          <button role="tab" data-theme="bubble" aria-selected="true"><svg class="i"><use href="#i-bubble"/></svg><span data-i="themeBubble">泡</span></button>
+          <button role="tab" data-theme="crystal" aria-selected="false"><svg class="i"><use href="#i-crystal"/></svg><span data-i="themeCrystal">水晶</span></button>
+          <button role="tab" data-theme="abyss" aria-selected="false"><svg class="i"><use href="#i-moon"/></svg><span data-i="themeAbyss">深海</span></button>
         </div>
-        <span class="spacer"></span>
         <button class="round small" id="midiGear" aria-label="MIDI表示の設定" aria-haspopup="dialog" aria-expanded="false" title="MIDI表示の設定" data-i-label="midiSettings" data-i-title="midiSettings"><svg class="i"><use href="#i-sliders"/></svg></button>
       </div>
       <div class="window midi-win" id="midiWin">
         <canvas id="midiCanvas"></canvas>
         <div class="empty" id="midiEmpty" hidden>
-          <svg class="i" style="width:34px;height:34px;color:var(--violet-2)"><use href="#i-bubble"/></svg>
-          <p data-i-html="midiEmpty">MIDIファイルをえらぶか、<br>カードにドロップしてね</p>
-          <button class="chip" id="btnMidi2"><svg class="i"><use href="#i-piano"/></svg><span data-i="chooseMidi">MIDIをえらぶ</span></button>
+          <svg class="i"><use href="#i-piano"/></svg>
+          <p data-i-html="midiEmpty">MIDIファイルを選ぶか、<br>このページにドロップしてください。</p>
+          <button class="chip" id="btnMidi2"><svg class="i"><use href="#i-piano"/></svg><span data-i="chooseMidi">MIDIを選ぶ</span></button>
         </div>
-        <span class="drag-hint" id="dragHint" data-i="dragHint">ドラッグでずれ調整</span>
+        <span class="drag-hint" id="dragHint" data-i="dragHint">ドラッグでずれを調整</span>
         <div class="flash" id="flash" hidden>+0 ms</div>
       </div>
-      <div class="pop midi-pop" id="midiPop" role="dialog" aria-label="MIDI表示の設定" data-i-label="midiSettings" style="top:40px;right:0" hidden>
+      <div class="pop midi-pop" id="midiPop" role="dialog" aria-label="MIDI表示の設定" data-i-label="midiSettings" style="top:64px;right:20px" hidden>
         <h3 data-i="midiDisplay">MIDI 表示</h3>
-        <div class="row"><span class="lbl" data-i="direction">流れる向き</span><div class="mini-seg" id="dirSeg"><button data-dir="up" aria-pressed="false" data-i="dirUp">のぼる</button><button data-dir="down" aria-pressed="false" data-i="dirDown">おちる</button><button data-dir="left" aria-pressed="false" data-i="dirLeft">よこ</button></div></div>
+        <div class="row"><span class="lbl" data-i="direction">流れる向き</span><div class="mini-seg" id="dirSeg"><button data-dir="up" aria-pressed="false" data-i="dirUp">上へ</button><button data-dir="down" aria-pressed="false" data-i="dirDown">下へ</button><button data-dir="left" aria-pressed="false" data-i="dirLeft">横</button></div></div>
         <div class="row"><label for="speed" data-i="visibleTime">見える秒数</label><input type="range" id="speed" min="1" max="8" step="0.5" value="3"><span class="val" id="speedVal">3.0 秒</span></div>
         <div class="row"><span class="lbl" data-i="keyRange">鍵盤の範囲</span><div class="mini-seg" id="keyModeSeg"><button data-km="auto" aria-pressed="true" data-i="keyAuto">自動</button><button data-km="manual" aria-pressed="false" data-i="keyManual">手動</button></div></div>
         <div class="row key-sum"><span class="lbl"></span><output class="val" id="keyCount"></output></div>
@@ -519,71 +478,68 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
         <div class="row"><span class="lbl" data-i="barLines">小節線</span><button class="switch" id="gridSw" role="switch" aria-checked="true" aria-label="小節線を表示" data-i-label="showBarLines"></button>
           <div class="mini-seg" id="gridModeSeg"><button data-gm="midi" aria-pressed="true" data-i="gridMidi">MIDIのまま</button><button data-gm="manual" aria-pressed="false" data-i="gridManual">手動</button></div></div>
         <div class="grid-box" id="gridBox" hidden>
-          <div class="row"><label class="lbl" for="bpmIn">BPM</label><button class="nudge sm" data-bpm="-1" aria-label="BPMを1さげる" data-i-label="bpmDown">−</button><input class="num" id="bpmIn" type="number" inputmode="decimal" min="20" max="300" step="0.1" value="120"><button class="nudge sm" data-bpm="1" aria-label="BPMを1あげる" data-i-label="bpmUp">+</button><button class="nudge" id="tapBtn" title="再生しながら拍に合わせて数回タップ" data-i-title="tapTitle" data-i="tap">タップ</button></div>
+          <div class="row"><label class="lbl" for="bpmIn">BPM</label><button class="nudge sm" data-bpm="-1" aria-label="BPMを1下げる" data-i-label="bpmDown">−</button><input class="num" id="bpmIn" type="number" inputmode="decimal" min="20" max="300" step="0.1" value="120"><button class="nudge sm" data-bpm="1" aria-label="BPMを1上げる" data-i-label="bpmUp">+</button><button class="nudge" id="tapBtn" title="再生しながら拍に合わせて数回タップします" data-i-title="tapTitle" data-i="tap">タップ</button></div>
           <div class="row"><span class="lbl" data-i="meter">拍子</span><div class="mini-seg" id="beatsSeg"><button data-beats="2" aria-pressed="false" data-i="beats2">2拍</button><button data-beats="3" aria-pressed="false" data-i="beats3">3拍</button><button data-beats="4" aria-pressed="true" data-i="beats4">4拍</button><button data-beats="6" aria-pressed="false" data-i="beats6">6拍</button></div></div>
-          <div class="row"><span class="lbl" data-i="gridStart">開始位置</span><button class="nudge sm" data-gs="-0.01" aria-label="開始位置を10ミリ秒はやく" data-i-label="gsEarlier">−10ms</button><output class="val" id="gridStartOut">0.000秒</output><button class="nudge sm" data-gs="0.01" aria-label="開始位置を10ミリ秒おそく" data-i-label="gsLater">+10ms</button></div>
-          <div class="row"><span class="lbl"></span><button class="nudge" data-gbeat="-1" data-i="beatMinus">−1拍</button><button class="nudge" data-gbeat="1" data-i="beatPlus">+1拍</button><button class="nudge" id="gridHere" data-i="gridHere">いまを1拍目に</button></div>
-          <button class="chip" id="gridFromMidi" data-i="gridFromMidi">MIDIのテンポから読みこむ</button>
+          <div class="row"><span class="lbl" data-i="gridStart">開始位置</span><button class="nudge sm" data-gs="-0.01" aria-label="開始位置を10ミリ秒早く" data-i-label="gsEarlier">−10ms</button><output class="val" id="gridStartOut">0.000秒</output><button class="nudge sm" data-gs="0.01" aria-label="開始位置を10ミリ秒遅く" data-i-label="gsLater">+10ms</button></div>
+          <div class="row"><span class="lbl"></span><button class="nudge" data-gbeat="-1" data-i="beatMinus">−1拍</button><button class="nudge" data-gbeat="1" data-i="beatPlus">+1拍</button><button class="nudge" id="gridHere" data-i="gridHere">今を1拍目にする</button></div>
+          <button class="chip" id="gridFromMidi" data-i="gridFromMidi">MIDIのテンポから読み込む</button>
         </div>
         <div class="row"><span class="lbl" data-i="syncBar">ずれ補正</span><button class="switch" id="syncSw" role="switch" aria-checked="true" aria-label="ずれ補正を表示" data-i-label="showSync"></button></div>
       </div>
     </section>
 
-    <section class="sync" id="syncSec" aria-label="タイミング調整" data-i-label="timing">
+    <section class="panel sync" id="syncSec" aria-label="タイミング調整" data-i-label="timing">
       <div class="sync-row">
-        <span class="sync-label"><svg class="i"><use href="#i-bubble"/></svg><span data-i="syncBar">ずれ補正</span></span>
+        <h2 class="sync-label" data-i="syncBar">ずれ補正</h2>
         <div class="nudger">
-          <button class="nudge" data-nudge="-10" aria-label="MIDIを10ミリ秒はやく" data-i-label="midiEarlier">−10</button>
+          <button class="nudge" data-nudge="-10" aria-label="MIDIを10ミリ秒早く" data-i-label="midiEarlier">−10</button>
           <output class="offset-out" id="offsetOut" aria-live="polite">+0<small>ms</small></output>
-          <button class="nudge" data-nudge="10" aria-label="MIDIを10ミリ秒おそく" data-i-label="midiLater">+10</button>
+          <button class="nudge" data-nudge="10" aria-label="MIDIを10ミリ秒遅く" data-i-label="midiLater">+10</button>
         </div>
-        <button class="chip auto" id="btnAuto" title="音の立ち上がりとノートの頭を照らし合わせて自動で合わせます" data-i-title="autoTitle"><svg class="i"><use href="#i-wand"/></svg><span class="lbl" data-i="auto">おまかせ</span></button>
-        <button class="round small expand" id="btnExpand" aria-expanded="false" aria-controls="syncPanel" aria-label="タイミング調整をひらく"><svg class="i"><use href="#i-chev"/></svg></button>
+        <button class="chip" id="btnAuto" title="音の立ち上がりとノートの頭を照らし合わせて、自動で合わせます" data-i-title="autoTitle"><svg class="i"><use href="#i-wand"/></svg><span class="lbl" data-i="auto">自動で合わせる</span></button>
+        <button class="round small expand" id="btnExpand" aria-expanded="false" aria-controls="syncPanel" aria-label="タイミング調整を開く"><svg class="i"><use href="#i-chev"/></svg></button>
       </div>
       <div class="sync-panel" id="syncPanel" hidden>
         <div class="zoom" id="zoomWin"><canvas id="zoomCanvas"></canvas></div>
-        <p class="help" data-i-html="syncHelp1">上の段が<b>おと</b>の波形、下の段が<b>MIDI</b>。下の段を左右にドラッグして、音の立ち上がりとノートの頭をそろえてね。</p>
+        <p class="help" data-i-html="syncHelp1">上の段が<b>音声</b>の波形、下の段が<b>MIDI</b>です。下の段を左右にドラッグして、音の立ち上がりとノートの頭をそろえます。</p>
         <div class="row"><label for="offsetRange" data-i="offset">オフセット</label><input type="range" id="offsetRange" min="-3000" max="3000" step="1" value="0"><span class="val" id="offsetVal">+0 ms</span></div>
         <div class="row">
-          <span class="lbl" data-i="fine">こまかく</span>
+          <span class="lbl" data-i="fine">細かく</span>
           <button class="nudge" data-nudge="-100">−100</button>
           <button class="nudge" data-nudge="-1">−1</button>
           <button class="nudge" data-nudge="1">+1</button>
           <button class="nudge" data-nudge="100">+100</button>
-          <button class="nudge" id="btnReset" data-i="resetZero">0 にもどす</button>
+          <button class="nudge" id="btnReset" data-i="resetZero">0 に戻す</button>
         </div>
         <div class="row"><label for="stretch" data-i="midiLength">MIDIの長さ</label><input type="range" id="stretch" min="-8" max="8" step="0.05" value="0"><span class="val" id="stretchVal">100.00%</span></div>
-        <div class="row"><span class="lbl" data-i="viewSpan">表示のはば</span><div class="mini-seg" id="zoomSeg"><button data-span="2" aria-pressed="false" data-i="sec2">2秒</button><button data-span="6" aria-pressed="true" data-i="sec6">6秒</button><button data-span="12" aria-pressed="false" data-i="sec12">12秒</button></div></div>
-        <p class="help" data-i-html="syncHelp2"><b>＋</b>でMIDIがおそく、<b>−</b>ではやくなります。だんだんずれていくときは「MIDIの長さ」で調整してね。</p>
+        <div class="row"><span class="lbl" data-i="viewSpan">表示の幅</span><div class="mini-seg" id="zoomSeg"><button data-span="2" aria-pressed="false" data-i="sec2">2秒</button><button data-span="6" aria-pressed="true" data-i="sec6">6秒</button><button data-span="12" aria-pressed="false" data-i="sec12">12秒</button></div></div>
+        <p class="help" data-i-html="syncHelp2"><b>＋</b>でMIDIが遅く、<b>−</b>で早くなります。だんだんずれていくときは「MIDIの長さ」で調整します。</p>
       </div>
     </section>
-  </article>
-  <div class="colors" role="radiogroup" aria-label="カラー" data-i-label="color">
-    <span class="colors-label" data-i="color">カラー</span>
-    <div class="swatches" id="swatches"></div>
   </div>
-  <p class="hint" data-i-html="hint"><span><kbd>Space</kbd> 再生</span> <span><kbd>←</kbd><kbd>→</kbd> 5秒</span> <span><kbd>[</kbd><kbd>]</kbd> ずれ ±10ms</span> <span><kbd>M</kbd> モード</span> <span><kbd>T</kbd> テーマ</span> <span><kbd>C</kbd> カラー</span><br><span>音声とMIDIは、カードにドロップしても読み込めます</span></p>
 </main>
+
+<footer class="foot caption" data-i="footNote">音声とMIDIは、このページにドロップしても読み込めます。</footer>
 
 <input type="file" id="fileAudio" accept="audio/*,.mp3,.m4a,.wav,.aac,.flac,.ogg,.oga,.opus,.aif,.aiff" hidden>
 <input type="file" id="fileMidi" accept=".mid,.midi,.smf,.kar,.rmi,audio/midi,audio/x-midi" hidden>
-<div class="drop" id="drop" hidden><div class="drop-inner" data-i-html="dropHere">ここに はなしてね ♪<small>音声ファイル・MIDIファイル（いっしょでもOK）</small></div></div>
+<div class="drop" id="drop" hidden><div class="drop-inner" data-i-html="dropHere">ここにドロップしてください<small>音声ファイルとMIDIファイル（両方同時でも読み込めます）</small></div></div>
 <input type="file" id="fileIcon" accept="image/*" hidden>
 <div class="modal" id="exportModal" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="exTitle">
     <header class="modal-head">
-      <h2 id="exTitle"><span class="t" data-i="makeVideo">動画にする</span> <span aria-hidden="true">✧</span></h2>
-      <button class="round small" id="exClose" aria-label="とじる" data-i-label="close"><svg class="i"><use href="#i-close"/></svg></button>
+      <h2 id="exTitle"><span class="t" data-i="makeVideo">動画にする</span></h2>
+      <button class="round small" id="exClose" aria-label="閉じる" data-i-label="close"><svg class="i"><use href="#i-close"/></svg></button>
     </header>
     <div class="ex-body">
       <div class="ex-stage"><canvas id="exPreview"></canvas><video id="exVideo" controls playsinline hidden></video></div>
       <div class="ex-opts" id="exOpts">
-        <div class="row"><span class="lbl" data-i="exShape">かたち</span><div class="mini-seg" id="exFormat"><button data-v="v" aria-pressed="true" data-i="exPortrait">縦 9:16</button><button data-v="h" aria-pressed="false" data-i="exLandscape">横 16:9</button><button data-v="s" aria-pressed="false" data-i="exSquare">正方形</button></div></div>
-        <div class="row"><span class="lbl" data-i="exSmooth">なめらかさ</span><div class="mini-seg" id="exFps"><button data-v="30" aria-pressed="true">30fps</button><button data-v="60" aria-pressed="false">60fps</button></div></div>
-        <div class="row"><span class="lbl" data-i="exRange">はんい</span><div class="mini-seg" id="exRange"><button data-v="all" aria-pressed="true" data-i="exAll">曲ぜんぶ</button><button data-v="here" aria-pressed="false" data-i="exHere">いまから30秒</button></div></div>
-        <div class="row"><span class="lbl" data-i="exQuality">画質</span><div class="mini-seg" id="exQuality"><button data-v="std" aria-pressed="true" data-i="exStd">ふつう</button><button data-v="high" aria-pressed="false" data-i="exHigh">きれい</button></div></div>
+        <div class="row"><span class="lbl" data-i="exShape">形</span><div class="mini-seg" id="exFormat"><button data-v="v" aria-pressed="true" data-i="exPortrait">縦 9:16</button><button data-v="h" aria-pressed="false" data-i="exLandscape">横 16:9</button><button data-v="s" aria-pressed="false" data-i="exSquare">正方形</button></div></div>
+        <div class="row"><span class="lbl" data-i="exSmooth">フレームレート</span><div class="mini-seg" id="exFps"><button data-v="30" aria-pressed="true">30fps</button><button data-v="60" aria-pressed="false">60fps</button></div></div>
+        <div class="row"><span class="lbl" data-i="exRange">範囲</span><div class="mini-seg" id="exRange"><button data-v="all" aria-pressed="true" data-i="exAll">曲全体</button><button data-v="here" aria-pressed="false" data-i="exHere">今から30秒</button></div></div>
+        <div class="row"><span class="lbl" data-i="exQuality">画質</span><div class="mini-seg" id="exQuality"><button data-v="std" aria-pressed="true" data-i="exStd">標準</button><button data-v="high" aria-pressed="false" data-i="exHigh">高画質</button></div></div>
         <p class="help" id="exInfo"></p>
-        <p class="help" data-i="exHelp">スペクトラムとMIDIは、いまのモード・テーマ・ずれ補正のまま動画になります（ずれ補正のパネルは入りません）。</p>
+        <p class="help" data-i="exHelp">スペクトラムとMIDIは、今のモード・テーマ・ずれ補正のまま動画になります（ずれ補正のパネルは入りません）。</p>
       </div>
     </div>
     <div class="ex-progress" id="exProgress" hidden>
@@ -592,10 +548,10 @@ button.art { padding: 0; border: 0; cursor: pointer; display: block; flex: none;
     </div>
     <footer class="modal-foot">
       <span class="ex-note" id="exNote"></span>
-      <button class="chip" id="exCancel" data-i="cancel" hidden>やめる</button>
-      <button class="chip" id="exAgain" data-i="again" hidden>もういちど</button>
+      <button class="chip" id="exCancel" data-i="cancel" hidden>中止</button>
+      <button class="chip" id="exAgain" data-i="again" hidden>やり直す</button>
       <button class="primary" id="exStart"><svg class="i"><use href="#i-video"/></svg><span data-i="exStart">書き出す</span></button>
-      <button class="primary" id="exSave" hidden><svg class="i"><use href="#i-sparkle"/></svg><span data-i="save">保存する</span></button>
+      <button class="primary" id="exSave" hidden><svg class="i"><use href="#i-save"/></svg><span data-i="save">保存</span></button>
     </footer>
   </div>
 </div>
@@ -643,63 +599,63 @@ const store = {
 const I18N = {
   ja: {
     preparing: '準備中…', docTitle: 'MIDI プレイヤー', langCode: 'EN', langOther: 'English', langSwitch: 'Switch to English',
-    cardLabel: 'うたかたプレイヤー', changeIcon: 'アイコンを変える', chooseIcon: 'アイコンをえらぶ', icon: 'アイコン', show: '表示', showIcon: 'アイコンを表示',
-    chooseImage: '画像をえらぶ', removeImage: '画像をはずす', openIconMenu: 'アイコンの設定をひらく',
-    iconHelp: '好きな画像をアイコンにできます。画像はこのブラウザにだけ保存されます。かくしたアイコンは、曲名をタップすると戻せます。',
-    openAudio: '音声ファイルをひらく', openMidi: 'MIDIファイルをひらく', makeVideo: '動画にする', audio: 'おと', video: '動画',
+    cardLabel: 'MIDI プレイヤー', changeIcon: 'アイコンを変える', chooseIcon: 'アイコンを選ぶ', icon: 'アイコン', show: '表示', showIcon: 'アイコンを表示',
+    chooseImage: '画像を選ぶ', removeImage: '画像を外す', openIconMenu: 'アイコンの設定をひらく',
+    iconHelp: '好きな画像をアイコンにできます。画像はこのブラウザにだけ保存されます。アイコンを隠したときは、曲名を押すと戻せます。',
+    openAudio: '音声ファイルを開く', openMidi: 'MIDIファイルを開く', makeVideo: '動画にする', audio: '音声', video: '動画',
     spectrumLabel: 'オーディオスペクトラム', specSettings: 'スペクトラムの設定', specModes: 'スペクトラムのモード',
-    modeCircle: 'まる', modeLine: 'ライン', modeWaves: 'なみ', spectrum: 'スペクトラム', freqAxis: '周波数軸', log: 'ログ', linear: 'リニア', sensitivity: '感度',
-    playback: '再生', position: '再生位置', loop: 'ループ再生', resetAll: '位置をリセット（0:00・ずれ補正 0）', back5: '5秒もどる', fwd5: '5秒すすむ',
+    modeCircle: '円', modeLine: 'ライン', modeWaves: '波', spectrum: 'スペクトラム', freqAxis: '周波数軸', log: 'ログ', linear: 'リニア', sensitivity: '感度',
+    playback: '再生', position: '再生位置', loop: 'ループ再生', resetAll: '位置をリセット（0:00・ずれ補正 0）', back5: '5秒戻る', fwd5: '5秒進む',
     play: '再生', pause: '一時停止', mute: 'ミュート', volume: '音量',
-    midiLabel: 'MIDIビジュアライザ', midiThemes: 'MIDIのテーマ', themeBubble: 'あわ', themeCrystal: 'すいしょう', themeAbyss: 'しんかい',
-    midiSettings: 'MIDI表示の設定', midiEmpty: 'MIDIファイルをえらぶか、<br>カードにドロップしてね', chooseMidi: 'MIDIをえらぶ', dragHint: 'ドラッグでずれ調整',
-    midiDisplay: 'MIDI 表示', direction: '流れる向き', dirUp: 'のぼる', dirDown: 'おちる', dirLeft: 'よこ', visibleTime: '見える秒数',
+    midiLabel: 'MIDIビジュアライザ', midiThemes: 'MIDIのテーマ', themeBubble: '泡', themeCrystal: '水晶', themeAbyss: '深海',
+    midiSettings: 'MIDI表示の設定', midiEmpty: 'MIDIファイルを選ぶか、<br>このページにドロップしてください。', chooseMidi: 'MIDIを選ぶ', dragHint: 'ドラッグでずれを調整',
+    midiDisplay: 'MIDI 表示', direction: '流れる向き', dirUp: '上へ', dirDown: '下へ', dirLeft: '横', visibleTime: '見える秒数',
     keyRange: '鍵盤の範囲', keyAuto: '自動', keyManual: '手動', keyLow: '最低音', keyHigh: '最高音', keysN: (n) => n + '鍵',
     keys88: '88鍵', keys61: '61鍵', keys49: '49鍵', keyFit: '曲に合わせる',
     loOctDown: '最低音を1オクターブ下げる', loDown: '最低音を1鍵下げる', loUp: '最低音を1鍵上げる', loOctUp: '最低音を1オクターブ上げる',
     hiOctDown: '最高音を1オクターブ下げる', hiDown: '最高音を1鍵下げる', hiUp: '最高音を1鍵上げる', hiOctUp: '最高音を1オクターブ上げる',
     drums: 'ドラム', showDrums: 'ドラムを表示', barLines: '小節線', showBarLines: '小節線を表示', gridMidi: 'MIDIのまま', gridManual: '手動',
-    bpmDown: 'BPMを1さげる', bpmUp: 'BPMを1あげる', tap: 'タップ', tapTitle: '再生しながら拍に合わせて数回タップ', meter: '拍子',
-    beats2: '2拍', beats3: '3拍', beats4: '4拍', beats6: '6拍', gridStart: '開始位置', gsEarlier: '開始位置を10ミリ秒はやく', gsLater: '開始位置を10ミリ秒おそく',
-    beatMinus: '−1拍', beatPlus: '+1拍', gridHere: 'いまを1拍目に', gridFromMidi: 'MIDIのテンポから読みこむ',
-    syncBar: 'ずれ補正', showSync: 'ずれ補正を表示', syncHidden: 'ずれ補正をかくしました（MIDI表示の設定から戻せます）',
-    timing: 'タイミング調整', midiEarlier: 'MIDIを10ミリ秒はやく', midiLater: 'MIDIを10ミリ秒おそく',
-    autoTitle: '音の立ち上がりとノートの頭を照らし合わせて自動で合わせます', auto: 'おまかせ', openTiming: 'タイミング調整をひらく', closeTiming: 'タイミング調整をとじる',
-    syncHelp1: '上の段が<b>おと</b>の波形、下の段が<b>MIDI</b>。下の段を左右にドラッグして、音の立ち上がりとノートの頭をそろえてね。',
-    offset: 'オフセット', fine: 'こまかく', resetZero: '0 にもどす', midiLength: 'MIDIの長さ', viewSpan: '表示のはば', sec2: '2秒', sec6: '6秒', sec12: '12秒',
-    syncHelp2: '<b>＋</b>でMIDIがおそく、<b>−</b>ではやくなります。だんだんずれていくときは「MIDIの長さ」で調整してね。',
-    color: 'カラー',
-    hint: '<span><kbd>Space</kbd> 再生</span> <span><kbd>←</kbd><kbd>→</kbd> 5秒</span> <span><kbd>[</kbd><kbd>]</kbd> ずれ ±10ms</span> <span><kbd>M</kbd> モード</span> <span><kbd>T</kbd> テーマ</span> <span><kbd>C</kbd> カラー</span><br><span>音声とMIDIは、カードにドロップしても読み込めます</span>',
-    dropHere: 'ここに はなしてね ♪<small>音声ファイル・MIDIファイル（いっしょでもOK）</small>',
-    close: 'とじる', exShape: 'かたち', exPortrait: '縦 9:16', exLandscape: '横 16:9', exSquare: '正方形', exSmooth: 'なめらかさ', exRange: 'はんい',
-    exAll: '曲ぜんぶ', exHere: 'いまから30秒', exQuality: '画質', exStd: 'ふつう', exHigh: 'きれい',
-    exHelp: 'スペクトラムとMIDIは、いまのモード・テーマ・ずれ補正のまま動画になります（ずれ補正のパネルは入りません）。',
-    cancel: 'やめる', again: 'もういちど', exStart: '書き出す', save: '保存する',
+    bpmDown: 'BPMを1下げる', bpmUp: 'BPMを1上げる', tap: 'タップ', tapTitle: '再生しながら拍に合わせて数回タップします', meter: '拍子',
+    beats2: '2拍', beats3: '3拍', beats4: '4拍', beats6: '6拍', gridStart: '開始位置', gsEarlier: '開始位置を10ミリ秒早く', gsLater: '開始位置を10ミリ秒遅く',
+    beatMinus: '−1拍', beatPlus: '+1拍', gridHere: '今を1拍目にする', gridFromMidi: 'MIDIのテンポから読み込む',
+    syncBar: 'ずれ補正', showSync: 'ずれ補正を表示', syncHidden: 'ずれ補正を隠しました。MIDI表示の設定から戻せます。',
+    timing: 'タイミング調整', midiEarlier: 'MIDIを10ミリ秒早く', midiLater: 'MIDIを10ミリ秒遅く',
+    autoTitle: '音の立ち上がりとノートの頭を照らし合わせて、自動で合わせます', auto: '自動で合わせる', openTiming: 'タイミング調整を開く', closeTiming: 'タイミング調整を閉じる',
+    syncHelp1: '上の段が<b>音声</b>の波形、下の段が<b>MIDI</b>です。下の段を左右にドラッグして、音の立ち上がりとノートの頭をそろえます。',
+    offset: 'オフセット', fine: '細かく', resetZero: '0 に戻す', midiLength: 'MIDIの長さ', viewSpan: '表示の幅', sec2: '2秒', sec6: '6秒', sec12: '12秒',
+    syncHelp2: '<b>＋</b>でMIDIが遅く、<b>−</b>で早くなります。だんだんずれていくときは「MIDIの長さ」で調整します。',
+    color: '配色', keysTitle: 'キーボード操作', footNote: '音声とMIDIは、このページにドロップしても読み込めます。', toDark: 'ダークにする', toLight: 'ライトにする',
+    keysList: '<li><span>再生・一時停止</span><span><kbd>Space</kbd></span></li><li><span>5秒戻る・進む</span><span><kbd>←</kbd><kbd>→</kbd></span></li><li><span>ずれ ±10ms</span><span><kbd>[</kbd><kbd>]</kbd></span></li><li><span>スペクトラムのモード</span><span><kbd>M</kbd></span></li><li><span>MIDIのテーマ</span><span><kbd>T</kbd></span></li><li><span>配色</span><span><kbd>C</kbd></span></li>',
+    dropHere: 'ここにドロップしてください<small>音声ファイルとMIDIファイル（両方同時でも読み込めます）</small>',
+    close: '閉じる', exShape: '形', exPortrait: '縦 9:16', exLandscape: '横 16:9', exSquare: '正方形', exSmooth: 'フレームレート', exRange: '範囲',
+    exAll: '曲全体', exHere: '今から30秒', exQuality: '画質', exStd: '標準', exHigh: '高画質',
+    exHelp: 'スペクトラムとMIDIは、今のモード・テーマ・ずれ補正のまま動画になります（ずれ補正のパネルは入りません）。',
+    cancel: '中止', again: 'やり直す', exStart: '書き出す', save: '保存',
     /* script strings */
-    pickSong: '曲をえらんでね', canLoad: '音声ファイルとMIDIファイルを読み込めます', synthAudio: 'MIDIから作った音', noMidi: 'MIDIなし',
-    loadingAudio: '音声を読み込み中…', badAudio: 'この音声ファイルは読めませんでした（mp3 / wav / m4a / ogg / flac などをためしてね）', analyzing: '波形を解析中…',
+    pickSong: '曲を選んでください', canLoad: '音声ファイルとMIDIファイルを読み込めます', synthAudio: 'MIDIから作った音', noMidi: 'MIDIなし',
+    loadingAudio: '音声を読み込み中…', badAudio: 'この音声ファイルは読めませんでした。mp3・wav・m4a・ogg・flac などを試してください。', analyzing: '波形を解析中…',
     badMidi: (m) => 'MIDIを読めませんでした（' + m + '）', noNotes: 'このMIDIにはノートがありません', midiLoaded: (n) => 'MIDIを読み込みました：' + n + ' ノート',
-    synthing: 'MIDIを音にしています…', synthDone: '音声がないので、MIDIをオルゴール風の音で鳴らします ♪', synthFail: 'MIDIの音を作れませんでした',
-    pickFiles: '音声ファイルかMIDIファイルをえらんでね', restored: (ms) => '前回のずれ補正 ' + ms + ' ms を戻しました',
-    needMidi: '先にMIDIを読み込んでね', waitAna: '音声の解析が終わるまで少し待ってね', checking: 'しらべ中…',
-    autoFail: 'うまく合わせられませんでした。下の波形を見ながら手で調整してね', autoDone: (ms, stars) => 'おまかせ調整：' + ms + ' ms（自信 ' + stars + '）',
-    preparingAudio: '音声を準備中です…', pickFirst: '先に音声ファイルかMIDIファイルをえらんでね', cantPlay: '再生できませんでした',
-    resetDone: '位置をリセットしました（0:00・ずれ補正 0 ms）', secUnit: '秒', secSp: ' 秒', noMidiTempo: 'MIDIがないので読みこめません',
-    iconTooBig: 'アイコン画像が大きくて保存できませんでした（このページを開いている間は使えます）', badImage: '画像を読めませんでした', iconChanged: 'アイコンを変えました',
-    waveLoading: '波形を準備中…', noMidiLane: 'MIDIがありません', laneAudio: 'おと',
+    synthing: 'MIDIを音にしています…', synthDone: '音声がないため、MIDIをオルゴール風の音で鳴らします。', synthFail: 'MIDIの音を作れませんでした',
+    pickFiles: '音声ファイルかMIDIファイルを選んでください', restored: (ms) => '前回のずれ補正 ' + ms + ' ms を戻しました',
+    needMidi: '先にMIDIを読み込んでください', waitAna: '音声の解析が終わるまでお待ちください', checking: '調べています…',
+    autoFail: '自動では合わせられませんでした。下の波形を見ながら手で調整してください', autoDone: (ms, stars) => '自動調整：' + ms + ' ms（自信 ' + stars + '）',
+    preparingAudio: '音声を準備中です…', pickFirst: '先に音声ファイルかMIDIファイルを選んでください', cantPlay: '再生できませんでした',
+    resetDone: '位置をリセットしました（0:00・ずれ補正 0 ms）', secUnit: '秒', secSp: ' 秒', noMidiTempo: 'MIDIがないため読み込めません',
+    iconTooBig: 'アイコン画像が大きいため保存できませんでした。このページを開いている間は使えます。', badImage: '画像を読めませんでした', iconChanged: 'アイコンを変えました',
+    waveLoading: '波形を準備中…', noMidiLane: 'MIDIがありません', laneAudio: '音声',
     vPortrait: '縦', vLandscape: '横', vSquare: '正方形', approx: '約 ',
     noEncoder: 'このブラウザでは動画をエンコードできません', exAudioPrep: '音声を準備中…', remaining: (s) => 'のこり ' + s, writing: '書き出し中…',
-    noAvcDesc: 'H.264 の設定情報が取れませんでした', muxing: 'ファイルにまとめています…', notReady: '音声の準備ができてからためしてね',
-    noExport: 'このブラウザは動画の書き出しに対応していません。Chrome・Edge・Firefox・Safari の最新版でためしてね。',
-    cantSaveHere: ' ・ この画面では保存できません（claude.ai でひらくと保存できます）', videoDone: '動画ができました ♪', exCancelled: '書き出しをやめました',
-    exFailed: (m) => '書き出しに失敗しました（' + m + '）', cantSaveToast: 'この画面では保存できません。claude.ai でひらいてためしてね', dlStarted: 'ダウンロードをはじめました ♪',
-    saved: '保存しました ♪', saveDeclined: '保存をキャンセルしました', rateLimited: '少し待ってから、もう一度ためしてね',
-    tooLarge: 'ファイルが大きすぎました。「いまから30秒」や「ふつう」でためしてね', saveFailed: (m) => '保存できませんでした（' + m + '）',
-    colorNames: { umi: 'うみ', orange: 'オレンジ', green: 'みどり', sakura: 'さくら', mono: 'モノクロ', cubase: 'ダーク' },
+    noAvcDesc: 'H.264 の設定情報が取れませんでした', muxing: 'ファイルにまとめています…', notReady: '音声の準備ができてから試してください',
+    noExport: 'このブラウザは動画の書き出しに対応していません。Chrome・Edge・Firefox・Safari の最新版で試してください。',
+    cantSaveHere: ' ・ この画面では保存できません（claude.ai で開くと保存できます）', videoDone: '動画ができました', exCancelled: '書き出しを中止しました',
+    exFailed: (m) => '書き出しに失敗しました（' + m + '）', cantSaveToast: 'この画面では保存できません。claude.ai で開いて試してください', dlStarted: 'ダウンロードを始めました',
+    saved: '保存しました', saveDeclined: '保存をキャンセルしました', rateLimited: '少し待ってから、もう一度試してください',
+    tooLarge: 'ファイルが大きすぎます。「今から30秒」か「標準」で試してください', saveFailed: (m) => '保存できませんでした（' + m + '）',
+    colorNames: { icy: 'ピンク', umi: 'ブルー', orange: 'オレンジ', green: 'グリーン', mono: 'モノクロ', cubase: 'ベロシティ' },
   },
   en: {
     preparing: 'Preparing…', docTitle: 'MIDI Player', langCode: 'JA', langOther: '日本語', langSwitch: '日本語に切り替え',
-    cardLabel: 'Utakata player', changeIcon: 'Change icon', chooseIcon: 'Choose icon', icon: 'Icon', show: 'Show', showIcon: 'Show icon',
+    cardLabel: 'MIDI player', changeIcon: 'Change icon', chooseIcon: 'Choose icon', icon: 'Icon', show: 'Show', showIcon: 'Show icon',
     chooseImage: 'Choose image', removeImage: 'Remove image', openIconMenu: 'Open icon settings',
     iconHelp: 'Use any picture as the icon. It is saved only in this browser. If you hide the icon, tap the song title to bring it back.',
     openAudio: 'Open audio file', openMidi: 'Open MIDI file', makeVideo: 'Make a video', audio: 'Audio', video: 'Video',
@@ -708,7 +664,7 @@ const I18N = {
     playback: 'Playback', position: 'Position', loop: 'Loop', resetAll: 'Reset (0:00, offset 0)', back5: 'Back 5 s', fwd5: 'Forward 5 s',
     play: 'Play', pause: 'Pause', mute: 'Mute', volume: 'Volume',
     midiLabel: 'MIDI visualizer', midiThemes: 'MIDI theme', themeBubble: 'Bubble', themeCrystal: 'Crystal', themeAbyss: 'Abyss',
-    midiSettings: 'MIDI display settings', midiEmpty: 'Choose a MIDI file,<br>or drop it on the card', chooseMidi: 'Choose MIDI', dragHint: 'Drag to adjust offset',
+    midiSettings: 'MIDI display settings', midiEmpty: 'Choose a MIDI file,<br>or drop it onto this page.', chooseMidi: 'Choose MIDI', dragHint: 'Drag to adjust offset',
     midiDisplay: 'MIDI display', direction: 'Direction', dirUp: 'Up', dirDown: 'Down', dirLeft: 'Side', visibleTime: 'Visible time',
     keyRange: 'Key range', keyAuto: 'Auto', keyManual: 'Manual', keyLow: 'Lowest', keyHigh: 'Highest', keysN: (n) => n + ' keys',
     keys88: '88 keys', keys61: '61 keys', keys49: '49 keys', keyFit: 'Fit to song',
@@ -720,13 +676,13 @@ const I18N = {
     beatMinus: '−1 beat', beatPlus: '+1 beat', gridHere: 'Downbeat here', gridFromMidi: 'Load from MIDI tempo',
     syncBar: 'Offset', showSync: 'Show offset bar', syncHidden: 'Offset bar hidden (turn it back on in MIDI display settings)',
     timing: 'Timing', midiEarlier: 'MIDI 10 ms earlier', midiLater: 'MIDI 10 ms later',
-    autoTitle: 'Match note starts to the audio onsets automatically', auto: 'Auto', openTiming: 'Open timing panel', closeTiming: 'Close timing panel',
+    autoTitle: 'Match note starts to the audio onsets automatically', auto: 'Auto-align', openTiming: 'Open timing panel', closeTiming: 'Close timing panel',
     syncHelp1: 'The top lane is the <b>audio</b> waveform, the bottom lane is the <b>MIDI</b>. Drag the bottom lane sideways to line up the attacks with the note starts.',
     offset: 'Offset', fine: 'Fine', resetZero: 'Reset to 0', midiLength: 'MIDI length', viewSpan: 'View span', sec2: '2 s', sec6: '6 s', sec12: '12 s',
     syncHelp2: '<b>+</b> makes the MIDI later, <b>−</b> earlier. If it drifts over time, adjust “MIDI length”.',
-    color: 'Color',
-    hint: '<span><kbd>Space</kbd> play</span> <span><kbd>←</kbd><kbd>→</kbd> 5 s</span> <span><kbd>[</kbd><kbd>]</kbd> offset ±10 ms</span> <span><kbd>M</kbd> mode</span> <span><kbd>T</kbd> theme</span> <span><kbd>C</kbd> color</span><br><span>You can also drop audio and MIDI files onto the card</span>',
-    dropHere: 'Drop here ♪<small>Audio and/or MIDI files</small>',
+    color: 'Colors', keysTitle: 'Keyboard', footNote: 'You can also drop audio and MIDI files onto this page.', toDark: 'Switch to dark', toLight: 'Switch to light',
+    keysList: '<li><span>Play / pause</span><span><kbd>Space</kbd></span></li><li><span>Back / forward 5 s</span><span><kbd>←</kbd><kbd>→</kbd></span></li><li><span>Offset ±10 ms</span><span><kbd>[</kbd><kbd>]</kbd></span></li><li><span>Spectrum mode</span><span><kbd>M</kbd></span></li><li><span>MIDI theme</span><span><kbd>T</kbd></span></li><li><span>Colors</span><span><kbd>C</kbd></span></li>',
+    dropHere: 'Drop files here<small>Audio and MIDI files, one or both</small>',
     close: 'Close', exShape: 'Shape', exPortrait: 'Portrait 9:16', exLandscape: 'Landscape 16:9', exSquare: 'Square', exSmooth: 'Frame rate', exRange: 'Range',
     exAll: 'Whole song', exHere: '30 s from here', exQuality: 'Quality', exStd: 'Standard', exHigh: 'High',
     exHelp: 'The spectrum and MIDI are rendered with the current mode, theme and offset (the offset panel is left out).',
@@ -734,7 +690,7 @@ const I18N = {
     pickSong: 'Pick a song', canLoad: 'Load an audio file and a MIDI file', synthAudio: 'synthesized from MIDI', noMidi: 'no MIDI',
     loadingAudio: 'Loading audio…', badAudio: 'Could not read this audio file (try mp3 / wav / m4a / ogg / flac)', analyzing: 'Analyzing waveform…',
     badMidi: (m) => 'Could not read the MIDI (' + m + ')', noNotes: 'This MIDI has no notes', midiLoaded: (n) => 'MIDI loaded: ' + n + ' notes',
-    synthing: 'Rendering the MIDI to audio…', synthDone: 'No audio loaded, so the MIDI plays as a music box ♪', synthFail: 'Could not render the MIDI',
+    synthing: 'Rendering the MIDI to audio…', synthDone: 'No audio is loaded, so the MIDI plays as a music box.', synthFail: 'Could not render the MIDI',
     pickFiles: 'Choose an audio file or a MIDI file', restored: (ms) => 'Restored last offset: ' + ms + ' ms',
     needMidi: 'Load a MIDI file first', waitAna: 'Please wait for the audio analysis to finish', checking: 'Checking…',
     autoFail: 'Could not find a match. Adjust by hand using the waveform below', autoDone: (ms, stars) => 'Auto offset: ' + ms + ' ms (confidence ' + stars + ')',
@@ -746,11 +702,11 @@ const I18N = {
     noEncoder: 'This browser cannot encode video', exAudioPrep: 'Preparing audio…', remaining: (s) => s + ' left', writing: 'Exporting…',
     noAvcDesc: 'Could not get the H.264 configuration', muxing: 'Writing the file…', notReady: 'Try again once the audio is ready',
     noExport: 'This browser cannot export video. Try the latest Chrome, Edge, Firefox or Safari.',
-    cantSaveHere: ' · cannot save in this view (open it on claude.ai to save)', videoDone: 'Your video is ready ♪', exCancelled: 'Export cancelled',
-    exFailed: (m) => 'Export failed (' + m + ')', cantSaveToast: 'Cannot save in this view. Try opening it on claude.ai', dlStarted: 'Download started ♪',
-    saved: 'Saved ♪', saveDeclined: 'Save cancelled', rateLimited: 'Please wait a moment and try again',
+    cantSaveHere: ' · cannot save in this view (open it on claude.ai to save)', videoDone: 'Your video is ready.', exCancelled: 'Export cancelled',
+    exFailed: (m) => 'Export failed (' + m + ')', cantSaveToast: 'Cannot save in this view. Try opening it on claude.ai', dlStarted: 'Download started.',
+    saved: 'Saved.', saveDeclined: 'Save cancelled', rateLimited: 'Please wait a moment and try again',
     tooLarge: 'The file is too large. Try “30 s from here” or “Standard”', saveFailed: (m) => 'Could not save (' + m + ')',
-    colorNames: { umi: 'Ocean', orange: 'Orange', green: 'Green', sakura: 'Sakura', mono: 'Mono', cubase: 'Dark' },
+    colorNames: { icy: 'Pink', umi: 'Blue', orange: 'Orange', green: 'Green', mono: 'Mono', cubase: 'Velocity' },
   },
 };
 let lang = I18N[store.get('lang')] ? store.get('lang') : 'ja';
@@ -876,74 +832,87 @@ function toast(msg, ms) {
   toastTimer = setTimeout(() => el.classList.remove('show'), ms || 2400);
 }
 
-/* ───────── color themes: only colours change, every shape stays the same ─────────
-   Each theme is a handful of base colours; CSS tokens and every canvas palette are derived from it. */
+/* ───────── colors ─────────
+   The page itself follows icysamon UI: greys plus one pink accent, light and dark on equal footing.
+   A "color" choice only tints the visualizations (spectrum, notes, seek bar, video); the neutrals
+   under them come from the current light / dark scheme so every canvas sits on the same surfaces. */
+const NEUTRALS = {
+  light: { bg: '#ffffff', panel: '#f7f8f9', win: '#eef0f2', ink: '#111827', ink2: '#4b5563', ink3: '#6b7280', line: '#e5e7eb', accent: '#db2777', key: '#1f2937' },
+  dark: { bg: '#242327', panel: '#2f2e32', win: '#3c3b3f', ink: '#f9fafb', ink2: '#d1d5db', ink3: '#9ca3af', line: '#504f52', accent: '#f472b6', key: '#1a191c' },
+};
 const COLOR_THEMES = {
-  umi: { name: 'うみ', scheme: 'light',
-    a1: '#8a68ff', a2: '#ab93ff', a3: '#5d9cff', a4: '#6fd3ee',
-    ink: '#3b3772', ink2: '#6e6aa7', ink3: '#a9a5d2', card: '#ffffff', line: '#ebe6ff', tint: '#ece7ff', mist: '#f6f4ff',
-    blush: '#f5bde6', blush2: '#ec94d2', shadow: '92, 76, 190',
-    sea: ['#f4f2ff', '#dcdfff', '#adb5f3', '#858bdd'], seaDark: ['#2b2a6e', '#1e1f5a', '#15174a', '#0b0c2c'], pageInk: '#4d4892', pageInkDark: '#d3cfff',
+  icy: { name: 'ピンク',
+    a1: '#db2777', a2: '#f472b6', a3: '#be185d', a4: '#f9a8d4', blush: '#fbcfe8',
+    pal: ['#be185d', '#db2777', '#ec4899', '#f472b6', '#f9a8d4'],
+    notes: ['#db2777', '#be185d', '#f472b6', '#ec4899', '#9d174d', '#f9a8d4'],
+    deep: ['#2a1622', '#1e1018', '#140a10'], deepNotes: ['#f472b6', '#f9a8d4', '#ec4899', '#fbcfe8', '#fb7185', '#fda4af'], glowLine: '#f9a8d4' },
+  umi: { name: 'ブルー',
+    a1: '#8a68ff', a2: '#ab93ff', a3: '#5d9cff', a4: '#6fd3ee', blush: '#f5bde6',
     pal: ['#8a68ff', '#7b7dff', '#5d9cff', '#4fbdf0', '#6fd8ee'],
     notes: ['#8a68ff', '#4f9bff', '#36bde2', '#b089ff', '#6c80ff', '#5fd0ec'],
     deep: ['#1d1a52', '#141239', '#0a1532'], deepNotes: ['#a07bff', '#4fd1ff', '#6ff7df', '#d08bff', '#6d8bff', '#9feeff'], glowLine: '#7fe6ff' },
-  orange: { name: 'オレンジ', scheme: 'light',
-    a1: '#f26b2e', a2: '#ff9f68', a3: '#ee5a6f', a4: '#ffc04d',
-    ink: '#5a3324', ink2: '#9a6a55', ink3: '#d4ae9c', card: '#ffffff', line: '#ffe4d6', tint: '#ffeee4', mist: '#fff7f2',
-    blush: '#ffc9b5', blush2: '#ff9a85', shadow: '190, 92, 52',
-    sea: ['#fff6ef', '#ffe1cc', '#ffb994', '#ee8a6a'], seaDark: ['#5a2a24', '#45201f', '#321818', '#1d0f10'], pageInk: '#8a4a33', pageInkDark: '#ffd9c7',
+  orange: { name: 'オレンジ',
+    a1: '#f26b2e', a2: '#ff9f68', a3: '#ee5a6f', a4: '#ffc04d', blush: '#ffc9b5',
     pal: ['#ee5a6f', '#f26b2e', '#ff8f3c', '#ffb347', '#ffd166'],
     notes: ['#f26b2e', '#ee5a6f', '#f5a019', '#ff8a7a', '#de5f3c', '#ffbe45'],
     deep: ['#3b1a1f', '#2a1216', '#1c0d10'], deepNotes: ['#ff8a5c', '#ffc65c', '#ff6b81', '#ffd28a', '#ff9f43', '#ffe1a8'], glowLine: '#ffc65c' },
-  green: { name: 'みどり', scheme: 'light',
-    a1: '#22a86a', a2: '#5fcf98', a3: '#1b9aa1', a4: '#9bd95f',
-    ink: '#21483a', ink2: '#587f6e', ink3: '#a0c2b3', card: '#ffffff', line: '#d9f1e4', tint: '#e3f6ec', mist: '#f3fbf7',
-    blush: '#ffd9a8', blush2: '#ffb870', shadow: '40, 120, 90',
-    sea: ['#f1fbf5', '#d3f2e2', '#9fdcc0', '#5fb79a'], seaDark: ['#173d32', '#113128', '#0c251e', '#061611'], pageInk: '#2e6a54', pageInkDark: '#c8f0dd',
+  green: { name: 'グリーン',
+    a1: '#22a86a', a2: '#5fcf98', a3: '#1b9aa1', a4: '#9bd95f', blush: '#ffd9a8',
     pal: ['#1b9aa1', '#1fae86', '#22a86a', '#74c652', '#b3dc58'],
     notes: ['#22a86a', '#1b9aa1', '#74c652', '#33bf98', '#13916f', '#a0d466'],
     deep: ['#0f2e27', '#0b231d', '#071812'], deepNotes: ['#47e3a1', '#5ce1e6', '#b8f36e', '#7fffd4', '#3fd18b', '#d4ff9a'], glowLine: '#7fffd4' },
-  sakura: { name: 'さくら', scheme: 'light',
-    a1: '#e9609c', a2: '#f59dc1', a3: '#b979f2', a4: '#ffb0c5',
-    ink: '#5a2e45', ink2: '#99687f', ink3: '#d6a9bf', card: '#ffffff', line: '#fbe1ec', tint: '#fdebf3', mist: '#fff6fa',
-    blush: '#ffd1e1', blush2: '#ff9cc0', shadow: '180, 70, 120',
-    sea: ['#fff4f8', '#ffdce9', '#f6b3cf', '#df88b1'], seaDark: ['#4a2236', '#3a1a2b', '#2a1220', '#170a12'], pageInk: '#93466c', pageInkDark: '#ffd6e7',
-    pal: ['#b979f2', '#dc72cc', '#e9609c', '#ff86a4', '#ffb0c5'],
-    notes: ['#e9609c', '#b979f2', '#ff86a4', '#dc72cc', '#cf5590', '#f59dc1'],
-    deep: ['#3a1730', '#2a1023', '#1c0a17'], deepNotes: ['#ff7eb6', '#d29bff', '#ffb3d1', '#ff9ad5', '#ff5fa2', '#ffd1e8'], glowLine: '#ffb3d1' },
-  mono: { name: 'モノクロ', scheme: 'light',
-    a1: '#3f3f47', a2: '#7c7c87', a3: '#57575f', a4: '#a7a7b0',
-    ink: '#26262b', ink2: '#66666f', ink3: '#a6a6ae', card: '#ffffff', line: '#e8e8ec', tint: '#eeeef1', mist: '#f7f7f9',
-    blush: '#dadadf', blush2: '#b9b9c1', shadow: '30, 30, 40',
-    sea: ['#f6f6f7', '#e4e4e7', '#c4c4ca', '#9c9ca4'], seaDark: ['#2c2c31', '#222226', '#19191c', '#0f0f11'], pageInk: '#4a4a52', pageInkDark: '#d8d8de',
+  mono: { name: 'モノクロ',
+    a1: '#3f3f47', a2: '#7c7c87', a3: '#57575f', a4: '#a7a7b0', blush: '#dadadf',
     pal: ['#2f2f36', '#4a4a53', '#686871', '#8c8c95', '#b0b0b8'],
     notes: ['#3f3f47', '#6a6a74', '#8f8f99', '#52525b', '#7d7d87', '#a3a3ad'],
+    dark: { a1: '#e4e4e8', a2: '#b5b5bd', a3: '#c9c9cf', a4: '#8f8f99',
+      pal: ['#8f8f99', '#a6a6ae', '#bdbdc4', '#d4d4d9', '#ececef'], notes: ['#e4e4e8', '#b5b5bd', '#d0d0d6', '#9a9aa3', '#f4f4f6', '#c2c2c9'] },
     deep: ['#1e1e22', '#161619', '#0e0e10'], deepNotes: ['#f2f2f5', '#c9c9cf', '#e0e0e6', '#b5b5bd', '#ffffff', '#d4d4da'], glowLine: '#ffffff' },
-  cubase: { name: 'ダーク', scheme: 'dark',
-    a1: '#3d9bff', a2: '#6fb5ff', a3: '#2a78d6', a4: '#37c6c0',
-    ink: '#e6e8ee', ink2: '#a3a8b4', ink3: '#6c717d', card: '#2b2d33', line: '#3b3e46', tint: '#353b47', mist: '#23252a',
-    blush: '#f2994a', blush2: '#f07a2a', shadow: '0, 0, 0',
-    sea: ['#2a2c31', '#212328', '#1a1b1f', '#121316'], seaDark: ['#2a2c31', '#212328', '#1a1b1f', '#121316'], pageInk: '#a3a8b4', pageInkDark: '#a3a8b4',
+  cubase: { name: 'ベロシティ',
+    a1: '#3d9bff', a2: '#6fb5ff', a3: '#2a78d6', a4: '#37c6c0', blush: '#f2994a',
     pal: ['#2f80ed', '#29b6d8', '#3ccf8e', '#e5c04b', '#f2994a'],
     notes: ['#3d9bff', '#37c6c0', '#3ccf8e', '#e5c04b', '#f2994a', '#e0565b'],
     deep: ['#1b1d22', '#15161a', '#0f1013'], deepNotes: ['#5aa9ff', '#45d6cf', '#56e09c', '#f0cf5a', '#f7a65a', '#ff6b6b'], glowLine: '#6fb5ff',
-    velocity: ['#3f6bff', '#2fb3ff', '#35d07f', '#e8d33f', '#ff8a2a', '#ff3b30'],
-    specBg: ['#26282d', '#222429', '#1d1f23'], rayA: 0.05,
-    midiLight: { bg: ['#2a2c32', '#26282d', '#222429'], kbW: '#d5d7dc', kbB: '#2a2b30', kbBg: '#17181b', grid: '#7a808c', drum: '#8a909c' } },
+    velocity: ['#3f6bff', '#2fb3ff', '#35d07f', '#e8d33f', '#ff8a2a', '#ff3b30'] },
 };
+const DEFAULT_COLOR = 'icy';
 const C = {};
-let colorId = 'umi';
+let colorId = DEFAULT_COLOR;
 
-function buildColors(T) {
-  const dark = T.scheme === 'dark', card = T.card;
-  const light = Object.assign({
-    bg: [mix(card, T.a4, 0.08), mix(card, T.a2, 0.12), mix(card, T.a1, 0.08)],
-    pal: T.notes, drum: mix(T.ink3, T.a3, 0.3), grid: mix(T.a1, T.ink2, 0.4), kbW: '#ffffff',
-    kbB: mix(T.ink, T.a1, 0.25), kbBg: mix(card, T.a1, 0.15), line: T.a2, rayA: dark ? 0.05 : 0.55,
+/* light / dark: follows the system unless the viewer picked one with the header button */
+const schemeMQ = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
+let schemePick = pick0(store.get('scheme', ''), ['light', 'dark'], '');
+function pick0(v, list, d) { return list.indexOf(v) >= 0 ? v : d; }
+const isDarkScheme = () => (schemePick ? schemePick === 'dark' : !!(schemeMQ && schemeMQ.matches));
+function applyScheme() {
+  const root = document.documentElement;
+  if (schemePick) root.dataset.theme = schemePick; else delete root.dataset.theme;
+  const dark = isDarkScheme(), btn = document.getElementById('btnScheme');
+  if (btn) {
+    const label = tl(dark ? 'toLight' : 'toDark');
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+    document.getElementById('schemeUse').setAttribute('href', dark ? '#i-sun' : '#i-moon');
+  }
+  applyColorTheme(colorId);
+}
+function toggleScheme() {
+  schemePick = isDarkScheme() ? 'light' : 'dark';
+  store.set('scheme', schemePick);
+  applyScheme();
+}
+
+function buildColors(T0, dark) {
+  const N = dark ? NEUTRALS.dark : NEUTRALS.light;
+  const T = Object.assign({}, T0, dark && T0.dark ? T0.dark : {});
+  const card = N.win;
+  const flat = [card, card, card];
+  const light = {
+    bg: flat, pal: T.notes, drum: mix(N.ink3, T.a3, 0.3), grid: mix(T.a1, N.ink2, 0.4), kbW: dark ? '#d1d5db' : '#ffffff',
+    kbB: dark ? N.key : mix(N.key, T.a1, 0.2), kbBg: mix(card, dark ? '#000000' : N.ink3, 0.18), line: T.a2, rayA: 0,
     bands: [mix(T.a4, card, 0.3), mix(T.a2, card, 0.3)], dust: T.a2, dark: false,
-  }, T.midiLight || {});
+  };
   const crystal = Object.assign({}, light, {
-    bg: T.midiLight ? light.bg : [mix(card, T.a2, 0.02), mix(card, T.a2, 0.1), mix(card, T.a3, 0.15)],
     pal: [T.notes[3], T.notes[1], T.notes[2], T.notes[0], T.notes[4], T.notes[5]],
     line: mix(T.a2, card, 0.2),
   });
@@ -954,57 +923,31 @@ function buildColors(T) {
   };
   const vel = T.velocity ? Array.from({ length: 128 }, (_, i) => ramp(T.velocity, i / 127)) : null;
   return {
-    id: colorId, dark, accent: T.a1, accent2: T.a2, accent3: T.a3, accent4: T.a4,
-    ink: T.ink, ink2: T.ink2, ink3: T.ink3, card, line: T.line,
+    id: colorId, dark, accent: T.a1, accent2: T.a2, accent3: T.a3, accent4: T.a4, ui: N.accent,
+    ink: N.ink, ink2: N.ink2, ink3: N.ink3, card, line: N.line, page: N.bg, panel: N.panel,
     spec: {
-      pal: T.pal, bg: T.specBg || [mix(card, T.a2, 0.06), mix(card, T.a2, 0.14), mix(card, T.a3, 0.2)],
-      rayA: T.rayA != null ? T.rayA : 0.6, glow: mix(T.a2, card, 0.3), ring: T.a2, wave: T.a1,
-      label: rgba(T.ink2, 0.75), water: dark ? 'rgba(255,255,255,.35)' : 'rgba(255,255,255,.9)',
+      pal: T.pal, bg: flat, rayA: 0, glow: mix(T.a2, card, 0.3), ring: T.a2, wave: T.a1,
+      label: rgba(N.ink2, 0.75), water: dark ? 'rgba(255,255,255,.35)' : 'rgba(255,255,255,.9)',
       waves: [mix(T.pal[0], card, 0.55), mix(T.pal[1], card, 0.45), mix(T.pal[2], card, 0.4), mix(T.pal[4], card, 0.35)],
     },
     midi: { bubble: light, crystal, abyss },
     vel,
-    seek: { pal: [T.a2, T.a1, T.a3], idle: mix(card, T.a1, dark ? 0.22 : 0.14), strip: T.a4, knob: T.a1, line: rgba(T.a1, 0.35), ring: card },
+    seek: { pal: [T.a2, T.a1, T.a3], idle: mix(N.panel, N.ink3, dark ? 0.35 : 0.25), strip: T.a4, knob: N.ink, line: rgba(N.ink, 0.25) },
     zoom: {
-      laneA: mix(card, T.a1, 0.05), laneM: mix(card, T.a3, 0.06), laneDrag: mix(card, T.a3, 0.14), text: T.ink3,
-      wave: rgba(T.a2, 0.55), onset: rgba(T.a4, 0.95), tick: rgba(T.a1, 0.9), midiLabel: T.a3, head: T.a1,
-      labelBg: dark ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.92)', notes: T.notes,
+      laneA: mix(card, T.a1, 0.05), laneM: mix(card, T.a3, 0.06), laneDrag: mix(card, T.a3, 0.14), text: N.ink3,
+      wave: rgba(T.a2, 0.55), onset: rgba(T.a4, 0.95), tick: rgba(T.a1, 0.9), midiLabel: N.ink2, head: N.ink,
+      labelBg: dark ? 'rgba(26,25,28,.85)' : 'rgba(255,255,255,.92)', notes: T.notes,
     },
-    ocean: T.sea, oceanRay: dark ? 0.05 : 0.42, cardShadow: 'rgba(' + T.shadow + ',' + (dark ? 0.6 : 0.38) + ')',
     icon: [T.a2, T.a3, T.a4], glyphAccent: T.blush, glyphLine: mix(T.a2, '#ffffff', 0.15),
   };
 }
-function themeCSS(T) {
-  const dark = T.scheme === 'dark';
-  const base = {
-    '--sea-1': T.sea[0], '--sea-2': T.sea[1], '--sea-3': T.sea[2], '--sea-4': T.sea[3],
-    '--ray': dark ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.62)', '--page-ink': T.pageInk,
-    '--card': T.card, '--card-line': T.line, '--ink': T.ink, '--ink-2': T.ink2, '--ink-3': T.ink3,
-    '--violet': T.a1, '--violet-2': T.a2, '--blue': T.a3, '--aqua': T.a4, '--lav': T.tint, '--mist': T.mist,
-    '--blush': T.blush, '--blush-2': T.blush2, '--on-accent': '#ffffff', '--shadow-rgb': T.shadow,
-    '--hl': dark ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.6)', '--hl-2': dark ? 'rgba(255,255,255,.03)' : 'rgba(255,255,255,.9)',
-    '--glass': dark ? 'rgba(43,45,51,.86)' : 'rgba(255,255,255,.8)', '--kbd-bg': dark ? 'rgba(255,255,255,.1)' : 'rgba(255,255,255,.55)',
-    '--tint-a': rgba(T.a2, 0.1), '--tint-b': rgba(T.a4, 0.1), '--tip-bg': T.ink, '--tip-fg': dark ? T.card : '#ffffff',
-  };
-  const night = dark ? base : Object.assign({}, base, {
-    '--sea-1': T.seaDark[0], '--sea-2': T.seaDark[1], '--sea-3': T.seaDark[2], '--sea-4': T.seaDark[3],
-    '--ray': rgba(mix(T.a2, '#ffffff', 0.2), 0.22), '--page-ink': T.pageInkDark, '--shadow-rgb': '6, 4, 20',
-    '--kbd-bg': 'rgba(255,255,255,.14)',
-  });
-  const decl = (o) => Object.keys(o).map((k) => k + ':' + o[k] + ';').join('');
-  return ':root{' + decl(base) + 'color-scheme:' + (dark ? 'dark' : 'light') + '}'
-    + '@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){' + decl(night) + 'color-scheme:dark}}'
-    + ':root[data-theme="dark"]{' + decl(night) + 'color-scheme:dark}';
-}
 function applyColorTheme(id) {
-  colorId = COLOR_THEMES[id] ? id : 'umi';
-  const T = COLOR_THEMES[colorId];
-  Object.assign(C, buildColors(T));
-  let st = document.getElementById('colorVars');
-  if (!st) { st = document.createElement('style'); st.id = 'colorVars'; document.body.appendChild(st); }
-  st.textContent = themeCSS(T);
+  colorId = COLOR_THEMES[id] ? id : DEFAULT_COLOR;
+  Object.assign(C, buildColors(COLOR_THEMES[colorId], isDarkScheme()));
   if (typeof onColorThemeChange === 'function') onColorThemeChange();
 }
+/* canvas text uses the same system font as the page */
+const FONT = 'ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif';
 
 /* ───────── Standard MIDI File parser ─────────
    Returns a "song": { notes:[{p,s,e,v,part,drum,ci}], parts:[...], grid:[{s,bar}], duration, title }
@@ -1907,7 +1850,7 @@ function drawLineSpec(g, w, h, t) {
   g.beginPath();
   for (let x = 0; x <= w; x += 8) { const y = base + 1.5 + Math.sin(x * 0.05 + t * 2) * 1.2; x ? g.lineTo(x, y) : g.moveTo(x, y); }
   g.strokeStyle = C.spec.water; g.lineWidth = 1.4; g.stroke();
-  g.font = '600 9px Quicksand, sans-serif';
+  g.font = '500 9px ' + FONT;
   g.fillStyle = C.spec.label;
   g.textAlign = 'center';
   const labels = S.scale === 'lin' ? [[30, '0'], [3000, '3k'], [6000, '6k'], [9000, '9k'], [12000, '12k']] : [[60, '60'], [250, '250'], [1000, '1k'], [4000, '4k'], [12000, '12k']];
@@ -2519,20 +2462,20 @@ function drawSeekScene(g, w, h, t, dur, preview) {
       g.fillRect(x0 + i * (bw + gap) - gap / 2, h - 6, bw + gap, 3);
     }
   }
-  /* playhead: a flat, single-colour dot */
+  /* playhead: a flat bar in the text colour */
   const kx = x0 + prog * span;
   g.fillStyle = C.seek.line;
   g.fillRect(Math.round(kx), 3, 1, h - 10);
-  g.beginPath(); g.arc(kx, midY, 7, 0, TAU);
-  g.fillStyle = C.seek.knob; g.fill();
-  g.lineWidth = 2; g.strokeStyle = C.seek.ring; g.stroke();
+  g.fillStyle = C.seek.knob;
+  roundRect(g, kx - 2, midY - 9, 4, 18, 2);
+  g.fill();
 }
 
 function zoomLabel(g, x, y, text, col) {
-  g.font = '700 10px "Zen Maru Gothic", sans-serif';
+  g.font = '500 10px ' + FONT;
   const tw = g.measureText(text).width;
   g.fillStyle = C.zoom.labelBg;
-  roundRect(g, x, y - 9, tw + 12, 16, 8);
+  roundRect(g, x, y - 9, tw + 12, 16, 3);
   g.fill();
   g.fillStyle = col;
   g.fillText(text, x + 6, y + 3);
@@ -2545,10 +2488,10 @@ function drawZoom(cv, t, dragging) {
   g.clearRect(0, 0, w, h);
   const span = S.zoomSpan, t0 = t - span / 2, pxs = w / span, mid = Math.round(h * 0.5);
   const A = { y: 18, h: mid - 22 }, M = { y: mid + 6, h: h - mid - 12 };
-  g.fillStyle = C.zoom.laneA; roundRect(g, 4, A.y - 2, w - 8, A.h + 4, 9); g.fill();
-  g.fillStyle = dragging ? C.zoom.laneDrag : C.zoom.laneM; roundRect(g, 4, M.y - 2, w - 8, M.h + 4, 9); g.fill();
+  g.fillStyle = C.zoom.laneA; roundRect(g, 4, A.y - 2, w - 8, A.h + 4, 4); g.fill();
+  g.fillStyle = dragging ? C.zoom.laneDrag : C.zoom.laneM; roundRect(g, 4, M.y - 2, w - 8, M.h + 4, 4); g.fill();
   const step = span <= 2 ? 0.25 : span <= 6 ? 1 : 2;
-  g.font = '600 9px Quicksand, sans-serif';
+  g.font = '500 9px ' + FONT;
   g.textAlign = 'center';
   for (let s = Math.ceil(t0 / step) * step; s <= t0 + span + 1e-6; s += step) {
     const x = Math.round((s - t0) * pxs);
@@ -2585,7 +2528,7 @@ function drawZoom(cv, t, dragging) {
     }
   } else {
     g.fillStyle = C.zoom.text;
-    g.font = '600 11px "Zen Maru Gothic", sans-serif';
+    g.font = '500 11px ' + FONT;
     g.fillText(tl('waveLoading'), 54, A.y + A.h / 2 + 4);
   }
   if (S.song) {
@@ -2606,7 +2549,7 @@ function drawZoom(cv, t, dragging) {
     }
   } else {
     g.fillStyle = C.zoom.text;
-    g.font = '600 11px "Zen Maru Gothic", sans-serif';
+    g.font = '500 11px ' + FONT;
     g.fillText(tl('noMidiLane'), 54, M.y + M.h / 2 + 4);
   }
   const px = Math.round(w / 2) + 0.5;
@@ -2615,7 +2558,7 @@ function drawZoom(cv, t, dragging) {
   g.setLineDash([3, 3]);
   g.beginPath(); g.moveTo(px, 15); g.lineTo(px, h - 3); g.stroke();
   g.setLineDash([]);
-  zoomLabel(g, 9, A.y + 9, tl('laneAudio'), C.accent);
+  zoomLabel(g, 9, A.y + 9, tl('laneAudio'), C.ink2);
   zoomLabel(g, 9, M.y + 9, 'MIDI ⇆', C.zoom.midiLabel);
 }
 
@@ -3019,6 +2962,7 @@ function applyLang(l) {
   updateGridUI();
   updateKeysUI();
   renderIcon();
+  applyScheme();
   if (!$('#exportModal').hidden) updateExportInfo();
 }
 function closePops() {
@@ -3081,6 +3025,7 @@ function bindUI() {
   $('#btnAuto').addEventListener('click', runAuto);
   $('#btnExpand').addEventListener('click', () => setSyncOpen(!S.syncOpen));
   $('#btnLang').addEventListener('click', () => applyLang(lang === 'ja' ? 'en' : 'ja'));
+  $('#btnScheme').addEventListener('click', toggleScheme);
   $('#zoomSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-span]'); if (!b) return; S.zoomSpan = +b.dataset.span; pressSeg($('#zoomSeg'), 'data-span', S.zoomSpan); });
 
   const fa = $('#fileAudio'), fm = $('#fileMidi');
@@ -3256,8 +3201,8 @@ function buildSwatches() {
     b.setAttribute('aria-checked', String(id === colorId));
     const dot = document.createElement('span');
     dot.className = 'dot';
-    dot.style.background = 'linear-gradient(135deg, ' + T.a2 + ' 0%, ' + T.a1 + ' 48%, ' + T.a3 + ' 52%, ' + T.a4 + ' 100%)';
-    if (T.scheme === 'dark') dot.style.background = 'linear-gradient(135deg, ' + T.card + ' 0 50%, ' + T.a1 + ' 50% 100%)';
+    dot.style.background = T.velocity ? 'linear-gradient(90deg, ' + T.velocity.join(', ') + ')'
+      : T.dark ? 'linear-gradient(135deg, ' + T.a1 + ' 50%, ' + T.dark.a1 + ' 50%)' : T.a1;
     const nm = document.createElement('span');
     nm.textContent = T.name;
     b.append(dot, nm);
@@ -3584,27 +3529,9 @@ function videoLayout(fmt) {
   return { card, head: { x, y: 52, w: wd, h: 58 }, spec: { x, y: 124, w: wd, h: 330 }, seek, times: seek.y + seek.h + 14, midi: { x, y: 538, w: wd, h: 370 } };
 }
 
-const ocean = { bubbles: [], fmt: '' };
-function drawOcean(g, w, h, t, fmt) {
-  const gr = g.createLinearGradient(0, 0, 0, h);
-  gr.addColorStop(0, C.ocean[0]); gr.addColorStop(0.36, C.ocean[1]); gr.addColorStop(0.74, C.ocean[2]); gr.addColorStop(1, C.ocean[3]);
-  g.fillStyle = gr;
+function drawVideoBg(g, w, h) {
+  g.fillStyle = C.page;
   g.fillRect(0, 0, w, h);
-  for (let i = 0; i < 4; i++) {
-    g.save();
-    g.translate(w * (0.1 + i * 0.26), -20);
-    g.rotate(0.24 - i * 0.12 + Math.sin(t * 0.3 + i * 1.7) * 0.05);
-    const rw = w * (i % 2 ? 0.08 : 0.15), rg = g.createLinearGradient(0, 0, 0, h * 0.95);
-    rg.addColorStop(0, 'rgba(255,255,255,' + C.oceanRay + ')'); rg.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = rg;
-    g.beginPath(); g.moveTo(-rw * 0.3, 0); g.lineTo(rw * 0.3, 0); g.lineTo(rw, h * 1.1); g.lineTo(-rw, h * 1.1); g.closePath(); g.fill();
-    g.restore();
-  }
-  if (ocean.fmt !== fmt) { ocean.fmt = fmt; ocean.bubbles = []; for (let i = 0; i < 16; i++) ocean.bubbles.push({ x: Math.random() * w, y: Math.random() * h, r: 2 + Math.random() * 6, v: 10 + Math.random() * 18, ph: Math.random() * TAU }); }
-  for (const b of ocean.bubbles) {
-    const y = (((b.y - t * b.v) % (h + 30)) + h + 30) % (h + 30) - 15;
-    drawBubble(g, b.x + Math.sin(t * 0.8 + b.ph) * 6, y, b.r, '#ffffff', 0.75);
-  }
 }
 function fitText(g, s, w) {
   if (g.measureText(s).width <= w) return s;
@@ -3618,27 +3545,18 @@ function panel(g, R, r, draw) {
   g.translate(R.x, R.y);
   draw(R.w, R.h);
   g.restore();
-  g.save();
-  roundRect(g, R.x + 0.5, R.y + 0.5, R.w - 1, R.h - 1, r);
-  g.strokeStyle = rgba(C.line, 0.95);
-  g.lineWidth = 1;
-  g.stroke();
-  g.restore();
 }
 /* one frame of the video card: header, spectrum, progress, MIDI — the sync panel is left out */
 function composeFrame(g, fmt, now, dt, wt, icon) {
   const F = VIDEO_FORMATS[fmt], L = videoLayout(fmt), dur = getDuration();
-  drawOcean(g, F.w, F.h, wt, fmt);
-  g.save();
-  g.shadowColor = C.cardShadow; g.shadowBlur = 44; g.shadowOffsetY = 20;
-  roundRect(g, L.card.x, L.card.y, L.card.w, L.card.h, 34);
-  g.fillStyle = C.card;
+  drawVideoBg(g, F.w, F.h);
+  roundRect(g, L.card.x, L.card.y, L.card.w, L.card.h, 6);
+  g.fillStyle = C.panel;
   g.fill();
-  g.restore();
   const H = L.head, s = H.h, showIcon = !iconState.hidden && !!icon;
   if (showIcon) {
     g.save();
-    roundRect(g, H.x, H.y, s, s, s * 0.34);
+    roundRect(g, H.x, H.y, s, s, 6);
     g.clip();
     if (icon) g.drawImage(icon, H.x, H.y, s, s);
     else { const ig = g.createLinearGradient(H.x, H.y, H.x + s, H.y + s); ig.addColorStop(0, C.icon[0]); ig.addColorStop(1, C.icon[2]); g.fillStyle = ig; g.fillRect(H.x, H.y, s, s); }
@@ -3646,22 +3564,22 @@ function composeFrame(g, fmt, now, dt, wt, icon) {
   }
   const tx = showIcon ? H.x + s + 12 : H.x + 2, tw = showIcon ? H.w - s - 12 : H.w - 2;
   g.textAlign = 'left';
-  if ('letterSpacing' in g) g.letterSpacing = '1.5px';
-  g.fillStyle = C.accent;
-  g.font = '700 10.5px Quicksand, "Zen Maru Gothic", sans-serif';
-  g.fillText('♡ now playing', tx, H.y + s * 0.24);
+  if ('letterSpacing' in g) g.letterSpacing = '1.2px';
+  g.fillStyle = C.ui;
+  g.font = '500 11px ' + FONT;
+  g.fillText('NOW PLAYING', tx, H.y + s * 0.24);
   if ('letterSpacing' in g) g.letterSpacing = '0px';
   g.fillStyle = C.ink;
-  g.font = '900 ' + Math.round(s * 0.34) + 'px "Zen Maru Gothic", sans-serif';
+  g.font = '700 ' + Math.round(s * 0.34) + 'px ' + FONT;
   g.fillText(fitText(g, songTitle(), tw), tx, H.y + s * 0.62);
   g.fillStyle = C.ink2;
-  g.font = '500 ' + Math.round(s * 0.2) + 'px "Zen Maru Gothic", sans-serif';
+  g.font = '400 ' + Math.round(s * 0.22) + 'px ' + FONT;
   g.fillText(fitText(g, songArtist(), tw), tx, H.y + s * 0.92);
-  panel(g, L.spec, 22, (w, h) => {
+  panel(g, L.spec, 6, (w, h) => {
     drawSpectrumScene(g, w, h, dt, wt);
-    g.font = '700 10px Quicksand, sans-serif';
-    if ('letterSpacing' in g) g.letterSpacing = '2px';
-    g.fillStyle = rgba(C.accent, 0.8);
+    g.font = '500 11px ' + FONT;
+    if ('letterSpacing' in g) g.letterSpacing = '1.2px';
+    g.fillStyle = C.ui;
     g.fillText(MODE_NAMES[S.mode].toUpperCase(), 14, 20);
     if ('letterSpacing' in g) g.letterSpacing = '0px';
   });
@@ -3669,14 +3587,14 @@ function composeFrame(g, fmt, now, dt, wt, icon) {
   g.translate(L.seek.x, L.seek.y);
   drawSeekScene(g, L.seek.w, L.seek.h, now, dur);
   g.restore();
-  g.font = '600 11.5px Quicksand, sans-serif';
-  g.fillStyle = C.ink2;
+  g.font = '400 12px ' + FONT;
+  g.fillStyle = C.ink3;
   g.textAlign = 'left';
   g.fillText(fmtTime(now), L.seek.x, L.times);
   g.textAlign = 'right';
   g.fillText(fmtTime(dur), L.seek.x + L.seek.w, L.times);
   g.textAlign = 'left';
-  panel(g, L.midi, 22, (w, h) => { drawMidiScene(g, w, h, dt, now, wt); });
+  panel(g, L.midi, 6, (w, h) => { drawMidiScene(g, w, h, dt, now, wt); });
 }
 
 /* ───────── video export: dialog, WebCodecs encoding, saving ───────── */
@@ -3742,7 +3660,6 @@ async function renderAudioSlice(buf, t0, t1, sr) {
 async function encodeVideo(o, onProgress) {
   const vc = await pickVideoConfig(o.W, o.H, o.fps, o.bitrate), ac = await pickAudioConfig();
   if (!vc || !ac) throw new Error(tl('noEncoder'));
-  try { await Promise.all(['900 20px "Zen Maru Gothic"', '500 12px "Zen Maru Gothic"', '700 12px Quicksand'].map((f) => document.fonts.load(f))); } catch (e) { /* fallback fonts */ }
   const icon = EX.icon || (await getIconImage().catch(() => null));
   onProgress(0, tl('exAudioPrep'));
   const abuf = await renderAudioSlice(engine.buffer, o.t0, o.t1, 48000);
@@ -3962,7 +3879,12 @@ function bindExport() {
 
 /* ───────── start ───────── */
 function init() {
-  applyColorTheme(store.get('color', 'umi'));
+  colorId = COLOR_THEMES[store.get('color', DEFAULT_COLOR)] ? store.get('color', DEFAULT_COLOR) : DEFAULT_COLOR;
+  applyScheme();
+  if (schemeMQ) {
+    const onScheme = () => { if (!schemePick) applyScheme(); };
+    if (schemeMQ.addEventListener) schemeMQ.addEventListener('change', onScheme); else if (schemeMQ.addListener) schemeMQ.addListener(onScheme);
+  }
   buildSwatches();
   setMode(S.mode);
   setTheme(S.theme);
