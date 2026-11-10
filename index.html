@@ -51,14 +51,6 @@
   color-scheme: dark;
 }
 
-/* the "ダーク" color: Cubase-like DAW greys (script sets it together with data-theme="dark") */
-:root[data-palette="daw"] {
-  --bg: #1f2024; --panel: rgba(255, 255, 255, .04); --panel-hover: rgba(255, 255, 255, .08); --band: rgba(43, 45, 51, .95);
-  --ctl: #2b2d33; --field: #17181b; --field-line: rgba(0, 0, 0, 0);
-  --text: #e6e8ee; --text-2: #b4b9c4; --muted: #8a8f9a; --line: #3b3e46;
-  --win: #2b2d33; color-scheme: dark;
-}
-
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; touch-action: manipulation; }
@@ -83,6 +75,10 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 .top-in { margin: 0 auto; max-width: 1280px; height: var(--header-height); padding: 0 var(--space-4); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
 .brand { font-size: 16px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
 .head-actions { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+/* fixed widths: switching language must not move the buttons */
+#btnAudio, #btnVideo { width: 96px; }
+#btnMidi { width: 80px; }
+#btnLang { width: 72px; }
 
 /* ───── layout ───── */
 .stage { width: 90%; max-width: 672px; margin: var(--space-4) auto var(--space-8); display: flex; flex-direction: column; gap: var(--space-4); }
@@ -298,7 +294,8 @@ kbd { font-family: var(--font-mono); font-size: 12px; line-height: 16px; padding
 
 @media (max-width: 520px) {
   .head-actions { gap: 4px; }
-  .head-actions .chip { padding: 0 10px; }
+  .head-actions .chip { padding: 0 10px; width: 44px; }
+  .head-actions #btnLang { width: 48px; }
   .head-actions .chip .lbl { display: none; }
   .chip.lang svg.i { display: none; }
   .panel { padding: var(--space-4); }
@@ -347,7 +344,6 @@ kbd { font-family: var(--font-mono); font-size: 12px; line-height: 16px; padding
   <symbol id="i-bars" viewBox="0 0 24 24"><path d="M5 20v-7M9.7 20V6M14.3 20v-9.5M19 20V4"/></symbol>
   <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 9.5c2.5 0 2.5-2.2 5-2.2s2.5 2.2 5 2.2 2.5-2.2 5-2.2 2.5 2.2 5 2.2"/><path d="M2 15.5c2.5 0 2.5-2.2 5-2.2s2.5 2.2 5 2.2 2.5-2.2 5-2.2 2.5 2.2 5 2.2"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.6A7.8 7.8 0 1 1 9.4 4.5a6.2 6.2 0 0 0 10.1 10.1z"/></symbol>
-  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol>
   <symbol id="i-wand" viewBox="0 0 24 24"><path d="M4.5 19.5l10-10"/><path d="M17 3l.9 2.1L20 6l-2.1.9L17 9l-.9-2.1L14 6l2.1-.9z"/></symbol>
   <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10.5l5-3v9l-5-3"/></symbol>
   <symbol id="i-restart" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5"/><path d="M4.5 4.5v4h4"/><circle cx="12" cy="12" r="1.6"/></symbol>
@@ -365,7 +361,6 @@ kbd { font-family: var(--font-mono); font-size: 12px; line-height: 16px; padding
       <button class="chip" id="btnMidi" title="MIDIファイルを開く" data-i-title="openMidi"><svg class="i"><use href="#i-piano"/></svg><span class="lbl">MIDI</span></button>
       <button class="chip" id="btnVideo" title="動画にする" data-i-title="makeVideo"><svg class="i"><use href="#i-video"/></svg><span class="lbl" data-i="video">動画</span></button>
       <button class="chip lang" id="btnLang" title="English" aria-label="Switch to English" data-i-title="langOther" data-i-label="langSwitch"><svg class="i"><use href="#i-globe"/></svg><span data-i="langCode">EN</span></button>
-      <button class="round" id="btnScheme" aria-label="ダークにする" title="ダークにする"><svg class="i"><use id="schemeUse" href="#i-moon"/></svg></button>
     </div>
   </div>
 </header>
@@ -627,7 +622,7 @@ const I18N = {
     syncHelp1: '上の段が<b>音声</b>の波形、下の段が<b>MIDI</b>です。下の段を左右にドラッグして、音の立ち上がりとノートの頭をそろえます。',
     offset: 'オフセット', fine: '細かく', resetZero: '0 に戻す', midiLength: 'MIDIの長さ', viewSpan: '表示の幅', sec2: '2秒', sec6: '6秒', sec12: '12秒',
     syncHelp2: '<b>＋</b>でMIDIが遅く、<b>−</b>で早くなります。だんだんずれていくときは「MIDIの長さ」で調整します。',
-    color: '配色', keysTitle: 'キーボード操作', footNote: '音声とMIDIは、このページにドロップしても読み込めます。', toDark: 'ダークにする', toLight: 'ライトにする',
+    color: '配色', keysTitle: 'キーボード操作', footNote: '音声とMIDIは、このページにドロップしても読み込めます。',
     keysList: '<li><span>再生・一時停止</span><span><kbd>Space</kbd></span></li><li><span>5秒戻る・進む</span><span><kbd>←</kbd><kbd>→</kbd></span></li><li><span>ずれ ±10ms</span><span><kbd>[</kbd><kbd>]</kbd></span></li><li><span>スペクトラムのモード</span><span><kbd>M</kbd></span></li><li><span>MIDIのテーマ</span><span><kbd>T</kbd></span></li><li><span>配色</span><span><kbd>C</kbd></span></li>',
     dropHere: 'ここにドロップしてください<small>音声ファイルとMIDIファイル（両方同時でも読み込めます）</small>',
     close: '閉じる', exShape: '形', exPortrait: '縦 9:16', exLandscape: '横 16:9', exSquare: '正方形', exSmooth: 'フレームレート', exRange: '範囲',
@@ -683,7 +678,7 @@ const I18N = {
     syncHelp1: 'The top lane is the <b>audio</b> waveform, the bottom lane is the <b>MIDI</b>. Drag the bottom lane sideways to line up the attacks with the note starts.',
     offset: 'Offset', fine: 'Fine', resetZero: 'Reset to 0', midiLength: 'MIDI length', viewSpan: 'View span', sec2: '2 s', sec6: '6 s', sec12: '12 s',
     syncHelp2: '<b>+</b> makes the MIDI later, <b>−</b> earlier. If it drifts over time, adjust “MIDI length”.',
-    color: 'Colors', keysTitle: 'Keyboard', footNote: 'You can also drop audio and MIDI files onto this page.', toDark: 'Switch to dark', toLight: 'Switch to light',
+    color: 'Colors', keysTitle: 'Keyboard', footNote: 'You can also drop audio and MIDI files onto this page.',
     keysList: '<li><span>Play / pause</span><span><kbd>Space</kbd></span></li><li><span>Back / forward 5 s</span><span><kbd>←</kbd><kbd>→</kbd></span></li><li><span>Offset ±10 ms</span><span><kbd>[</kbd><kbd>]</kbd></span></li><li><span>Spectrum mode</span><span><kbd>M</kbd></span></li><li><span>MIDI theme</span><span><kbd>T</kbd></span></li><li><span>Colors</span><span><kbd>C</kbd></span></li>',
     dropHere: 'Drop files here<small>Audio and MIDI files, one or both</small>',
     close: 'Close', exShape: 'Shape', exPortrait: 'Portrait 9:16', exLandscape: 'Landscape 16:9', exSquare: 'Square', exSmooth: 'Frame rate', exRange: 'Range',
@@ -745,7 +740,7 @@ function ramp(stops, t) {
 
 /* ───────── canvas ───────── */
 function fitCanvas(cv) {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
   const w = cv.clientWidth, h = cv.clientHeight;
   const W = Math.max(1, Math.round(w * dpr)), H = Math.max(1, Math.round(h * dpr));
   if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
@@ -778,9 +773,6 @@ function toast(msg, ms) {
 const NEUTRALS = {
   light: { bg: '#ffffff', panel: '#f7f8f9', win: '#eef0f2', ink: '#111827', ink2: '#4b5563', ink3: '#6b7280', line: '#e5e7eb', accent: '#db2777', key: '#1f2937' },
   dark: { bg: '#242327', panel: '#2f2e32', win: '#3c3b3f', ink: '#f9fafb', ink2: '#d1d5db', ink3: '#9ca3af', line: '#504f52', accent: '#f472b6', key: '#1a191c' },
-  /* the Cubase-like dark: neutral DAW greys, used by the "ダーク" color (it always turns the page dark) */
-  daw: { bg: '#1f2024', panel: '#25272b', win: '#2b2d33', ink: '#e6e8ee', ink2: '#b4b9c4', ink3: '#8a8f9a', line: '#3b3e46', accent: '#f472b6', key: '#2a2b30',
-    kbW: '#d5d7dc', kbBg: '#17181b', grid: '#7a808c', drum: '#8a909c' },
 };
 const COLOR_THEMES = {
   icy: { name: 'ピンク',
@@ -810,7 +802,7 @@ const COLOR_THEMES = {
     dark: { a1: '#e4e4e8', a2: '#b5b5bd', a3: '#c9c9cf', a4: '#8f8f99',
       pal: ['#8f8f99', '#a6a6ae', '#bdbdc4', '#d4d4d9', '#ececef'], notes: ['#e4e4e8', '#b5b5bd', '#d0d0d6', '#9a9aa3', '#f4f4f6', '#c2c2c9'] },
     deep: ['#1e1e22', '#161619', '#0e0e10'], deepNotes: ['#f2f2f5', '#c9c9cf', '#e0e0e6', '#b5b5bd', '#ffffff', '#d4d4da'], glowLine: '#ffffff' },
-  cubase: { name: 'ダーク', scheme: 'dark',
+  cubase: { name: 'ダーク', swatch: ['#2b2d33', '#3d9bff'],
     a1: '#3d9bff', a2: '#6fb5ff', a3: '#2a78d6', a4: '#37c6c0', blush: '#f2994a',
     pal: ['#2f80ed', '#29b6d8', '#3ccf8e', '#e5c04b', '#f2994a'],
     notes: ['#3d9bff', '#37c6c0', '#3ccf8e', '#e5c04b', '#f2994a', '#e0565b'],
@@ -821,36 +813,13 @@ const DEFAULT_COLOR = 'icy';
 const C = {};
 let colorId = DEFAULT_COLOR;
 
-/* light / dark: follows the system unless the viewer picked one with the header button.
-   The "ダーク" color (Cubase-like) always uses its own dark greys. */
+/* light / dark: always follows the system setting */
 const schemeMQ = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
-let schemePick = pick0(store.get('scheme', ''), ['light', 'dark'], '');
-function pick0(v, list, d) { return list.indexOf(v) >= 0 ? v : d; }
-const forcedDark = () => COLOR_THEMES[colorId] && COLOR_THEMES[colorId].scheme === 'dark';
-const isDarkScheme = () => forcedDark() || (schemePick ? schemePick === 'dark' : !!(schemeMQ && schemeMQ.matches));
-function applyScheme() {
-  const root = document.documentElement;
-  if (forcedDark()) root.dataset.theme = 'dark'; else if (schemePick) root.dataset.theme = schemePick; else delete root.dataset.theme;
-  if (forcedDark()) root.dataset.palette = 'daw'; else delete root.dataset.palette;
-  const dark = isDarkScheme(), btn = document.getElementById('btnScheme');
-  if (btn) {
-    const label = tl(dark ? 'toLight' : 'toDark');
-    btn.setAttribute('aria-label', label);
-    btn.title = label;
-    document.getElementById('schemeUse').setAttribute('href', dark ? '#i-sun' : '#i-moon');
-  }
-  applyColorTheme(colorId);
-}
-function toggleScheme() {
-  /* leaving the forced dark of the DAW color goes back to the default color in light */
-  if (forcedDark()) { colorId = DEFAULT_COLOR; store.set('color', colorId); schemePick = 'light'; }
-  else schemePick = isDarkScheme() ? 'light' : 'dark';
-  store.set('scheme', schemePick);
-  applyScheme();
-}
+const isDarkScheme = () => !!(schemeMQ && schemeMQ.matches);
+function applyScheme() { applyColorTheme(colorId); }
 
 function buildColors(T0, dark) {
-  const N = T0.scheme === 'dark' ? NEUTRALS.daw : dark ? NEUTRALS.dark : NEUTRALS.light;
+  const N = dark ? NEUTRALS.dark : NEUTRALS.light;
   const T = Object.assign({}, T0, dark && T0.dark ? T0.dark : {});
   const card = N.win;
   /* block: solid notes on the window surface */
@@ -863,8 +832,8 @@ function buildColors(T0, dark) {
   const outline = Object.assign({}, block, { pal: [T.notes[3], T.notes[1], T.notes[2], T.notes[0], T.notes[4], T.notes[5]] });
   /* night: a dark stage in every scheme, bright notes */
   const night = {
-    bg: T.scheme === 'dark' ? '#17181b' : T.deep[1], pal: T.deepNotes, drum: mix(T.deepNotes[0], T.deep[0], 0.5), grid: T.a2,
-    kbW: mix(T.deep[0], '#ffffff', 0.78), kbB: mix(T.deep[2], '#000000', 0.3), kbBg: mix(T.deep[2], '#000000', 0.2),
+    bg: '#1a191c', pal: T.deepNotes, drum: '#8a8f9a', grid: '#9ca3af',
+    kbW: '#d1d5db', kbB: '#242327', kbBg: '#111013',
     line: rgba(T.glowLine, 0.7), dark: true,
   };
   const vel = T.velocity ? Array.from({ length: 128 }, (_, i) => ramp(T.velocity, i / 127)) : null;
@@ -1645,8 +1614,8 @@ function updateSpectrum(dt, t, src) {
       spec.raw[i] = Math.pow(clamp(v, 0, 1.15), 1.7);
     }
   } else {
-    /* resting pose: a slow tide so the porthole never looks dead */
-    for (let i = 0; i < N; i++) spec.raw[i] = 0.05 + 0.13 * Math.exp((-i / N) * 1.6) * (0.65 + 0.35 * Math.sin(t * 1.2 - i * 0.22));
+    /* at rest everything settles and stays still */
+    spec.raw.fill(0);
   }
   const up = ease(0.55, dt), down = ease(0.12, dt);
   for (let i = 0; i < N; i++) {
@@ -1673,7 +1642,7 @@ function updateSpectrum(dt, t, src) {
     const k2 = ease(0.45, dt);
     for (let j = 0; j < M; j++) { const v = (w[start + Math.floor((j / M) * span)] - 128) / 128; spec.wave[j] += (v - spec.wave[j]) * k2; }
   } else {
-    for (let j = 0; j < M; j++) spec.wave[j] = lerp(spec.wave[j], Math.sin(t * 1.6 + j * 0.2) * 0.05, ease(0.06, dt));
+    for (let j = 0; j < M; j++) spec.wave[j] = lerp(spec.wave[j], 0, ease(0.12, dt));
   }
 }
 
@@ -1778,7 +1747,7 @@ function drawWaves(g, w, h, t, dt) {
     /* loudness relative to what this song has done lately: calm verses stay calm, choruses swell */
     L.pk = Math.max(L.pk * Math.exp(-dt / 12), e, 0.42);
     L.e += (clamp(e / L.pk, 0, 1) - L.e) * ease(0.12, dt);
-    L.ph += dt * (0.22 + L.e * 2.4) * L.sp;
+    L.ph += dt * L.e * 2.4 * L.sp;
     const A = h * L.amp * (0.06 + Math.pow(L.e, 1.6) * 3.2);
     const kr = ease(L.rs, dt);
     for (let s = 0; s <= steps; s++) {
@@ -1956,18 +1925,20 @@ function drawKeyboard(g, G, kl, th) {
   if (dir === 'down') g.fillRect(0, G.h - kb, G.w, kb);
   else if (dir === 'up') g.fillRect(0, 0, G.w, kb);
   else g.fillRect(0, 0, kb, G.h);
-  const rad = Math.min(2, G.unit * 0.2);
+  /* keys sit on whole device pixels so narrow ones stay crisp */
+  const k = g.getTransform ? g.getTransform().a || 1 : 1, px = 1 / k, snap = (v) => Math.round(v * k) / k;
+  const gap = Math.max(px, snap(Math.min(1, G.unit * 0.12)));
+  const rad = G.unit >= 10 ? 2 : 0;
   for (let p = kl.a; p <= kl.b; p++) {
     const kp = kl.pos[p];
     if (kp.black) continue;
-    const s0 = G.m + (kp.c - 0.5) * G.unit;
+    const a = snap(G.m + (kp.c - 0.5) * G.unit), b = snap(G.m + (kp.c + 0.5) * G.unit);
     let x, y, w, h;
-    if (horiz) { x = 0; y = G.h - s0 - G.unit + 0.5; w = kb - 1.5; h = G.unit - 1; }
-    else { x = s0 + 0.5; w = G.unit - 1; y = dir === 'down' ? G.h - kb + 1.5 : 0; h = kb - 1.5; }
+    if (horiz) { x = 0; y = snap(G.h) - b; w = snap(kb) - gap; h = b - a - gap; }
+    else { x = a; w = b - a - gap; y = dir === 'down' ? snap(G.h - kb) + gap : 0; h = snap(kb) - gap; }
     const gl = mv.glow[p];
-    roundRect(g, x, y, w, h, rad);
     g.fillStyle = gl > 0.5 ? mv.kcol[p] : th.kbW;
-    g.fill();
+    if (rad) { roundRect(g, x, y, w, h, rad); g.fill(); } else g.fillRect(x, y, w, h);
   }
   for (let p = kl.a; p <= kl.b; p++) {
     const kp = kl.pos[p];
@@ -1977,10 +1948,10 @@ function drawKeyboard(g, G, kl, th) {
     if (dir === 'down') { x = c - span / 2; y = G.h - kb; w = span; h = kb * 0.6; }
     else if (dir === 'up') { x = c - span / 2; y = kb * 0.4; w = span; h = kb * 0.6; }
     else { x = kb * 0.4; y = c - span / 2; w = kb * 0.6; h = span; }
+    x = snap(x); y = snap(y); w = Math.max(px, snap(w)); h = Math.max(px, snap(h));
     const gl = mv.glow[p];
-    roundRect(g, x, y, w, h, Math.min(1.5, span * 0.2));
     g.fillStyle = gl > 0.5 ? mv.kcol[p] : th.kbB;
-    g.fill();
+    g.fillRect(x, y, w, h);
   }
 }
 
@@ -2649,7 +2620,6 @@ function bindUI() {
   $('#btnAuto').addEventListener('click', runAuto);
   $('#btnExpand').addEventListener('click', () => setSyncOpen(!S.syncOpen));
   $('#btnLang').addEventListener('click', () => applyLang(lang === 'ja' ? 'en' : 'ja'));
-  $('#btnScheme').addEventListener('click', toggleScheme);
   $('#zoomSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-span]'); if (!b) return; S.zoomSpan = +b.dataset.span; pressSeg($('#zoomSeg'), 'data-span', S.zoomSpan); });
 
   const fa = $('#fileAudio'), fm = $('#fileMidi');
@@ -2826,7 +2796,7 @@ function buildSwatches() {
     b.setAttribute('aria-checked', String(id === colorId));
     const dot = document.createElement('span');
     dot.className = 'dot';
-    dot.style.background = T.velocity ? 'linear-gradient(90deg, ' + T.velocity.join(', ') + ')'
+    dot.style.background = T.swatch ? 'linear-gradient(135deg, ' + T.swatch[0] + ' 50%, ' + T.swatch[1] + ' 50%)'
       : T.dark ? 'linear-gradient(135deg, ' + T.a1 + ' 50%, ' + T.dark.a1 + ' 50%)' : T.a1;
     const nm = document.createElement('span');
     nm.textContent = T.name;
@@ -3507,7 +3477,7 @@ function init() {
   colorId = COLOR_THEMES[store.get('color', DEFAULT_COLOR)] ? store.get('color', DEFAULT_COLOR) : DEFAULT_COLOR;
   applyScheme();
   if (schemeMQ) {
-    const onScheme = () => { if (!schemePick) applyScheme(); };
+    const onScheme = () => applyScheme();
     if (schemeMQ.addEventListener) schemeMQ.addEventListener('change', onScheme); else if (schemeMQ.addListener) schemeMQ.addListener(onScheme);
   }
   buildSwatches();
